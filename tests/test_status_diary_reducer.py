@@ -651,6 +651,102 @@ class TestReduceConcurrentRollbackPrecedence:
         assert state.work_packages["WP01"]["last_event_id"] == _ulid(5)
         assert state.summary["approved"] == 0
 
+    def test_migration_seed_does_not_reject_the_real_lifecycle(self) -> None:
+        """#5967 follow-up: a reconstruction SEED is not a decision, so it must
+        not reject the WP's later recorded lifecycle.
+
+        A corpus backfill (actor ``migration:backfill_runtime_state``) seeds
+        ``planned -> claimed`` at the genesis instant, restating what the legacy
+        frontmatter said. The real event log then records the true lifecycle
+        ``planned -> blocked -> in_progress -> for_review -> in_review ->
+        approved`` with later ``at`` values. Sorted by ``at`` the seed applies
+        first and becomes the current setter; the real ``planned -> blocked``
+        then carries ``from_lane=planned`` != the seeded ``claimed``. Under the
+        rollback-generalized from_lane-continuity drop this stranded the WP at
+        ``claimed``. Because the current setter is a reconstruction seed, the
+        drop is now suppressed and the real lifecycle wins (ends ``approved``)."""
+        events = [
+            _row(
+                _ulid(2),
+                from_lane="planned",
+                to_lane="claimed",
+                at="2026-02-08T12:00:00+00:00",
+                actor="migration:backfill_runtime_state",
+            ),
+            _row(
+                _ulid(3),
+                from_lane="planned",
+                to_lane="blocked",
+                at="2026-02-08T18:00:00+00:00",
+                actor="implement-command",
+            ),
+            _row(
+                _ulid(4),
+                from_lane="blocked",
+                to_lane="in_progress",
+                at="2026-02-08T18:05:00+00:00",
+                actor="user",
+            ),
+            _row(
+                _ulid(5),
+                from_lane="in_progress",
+                to_lane="for_review",
+                at="2026-02-08T18:10:00+00:00",
+                actor="user",
+            ),
+            _row(
+                _ulid(6),
+                from_lane="for_review",
+                to_lane="in_review",
+                at="2026-02-08T18:15:00+00:00",
+                actor="user",
+            ),
+            _row(
+                _ulid(7),
+                from_lane="in_review",
+                to_lane="approved",
+                at="2026-02-08T18:20:00+00:00",
+                actor="user",
+                review_result=_REVIEW_RESULT,
+            ),
+        ]
+
+        state = reduce(events)
+
+        assert state.work_packages["WP01"]["lane"] == "approved"
+        assert state.work_packages["WP01"]["last_event_id"] == _ulid(7)
+        assert state.summary["approved"] == 1
+
+    def test_migration_seed_still_holds_when_no_real_transition_supersedes_it(self) -> None:
+        """The seed exemption only *yields* to a real lifecycle; with none, the
+        seed's own reconstructed state stands.
+
+        A WP whose only runtime transition is the backfill seed
+        (``planned -> in_progress``) must stay ``in_progress`` -- the exemption
+        must not drop the seed itself (a naive "ignore migration seeds" rule
+        would regress such a WP back to ``planned``)."""
+        events = [
+            _row(
+                _ulid(1),
+                from_lane="genesis",
+                to_lane="planned",
+                at="2026-02-08T12:00:00+00:00",
+                actor="finalize-tasks",
+            ),
+            _row(
+                _ulid(2),
+                from_lane="planned",
+                to_lane="in_progress",
+                at="2026-02-08T12:00:00.000500+00:00",
+                actor="migration:backfill_runtime_state",
+            ),
+        ]
+
+        state = reduce(events)
+
+        assert state.work_packages["WP01"]["lane"] == "in_progress"
+        assert state.work_packages["WP01"]["last_event_id"] == _ulid(2)
+
 
 class TestSummaryCounts:
     def test_summary_counts_match_wp_states(self) -> None:

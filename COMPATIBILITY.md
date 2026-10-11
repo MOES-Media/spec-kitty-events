@@ -1,6 +1,6 @@
 # Compatibility Guide
 
-**Current package version**: `10.4.1`
+**Current package version**: `10.4.2`
 
 The on-wire envelope schema version is `3.0.0` and has been unchanged since
 the cutover. The package version and the envelope schema version move

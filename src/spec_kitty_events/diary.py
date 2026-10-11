@@ -1066,6 +1066,34 @@ def _is_rollback_event(event: StatusEvent) -> bool:
     return False
 
 
+#: Actor-identity prefix marking a *reconstruction seed* -- an event appended by
+#: a migration/backfill that reconstructs a WP's historical runtime state from a
+#: legacy source (frontmatter/checkboxes), rather than recording a live operator
+#: or agent decision. The ``migration:`` actor convention is the established
+#: cross-cutting marker for such events (the consolidation attribution reducer
+#: already treats ``migration:`` actors specially: they never open or close an
+#: authorship window). The diary reducer reads it the same way -- see
+#: :func:`_is_reconstruction_seed`.
+_RECONSTRUCTION_SEED_ACTOR_PREFIX = "migration:"
+
+
+def _is_reconstruction_seed(event: StatusEvent) -> bool:
+    """Whether *event* is a migration/backfill reconstruction seed, not a decision.
+
+    A reconstruction seed is a best-effort restatement of a WP's historical
+    state injected by a corpus migration (actor identity prefixed
+    ``migration:``, e.g. ``migration:backfill_runtime_state``). It is NOT an
+    authoritative operator/agent decision. The distinction matters only in
+    :func:`_should_apply_event` arm (ii): a seed that happens to be the current
+    setter must not *reject* a later, causally-consistent real lifecycle
+    transition the way a genuine decision (a cancel, a rejection, or any real
+    forward step) does. The seed still sets its own lane when nothing
+    supersedes it; it simply yields to the recorded live lifecycle when one
+    exists (spec-kitty#5967 follow-up).
+    """
+    return actor_identity_str(event.actor).startswith(_RECONSTRUCTION_SEED_ACTOR_PREFIX)
+
+
 def _wp_state_from_event(
     event: StatusEvent,
     previous: dict[str, Any] | None,
@@ -1354,9 +1382,24 @@ def _should_apply_event(
     # is authoritative and always applies; ``force=True`` is the deliberate,
     # reason-carrying break-glass override. The hazards are all *unforced*
     # forward transitions, so neither exemption reopens them.
+    #
+    # Further exemption (spec-kitty#5967 follow-up): this drop fires only when the
+    # CURRENT SETTER is a genuine decision. A reconstruction SEED
+    # (``migration:`` actor, :func:`_is_reconstruction_seed`) is a best-effort
+    # restatement of historical state, not a decision, so it must not reject the
+    # WP's later recorded live lifecycle. A corpus backfill seeds e.g.
+    # ``planned -> claimed`` at the genesis instant; the real log then continues
+    # ``planned -> blocked -> ... -> approved``. Without this clause the seed
+    # (applied first by ``at``) becomes the current setter and every real step
+    # (``from_lane`` != the seeded lane) is dropped, stranding the WP at the
+    # seed's lane. The seed still stands when NO real transition supersedes it
+    # (it remains the current setter and nothing is dropped). The #5967 hazards
+    # keep their real-decision setters (a cancel, a rework claim), so this does
+    # not reopen them.
     if (
         current_setter is not None
         and not _is_rollback_event(new_event)
+        and not _is_reconstruction_seed(current_setter)
         and not new_event.force
         and str(new_event.from_lane) != current_lane
     ):

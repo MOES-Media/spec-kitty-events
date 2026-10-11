@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [10.4.2] - 2026-10-11
+
+### Fixed
+
+- **A migration/backfill reconstruction seed no longer buries a work package's
+  real recorded lifecycle (spec-kitty#5967 follow-up).** 10.4.1 generalized
+  `from_lane` continuity to every non-rollback current setter. That correctly
+  closed the cancel/rework split-brain, but it also let a reconstruction *seed*
+  reject a WP's later real transitions: a corpus migration (actor
+  `migration:backfill_runtime_state`) seeds e.g. `planned -> claimed` at the
+  genesis instant, the real log then records `planned -> blocked -> ... ->
+  approved`, and because the seed (applied first by `at`) became the current
+  setter every real step carried a `from_lane` that no longer matched the
+  seeded lane and was dropped — stranding the WP at the seeded lane. The
+  reducer now recognises a reconstruction seed (`_is_reconstruction_seed`: an
+  actor identity prefixed `migration:`) and does not let it, as current setter,
+  reject a later transition. The seed still sets its own lane when nothing
+  supersedes it; it only yields to the WP's recorded live lifecycle when one
+  exists. The #5967 cancel/rework fix is unchanged — those setters are real
+  decisions, not seeds — and the rollback / `force=True` exemptions are
+  untouched.
+
 ## [10.4.1] - 2026-10-11
 
 ### Fixed
