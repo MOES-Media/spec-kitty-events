@@ -1396,10 +1396,25 @@ def _should_apply_event(
     # (it remains the current setter and nothing is dropped). The #5967 hazards
     # keep their real-decision setters (a cancel, a rework claim), so this does
     # not reopen them.
+    #
+    # The seed exemption is itself narrowed (spec-kitty#4941): it lifts the drop
+    # only for a seed that is a forward restatement, NOT for a seed that is a
+    # committed REJECTION (``_is_rollback_event``). A backfilled rejection cycle
+    # leaves the WP in ``in_progress``/``planned``/``claimed`` while the
+    # rejection itself branched off ``in_review``. A bare ``in_review ->
+    # approved`` approval with no rework between it and the rejection branches
+    # off that SAME ``in_review`` state -- it is causally concurrent with the
+    # rejection, not a rework following it, so arm (ii) must still drop it (the
+    # ``approval after rejection`` sibling of the #4990 ``rejection after
+    # approval`` mirror). A seed restating a rejection therefore keeps the
+    # rejection's authority; only a non-rejection seed (e.g. ``planned ->
+    # claimed``) yields to the real lifecycle. The #5967 cases are unaffected:
+    # their seeds (``planned -> claimed``) are not rollbacks, and their real
+    # setters (a cancel, a rework claim) are not seeds at all.
     if (
         current_setter is not None
         and not _is_rollback_event(new_event)
-        and not _is_reconstruction_seed(current_setter)
+        and not (_is_reconstruction_seed(current_setter) and not _is_rollback_event(current_setter))
         and not new_event.force
         and str(new_event.from_lane) != current_lane
     ):

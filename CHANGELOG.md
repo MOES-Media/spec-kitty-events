@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [10.4.3] - 2026-10-12
+
+### Fixed
+
+- **A backfilled rejection is no longer buried by a bare concurrent approval
+  (spec-kitty#4941).** This closes the `approval after rejection` sibling of the
+  `10.4.0` (#69) `rejection after approval` mirror. `10.4.1`'s reconstruction-seed
+  exemption (a `migration:` seed as current setter must not reject a WP's real
+  later lifecycle) was unconditional, so it also lifted arm (ii)'s
+  `from_lane`-continuity drop when the seed was itself a committed **rejection**.
+  The hazard: a backfilled rejection cycle leaves the WP in `in_progress` (the
+  rejection branched off `in_review`), then a bare `in_review -> approved`
+  approval carrying no rework between it and the rejection branches off that same
+  `in_review` state — it is causally concurrent with the rejection, not a rework
+  following it — yet the seed exemption let it win, resolving the WP to verdict
+  `approved` when it should stay `changes_requested`. The reducer now narrows the
+  seed exemption: it yields to the real lifecycle only for a seed that is a
+  forward restatement, never for a seed that is a rollback/rejection, which keeps
+  the rejection's authority and drops the concurrent approval regardless of its
+  wall-clock `at`. The `10.4.1` #5967 cancel/rework cases are unaffected (their
+  seeds are not rollbacks and their real setters are not seeds), and the
+  rollback / `force=True` exemptions are untouched. Public API and serialized
+  shapes are byte-identical; this is a reduction-decision fix only.
+
 ## [10.4.2] - 2026-10-11
 
 ### Fixed
