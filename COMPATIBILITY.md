@@ -1,6 +1,6 @@
 # Compatibility Guide
 
-**Current package version**: `10.4.2`
+**Current package version**: `10.4.3`
 
 The on-wire envelope schema version is `3.0.0` and has been unchanged since
 the cutover. The package version and the envelope schema version move
@@ -23,6 +23,37 @@ This document is the public compatibility policy for consumers of:
 - `spec-kitty-saas`
 - `spec-kitty`
 
+
+## `10.4.3` — status-diary reducer: a backfilled rejection is never overwritten by a bare concurrent approval
+
+`10.4.3` (spec-kitty/spec-kitty#4941) closes the remaining `approval after
+rejection` sibling of the `10.4.0` (#69) / `10.4.1` (#5967) reducer fixes
+(`spec_kitty_events.diary.reduce` / `reduce_parsed`). `10.4.1` added a seed
+exemption so a reconstruction seed (`migration:` actor) as current setter does
+not reject a WP's later real lifecycle. That exemption was unconditional: it
+also lifted arm (ii)'s `from_lane`-continuity drop when the seed was itself a
+committed **rejection**. The hazard: a backfilled rejection cycle leaves the WP
+in `in_progress` (the rejection branched off `in_review`), then a bare
+`in_review -> approved` approval carrying **no rework** between it and the
+rejection branches off that same `in_review` state. It is causally concurrent
+with the rejection, not a rework following it, yet the seed exemption let it
+win — the WP resolved to `approved` with verdict `approved` when it should have
+stayed in the reclaimed lane with verdict `changes_requested`. The fix narrows
+the seed exemption: it lifts the drop only for a seed that is a forward
+restatement, never for a seed that is a rollback/rejection. A seed restating a
+rejection keeps the rejection's authority (arm (ii) still drops the concurrent
+approval, regardless of its wall-clock `at`); only a non-rejection seed (e.g.
+`planned -> claimed`) still yields to the real lifecycle. The `10.4.1` #5967
+cases are unaffected — their seeds are not rollbacks and their real setters (a
+cancel, a rework claim) are not seeds. Like its predecessors this corrects a
+**defect** in the `reduce()`/`reduce_parsed()` consumer role — a rejected WP
+silently resurfacing as `approved` was never a contracted outcome — so it is a
+bug fix, not a promised-behavior change. The envelope contract is untouched (no
+wire shape, required field, or forbidden-key change), so the on-wire schema
+version stays `3.0.0`; the patch bump conservatively flags the corrected
+reducer output for consumers that pin conformance goldens. Exemptions are
+otherwise unchanged: a rollback event is authoritative and always applies, and
+`force=True` is the deliberate break-glass override.
 
 ## `10.4.1` — status-diary reducer: `from_lane` continuity now holds for every current setter, not only a rollback
 

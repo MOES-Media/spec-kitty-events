@@ -113,6 +113,12 @@ _REVIEW_RESULT = {
     "reference": "feedback://034/WP01/approved",
 }
 
+_REVIEW_RESULT_CHANGES_REQUESTED = {
+    "reviewer": "reviewer-1",
+    "verdict": "changes_requested",
+    "reference": "feedback://034/WP01/changes-requested",
+}
+
 
 # ── Empty stream ───────────────────────────────────────────────────────────────
 
@@ -746,6 +752,50 @@ class TestReduceConcurrentRollbackPrecedence:
 
         assert state.work_packages["WP01"]["lane"] == "in_progress"
         assert state.work_packages["WP01"]["last_event_id"] == _ulid(2)
+
+    def test_backfilled_rejection_beats_bare_concurrent_approval(self) -> None:
+        """#4941: a reconstruction SEED that is itself a committed rejection
+        keeps the rejection's authority -- a bare ``in_review -> approved``
+        approval that is causally CONCURRENT with it (no rework between the
+        rejection and the approval) must be dropped, so the resolved verdict
+        stays ``changes_requested``.
+
+        This is the ``approval after rejection`` sibling of #4990's mirror
+        ``rejection after approval`` case. The backfilled rejection
+        ``in_review -> in_progress`` leaves the WP in ``in_progress`` but
+        branched off ``in_review``; the real approval ``in_review -> approved``
+        branches off the SAME ``in_review`` state rather than following the
+        rejection's ``in_progress`` result, so it never reworked the rejection
+        -- it is causally concurrent and must not win. The #5967 seed exemption
+        must NOT swallow this: a seed that is a rollback still carries a
+        rejection's authority. The rule is causal, not wall-clock -- the
+        approval carries the LATER ``at`` and is still dropped."""
+        events = [
+            _row(
+                _ulid(1),
+                from_lane="in_review",
+                to_lane="in_progress",
+                at="2026-02-08T12:00:00+00:00",
+                actor="migration:backfill_runtime_state",
+                review_ref="review://WP01/changes-requested",
+                review_result=_REVIEW_RESULT_CHANGES_REQUESTED,
+            ),
+            _row(
+                _ulid(2),
+                from_lane="in_review",
+                to_lane="approved",
+                at="2026-02-08T18:00:00+00:00",
+                actor="reviewer-b",
+                review_result=_REVIEW_RESULT,
+            ),
+        ]
+
+        state = reduce(events)
+
+        assert state.work_packages["WP01"]["lane"] == "in_progress"
+        assert state.work_packages["WP01"]["last_event_id"] == _ulid(1)
+        assert state.work_packages["WP01"]["review_result"] == _REVIEW_RESULT_CHANGES_REQUESTED
+        assert state.summary["approved"] == 0
 
 
 class TestSummaryCounts:
