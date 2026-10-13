@@ -1,0 +1,29 @@
+schema: review-refute/v1
+complete: true
+phase: op
+batch: 2
+verdicts:
+  - id: OP-ARCH-009
+    verdict: refuted
+    reason: The "consumers pin <11" claim is sourced in the repo (docs/changelog/2026-10-12-...:61 shows a spec-kitty-events>=10.4.3,<11 pin), 10.4.4 is correct, and design section 8 already states what schemaversion tracks; this is a style preference, not a defect.
+  - id: OP-ARCH-010
+    verdict: refuted
+    reason: The quoted lines exist, but the finding rests on a review-brief rule I cannot find in the repo or the review artifacts, and the wording only records the maintainer's direction, so it is unsupported.
+  - id: OP-CONTRACT-001
+    verdict: confirmed
+    reason: I fetched ce@v1.0.2 and main. v1.0.2 has no correlation.md (404), its Kafka binding has no batch sentence, and its sequence.md lacks the quoted lines, which main has, while the design says it checked ce@v1.0.2.
+  - id: OP-CONTRACT-002
+    verdict: confirmed
+    reason: ce@v1.0.2 json-format.md lines 69-70 say unset attributes MAY be null and a null on decode MUST be treated as unset, contradicting the design's "not explicitly stated" at section 2.
+  - id: OP-CONTRACT-003
+    verdict: confirmed
+    reason: ce@v1.0.2 spec.md line 186 limits Integer to signed 32 bits, lamport_clock in models.py is an unbounded int with ge=0, and the design has no range rule or error code.
+  - id: OP-CONTRACT-004
+    verdict: confirmed
+    reason: The section 9 code table has no code for schema_version skew or missing, unknown keys or invalid payload, even though envelope_strict_journal fixtures for those exist; it also gives no precedence, and it lists raw_status_entry as the example of an unrecognised shape while section 1 names bare status entries as a C shape.
+  - id: OP-CONTRACT-005
+    verdict: confirmed
+    reason: Section 9 line 245 says "never defaulted" but the shape-A trace at line 350 applies "data_tier (default 0)", and the lifted-field rule covers only WPStatusChanged.
+  - id: OP-CONTRACT-006
+    verdict: confirmed
+    reason: Design line 181-182 calls dedupe by id alone "safe" on the ground that "ids are ULIDs", but normalize_event_id accepts UUID forms and the spec's duplicate rule is source+id.

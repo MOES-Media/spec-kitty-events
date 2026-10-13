@@ -1,0 +1,26 @@
+schema: review-refute/v1
+complete: true
+phase: op
+batch: 3
+verdicts:
+  - id: OP-CONTRACT-002
+    verdict: confirmed
+    reason: v1.0.2 section 3.3.1 reads "If present, ... content-type MUST be set"; the design quote at section 12 drops the condition in a section that claims primary-source verification.
+  - id: OP-CONTRACT-003
+    verdict: refuted
+    reason: Section 9 already sets the decision-level rule (unmappable row fails closed in strict use, passes through permissively on local read), and the row-level handling of a non-conforming time belongs to the implementation mission.
+  - id: OP-CONTRACT-004
+    verdict: refuted
+    reason: The finding itself concedes the example is labelled pretty-printed and section 11 leaves byte rules unfixed, so there is no defect.
+  - id: OP-GOV-001
+    verdict: refuted
+    reason: The phase table orders dependencies (library reader before writers) and 4b is explicitly marked "Timing is open question 3"; library-first is needed under any timing option, so the table does not decide the question.
+  - id: OP-GOV-002
+    verdict: refuted
+    reason: The Read API is Java, so needing a parser is a plain consequence; the generated-binding question is conditional and already flagged in the Charter section and Costs, so the two sections do not conflict.
+  - id: OP-GOV-003
+    verdict: refuted
+    reason: The whole ADR and design are Proposed and to be confirmed on the PR, and the type grammar is not shown to be outside the brief (the claim cannot be verified from the artifacts); this is a labelling preference, not a defect.
+  - id: OP-GOV-004
+    verdict: refuted
+    reason: The finding concedes the claim is correct, and the sentence directly above row A names core ADR 2026-02-09-3, so the referent is clear in context.

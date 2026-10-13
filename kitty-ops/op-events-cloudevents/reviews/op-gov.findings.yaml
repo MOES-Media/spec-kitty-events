@@ -1,0 +1,73 @@
+schema: review-findings/v1
+complete: true
+phase: op
+lens_group: gov
+mission: op-events-cloudevents
+findings:
+  - id: OP-GOV-001
+    lens: scope
+    severity: 2
+    title: Phased rollout presupposes the answer to open question 3 (timing)
+    evidence:
+      - artifact: "design section 14 phase table (Phases 2 to 4 additive, 4b cutover, 5 writers)"
+      - artifact: "ADR Open question 3 (option A: with the Spec Kitty 4.0 GA; B: later with first write-core switch)"
+    claim: >
+      The ADR says library-first release is conditional ("If B is chosen, release the library first").
+      The design states the library-first sequence (additive minor releases, then a 4b cutover major,
+      then writers) as the plan without that condition. Under option A the sequence collapses into one
+      release, so the phase table silently decides part of a question the ADR keeps open.
+    remediation: >
+      Label section 14 as "sequence assuming option B or C of open question 3", and state in one line
+      what changes under option A.
+  - id: OP-GOV-002
+    lens: charter compliance
+    severity: 2
+    title: ADR Consequences treats a Java parser as required while Charter section treats a Java binding as conditional
+    evidence:
+      - artifact: "ADR Consequences > Consumers > Mission Status Read API ('needs a CloudEvents parser and the upcaster contract in Java')"
+      - artifact: "ADR Consequences > Charter (reading 2, Java binding) and Costs ('if the Java binding goes ahead')"
+      - artifact: ".kittify/charter/charter.md Deployment Constraints and Policy Summary (Python library, Pydantic event models)"
+    claim: >
+      Consumers states the Java upcaster as a need, which is the charter-contradicting reading, while the
+      Charter section says no amendment is strictly required under reading 1. The reader cannot tell
+      whether the amendment flag is live. The flag is present, but the two sections disagree on whether
+      the Java binding is assumed.
+    remediation: >
+      Reword the Consumers bullet to say the Read API needs a parser and upcaster and that how it gets
+      them (hand-written against the schemas, or a generated binding) is the reading-2 question flagged
+      under Charter.
+  - id: OP-GOV-003
+    lens: scope
+    severity: 2
+    title: Type-name grammar and flat registry rules stated as settled design
+    evidence:
+      - artifact: "design section 7 ('type is <prefix>.<noun>.<verb>.v<N>'; '.vN is the payload major'; new type on incompatible change)"
+    claim: >
+      The type grammar and the vN-per-incompatible-change rule are not among the ADR's listed open
+      questions or the two embedded choices to confirm, and are not labelled proposals. They are
+      decisions about the public type namespace that the brief did not ask this document to take.
+    remediation: >
+      Label the grammar and vN rule as proposals and add them to the "to confirm on the PR" list in the
+      design header and the ADR "Further choices" section.
+  - id: OP-GOV-004
+    lens: scope
+    severity: 1
+    title: Ambiguous "the ADR" in ordering option A
+    evidence:
+      - artifact: "ADR Open question 1 table, row A ('contradicts the ADR')"
+    claim: >
+      The sentence just above names core ADR 2026-02-09-3, but the document itself is also "this ADR".
+      I checked the core ADR: it does order by Lamport, then at, then event_id, so the claim holds.
+      The referent is unclear.
+    remediation: Write "contradicts core ADR 2026-02-09-3".
+  - id: OP-GOV-005
+    lens: format
+    severity: 1
+    title: doc_status inconsistent between a Proposed ADR and the design
+    evidence:
+      - artifact: "ADR front matter (status: Proposed, doc_status: active)"
+      - artifact: "design front matter (doc_status: draft)"
+    claim: >
+      The ADR is Proposed yet marks the page doc_status active, while the design it supports is draft.
+      Not wrong under a page-lifecycle reading, but easy to misread as Accepted.
+    remediation: Set the ADR doc_status to draft until it is Accepted, or note the meaning in the index.

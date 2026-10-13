@@ -1,0 +1,15 @@
+schema: review-verify/v1
+complete: true
+phase: op
+unrelated_hunks: []
+results:
+  - id: OP-FRESHB-001
+    status: resolved
+    reason: Design section 9, the section 15 risk entry, the ADR Compatibility bullet and the Phase 5 precondition plus exit criteria now name both modes (unchanged driver rejects on missing event_id and conflicts, drivers.py:245-257; partially adopted driver has blind fork detection), and the cited lines match core 3847251e0 (drivers.py 245-257, event_log_merge.py 73-77 and 137-142).
+  - id: OP-FRESHB-002
+    status: resolved
+    reason: ADR Q3 is split into 3a (writer timing, options A/B/C kept) and 3b (retire vs keep 3.0.0, taken from design Cutover A/B), 4b is stated as gated on neither, and the ADR intro, Versioning and Package-version bullets, silent-aliases bullet, design intro, section 8 table, Phase 0 exit, Phase 4b and Cutover text all use the 3a/3b labels consistently with no leftover bare "question 3".
+    note: nit (severity 1, not a blocker) - the ADR still headlines "### 3. Timing" and the "four open questions" count now yields five rulings (Phase 0 correctly lists 1, 2, 3a, 3b, 4).
+  - id: OP-FRESHB-003
+    status: resolved
+    reason: ADR Versioning bullet, design section 13 and the Phase 3 exit criterion now state that the Phase 3 validator and 4.0.0 schemas are non-normative until 4b (no consumer or producer gates on them), which grounds the minor classification of Phases 1-3 and makes 4b the accept/reject boundary change.

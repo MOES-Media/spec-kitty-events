@@ -1,0 +1,418 @@
+schema: review-confirmed/v1
+phase: op
+findings:
+- id: OP-ARCH-001
+  lens: compatibility-stability-contract
+  severity: 5
+  title: Fail-closed upcaster on the local read path would remove the permissive local-CLI reader the
+    versioning contract guarantees
+  evidence:
+  - artifact: "design \xA7 9 (Failure behaviour: fail closed, never dropped, never defaulted), \xA7 11\
+      \ (file is read by upcasting each line), \xA7 13 (local-CLI domain 'unchanged in kind'), ADR Consequences/Compatibility"
+  - code: contracts/versioning-and-compatibility.md:78-93 (local-CLI reader permissive, 'Not weakened
+      by any package bump'); COMPATIBILITY.md:762-768 (tolerates feature_slug, mission_key, rows missing
+      schema_version, pre-canonical lanes)
+  - code: src/spec_kitty_events/diary.py:1844 (reducer sorts raw `at` strings; no RFC 3339 parse), diary.py:486
+      (empty-string mission_slug fallback), diary.py:1757-1789 (parse_diary accepts any event_id string
+      on lane rows)
+  claim: 'Today a lane row with a non-RFC-3339 or naive `at`, a non-ULID/UUID `event_id`, or no resolvable
+    mission_id is still reduced. The design makes the same rows raise UPCAST_TIME_INVALID, UPCAST_ID_INVALID
+    or UPCAST_MISSION_ID_UNRESOLVED on every read, including the local CLI reading a user''s own history,
+    and the shape C rows fail closed outright. That narrows the local-CLI validity domain, which the contract
+    forbids, while the design asserts the domain is unchanged. The ingress (fail-closed) and local (permissive)
+    domains need different upcaster behaviours and the design defines only the strict one.
+
+    '
+  remediation: "Define two explicit upcaster modes, strict (ingress, merge driver writes) and local-read\
+    \ (permissive: a row that the reducer accepts today still yields a result, or is passed through unchanged\
+    \ with a named, non-fatal diagnostic), and state which callers use which. Add fixtures proving every\
+    \ row the current reducer accepts is still accepted on the local path. Reword \xA7 13 so it does not\
+    \ claim 'unchanged in kind' until this holds.\n"
+- id: OP-ARCH-002
+  lens: upcaster-completeness
+  severity: 4
+  title: The diary replay corpus contains rows the upcaster cannot and must not map, contradicting 'never
+    drops a row' and 'every line' fixture coverage
+  evidence:
+  - artifact: "design \xA7 4 (last paragraph: non-lane rows 'map through the registry like shape A'; 'upcaster\
+      \ itself never drops a row'), \xA7 9 Fixtures ('status_diary/replay/*.jsonl (shape B; every line)')"
+  - code: src/spec_kitty_events/conformance/fixtures/status_diary/replay/status_diary_unknown_kinds.jsonl:1-3
+      (rows with event_id 'dp-opened-1', 'future-1', 'retro-req-1', event_type 'SomeFutureProtocolEventV99',
+      no `at`, no aggregate, no lamport)
+  - code: 'src/spec_kitty_events/diary.py:1724-1749 (_is_non_lane_row: event_type presence, event_name
+      retrospective.*, and `type`-keyed retrospective lifecycle events are ignored in place)'
+  claim: 'Decision Point and retrospective rows written into status.events.jsonl are not shape A (they
+    lack aggregate_id, build_id, node_id, lamport_clock, project_uuid, correlation_id) and use non-ULID
+    ids and no timestamp. The upcaster as specified fails them with UPCAST_ID_INVALID, UPCAST_TIME_INVALID
+    or UPCAST_UNMAPPED_EVENT_TYPE, so the ''every line'' fixture and the reducer-equivalence test cannot
+    pass, and the reducer''s tolerated ignore-in-place rule is lost. Retrospective lifecycle events also
+    use a `type` key, which collides with the shape C pre-3.0 `type`/`ts`/`wp` detection and would be
+    misclassified as UPCAST_UNRECOGNISED_SHAPE. Annotation rows (`kind: annotation`, `delta`, InnerStateChanged)
+    have no mapping table at all.
+
+    '
+  remediation: 'Add a shape D section covering Decision Point rows, retrospective rows (both `event_name`
+    and `type` forms) and annotation rows with explicit mapping or an explicit ''pass-through, not upcast''
+    outcome and its own error semantics; make shape detection order explicit so retrospective `type` rows
+    are not read as pre-3.0 shape C; give annotation fields (kind, delta) mapping rows; restate the fixture
+    claim as ''every row of the corpus has an expected CloudEvent, pass-through or error code''.
+
+    '
+- id: OP-ARCH-003
+  lens: payload-compatibility
+  severity: 4
+  title: '''Existing payload models carry over'' is false for WPStatusChanged, and the merged lane.transitioned.v1
+    data shape is not defined'
+  evidence:
+  - artifact: "ADR Decision Drivers ('existing payload models and fixtures should carry over'); design\
+      \ \xA7 1 ('A and B converge on one CloudEvent type'), \xA7 3 'Lifted payload fields', \xA7 4 table"
+  - code: 'src/spec_kitty_events/status.py:411-466 (StatusTransitionPayload: extra=''forbid''; requires
+      mission_slug, wp_id, actor, execution_mode; from_lane Optional; has mission_id and summary; no policy_metadata,
+      no review_result)'
+  - code: 'src/spec_kitty_events/diary.py:414-445 (StatusEvent: from_lane required, has policy_metadata,
+      review_result)'
+  claim: 'Lifting mission_slug, wp_id, actor and execution_mode out of `data` means the post-lift `data`
+    cannot validate against StatusTransitionPayload (required fields removed, extra=forbid), so a new
+    payload model and schema are needed. The one merged type must also reconcile shape A fields absent
+    from the design (`summary`, optional `mission_id`, `from_lane: null`) with shape B-only fields (`policy_metadata`,
+    `review_result`), and states no rule for a payload.mission_id that disagrees with the aggregate-derived
+    missionid (UPCAST_CONFLICTING_FIELDS lists only four lifted fields). The ADR rule ''a field with no
+    mapping is a defect'' is therefore violated by the design''s own tables.
+
+    '
+  remediation: 'Add a normative `data` schema for lane.transitioned.v1 as a union with optionality stated,
+    map `summary`, `mission_id` and `from_lane: null` explicitly, extend UPCAST_CONFLICTING_FIELDS to
+    payload.mission_id, and drop or qualify the ''payload models carry over'' driver. State whether the
+    post-lift model is a new Pydantic model (charter: Pydantic remains the source) and how WPStatusChanged''s
+    old model stays for legacy validation.
+
+    '
+- id: OP-ARCH-004
+  lens: versioning-rule
+  severity: 4
+  title: Cutover release and the 3.0.0 accept boundary are undefined; design cites a 'cutover release
+    (section 14)' that section 14 does not contain
+  evidence:
+  - artifact: "design \xA7 8 last paragraph ('until the cutover release (section 14)'), \xA7 14 Phase\
+      \ 3 and Phase 5; ADR Consequences/Versioning and Open question 3; ADR Compatibility ('explicit cutover\
+      \ decision')"
+  - code: src/spec_kitty_events/strict.py:144, 626-636 (validate_strict_envelope requires schema_version
+      == '3.0.0'); contracts/versioning-and-compatibility.md:18-25 (producers must keep emitting 3.0.0;
+      strict profile rejects anything else)
+  claim: 'The documents never say when validate_strict_envelope stops accepting 3.0.0 `Event`, nor whether
+    SaaS ingress keeps accepting shape A after Phase 4. Phase 3 adds a validator alongside and calls the
+    release ''the new major'', yet a purely additive validator does not change the 3.0.0 boundary, so
+    ''on-wire 3.0.0 to 4.0.0'' is claimed without a release that makes it true. Until fixed, producers
+    following the contract (must emit 3.0.0) and the design (emit CloudEvents) conflict, and the charter''s
+    ''explicit cutover decision'' for canonical-field changes is not satisfiable because the timing question
+    (Q3) is open while the ADR says it ''is the explicit cutover decision''.
+
+    '
+  remediation: 'Define a cutover phase row: which release makes shape A rejected by the strict profile
+    (or states shape A remains accepted at ingress indefinitely), which release flips the contract text
+    ''producers must emit 3.0.0'', and which release is the major. Make the ADR sentence conditional:
+    the explicit cutover decision is recorded when Q3 is ruled. Fix the dangling ''section 14'' reference.
+
+    '
+- id: OP-ARCH-005
+  lens: upcaster-determinism-idempotence
+  severity: 3
+  title: 'Merge driver behaviour is under-specified: dedupe by id alone conflicts with the reducer''s
+    same-id seed rule, and ''no log rewrite'' versus emitting upcast rows is not resolved'
+  evidence:
+  - artifact: "ADR Compatibility ('merge driver uses the upcaster ... merges by id'); design \xA7 6 ('merge\
+      \ driver dedupes by id alone'), \xA7 15 Id collapse, \xA7 14 Phase 5"
+  - code: 'src/spec_kitty_events/diary.py:1805-1806, 1615 (dedupe: first occurrence; all-seed same-id
+      rows keep the canonical-minimum row, content-based)'
+  - code: src/spec_kitty_events/models.py:27-56 (normalize_event_id lowercases UUIDs, uppercases ULIDs,
+      so spelling variants collide after upcast but not in the reducer's raw-string dedupe)
+  claim: 'Three gaps. (1) The driver''s output form is not stated: if it writes upcast rows into the merged
+    file the log is rewritten for merged rows, contradicting ''no log rewrite''; if it keeps original
+    bytes it must still key dedupe on the upcast id. (2) ''Dedupes by id alone'' ignores that same-id
+    migration seeds with different content resolve by canonical-minimum row, so a naive driver changes
+    reduction results. (3) id normalisation merges spelling variants that the reducer treats as distinct,
+    so the reducer-equivalence test can fail on logs with such duplicates. The ''as it does today for
+    diary rows'' claim concerns the spec-kitty merge driver, which is not in this repo and is unverified
+    here.
+
+    '
+  remediation: 'Specify that the driver compares by upcast id but writes the original bytes of the retained
+    row, reuse the reducer''s same-id resolution rule (cite diary.py), add a fixture with a spelling-variant
+    duplicate and a same-id differing seed pair, and mark the current-driver behaviour as unverified or
+    cite the spec-kitty file and line.
+
+    '
+- id: OP-ARCH-006
+  lens: upcaster-determinism-idempotence
+  severity: 3
+  title: 'Determinism statement inconsistencies: ''never defaulted'' versus data_tier default, source
+    depends on caller context, idempotence not stated as a property'
+  evidence:
+  - artifact: "design \xA7 9 (Determinism, Failure behaviour 'never defaulted'), \xA7 3 (data_tier 'copied';\
+      \ shape A trace says 'data_tier (default 0)'), \xA7 4 (missionid from caller context), \xA7 6 (source+id\
+      \ uniqueness)"
+  - code: src/spec_kitty_events/models.py:141-146 (schema_version and data_tier have defaults; strict.py:97-98
+      lists them required in the strict profile)
+  claim: 'The upcaster defaults data_tier for shape A rows that omit it while claiming never to default.
+    `source` embeds missionid, which for shape B comes from caller context (meta.json); the same row upcast
+    under two contexts yields different `source` and therefore different identity under the spec''s source+id
+    rule, and a context mission_id that disagrees with a row''s own mission_id is not covered by any error
+    code. Idempotence (upcast of an upcast CloudEvent) is stated only as ''validated and returned unchanged'',
+    with no property test listed.
+
+    '
+  remediation: 'Say which defaults are applied (list them in the mapping tables) or require the field
+    and fail closed; add UPCAST_CONFLICTING_FIELDS coverage for row-versus-context mission_id; add a hypothesis
+    property test list: determinism, idempotence (upcast(upcast(x)) == upcast(x)), and context-independence
+    of `id`.
+
+    '
+- id: OP-ARCH-007
+  lens: contract-soundness
+  severity: 3
+  title: Ordering and reducer integration are out of scope in the design yet required by the exit criteria
+  evidence:
+  - artifact: "design \xA7 1 (out of scope: reducer's folding rules), \xA7 9 (reducer-equivalence test),\
+      \ \xA7 5; ADR Open question 1"
+  - code: src/spec_kitty_events/diary.py:1757-1789 (parse_diary decodes legacy dicts only), diary.py:1844
+      (sort key (at, event_id))
+  claim: 'The reducer-equivalence test requires the diary reducer to consume the upcast form, but parse_diary
+    and StatusEvent.from_dict decode only the legacy keys. Nothing says whether diary.reduce gains a CloudEvent
+    input path, whether upcasting happens before parse_diary, or whether the reducer sort key changes
+    with Q1. The reducer-equivalence phase 2 exit therefore has no defined mechanism, and the choice interacts
+    with Q1 (option B/C changes the sort key).
+
+    '
+  remediation: 'Add a section stating the integration seam (for example upcast rows are mapped back through
+    a CloudEvent-to-StatusEvent decoder, or parse_diary accepts CloudEvents) and make the Q1 options say
+    what happens to diary.reduce sorting for each option.
+
+    '
+- id: OP-CONTRACT-001
+  lens: spec-claims-primary-source
+  severity: 3
+  title: Spec claims attributed to ce@v1.0.2 come from unreleased main (Kafka batch sentence, Correlation
+    extension, Sequence quotes)
+  evidence:
+  - artifact: "design preamble ('latest release tag read was ce@v1.0.2'); design \xA7 3 (Correlation extension);\
+      \ \xA7 5 (sequence quotes); \xA7 12 (Kafka batch)"
+  - code: https://raw.githubusercontent.com/cloudevents/spec/ce@v1.0.2/cloudevents/extensions/correlation.md
+      and .../v1.0.2/... (404 / no correlationid); ce@v1.0.2 bindings/kafka-protocol-binding.md has no
+      'batch' text; main has it at lines 74-80
+  - code: ce@v1.0.2 extensions/sequence.md says 'MUST be a non-empty lexicographically-orderable string';
+      the quoted 'a string that can be lexicographically compared' and 'Produces and consumers are free
+      to define an out-of-band agreement' exist only on main
+  claim: The design says its spec claims were checked against v1.0 / ce@v1.0.2. I fetched that tag. The
+    Correlation extension (correlationid/causationid) does not exist there, the Kafka 'does not currently
+    support the batch content mode' sentence does not exist there, and the two Sequence-extension quotes
+    (including the typo 'Produces') are from main, not the release. The claims are true of main but are
+    presented as release facts. The 'documented Correlation extension' is not part of any released spec,
+    which weakens the justification for reusing its names.
+  remediation: 'State the basis honestly: normative claims from ce@v1.0.2; Correlation, Kafka batch sentence
+    and Sequence quotes marked ''CloudEvents spec main (unreleased as of 2026-10-13)''. Quote Sequence
+    from ce@v1.0.2 or mark main. In section 3 say correlationid/causationid are an unreleased extension,
+    defined here by our own schema either way.'
+- id: OP-CONTRACT-002
+  lens: spec-claims-primary-source
+  severity: 3
+  title: Design says the spec does not state null-attribute handling; json-format.md states it explicitly
+  evidence:
+  - artifact: "design \xA7 2 last bullet ('does not say in so many words whether a null attribute value\
+      \ is allowed (not explicitly stated)')"
+  - code: 'ce@v1.0.2 cloudevents/formats/json-format.md lines 69-71: ''Unset attributes MAY be encoded
+      to the JSON value of null. When decoding attributes and a null value is encountered, it MUST be
+      treated as the equivalent of unset or omitted.'''
+  claim: The claim is false for the JSON format, which is the format in use. Writing nulls is permitted;
+    reading them as unset is a MUST. Omitting absent attributes is still a valid writer choice, but the
+    validator and upcaster (an input that is already a CloudEvent is 'validated and returned unchanged')
+    must accept an inbound null attribute as unset, not reject it. Nothing in the design pins that, and
+    the 'fail closed' posture could otherwise reject spec-valid events.
+  remediation: 'Replace the bullet with the json-format.md citation. Add to section 9/11: the CloudEvents
+    validator treats a null context attribute as absent (per spec); writers in this repo omit rather than
+    emit null; `data` members are unaffected.'
+- id: OP-CONTRACT-003
+  lens: attribute-type-conformance
+  severity: 3
+  title: Integer extension attributes (lamportclock, datatier) have no range rule; spec limits Integer
+    to signed 32 bits
+  evidence:
+  - artifact: "design \xA7 3 rows lamport_clock, data_tier; \xA7 5; \xA7 9 error table"
+  - code: 'ce@v1.0.2 spec.md line ~186-189: Integer is ''in the range -2,147,483,648 to +2,147,483,647
+      inclusive''; event formats ''MUST only use Integer values in this range'''
+  - code: 'src/spec_kitty_events/models.py:120-122 lamport_clock: int, ge=0 (unbounded); models.py:144
+      data_tier ge=0 le=4'
+  claim: The design quotes the type-system list but not the Integer range. `Event.lamport_clock` is an
+    unbounded Python int, so a legacy row with a clock above 2^31-1 would produce a spec-invalid CloudEvent.
+    No UpcastErrorCode covers it and the 'copied' rule would emit it. This is also an ordering-design
+    fact for open question 1 (a clock that must wrap or fail).
+  remediation: In section 2 add the Integer range MUST. In section 3 say lamportclock above 2^31-1 fails
+    closed with a named code (for example UPCAST_INTEGER_OUT_OF_RANGE) or specify an alternative (string-typed
+    clock); add the code to the section 9 table and a boundary fixture (2^31-1 passes, 2^31 fails).
+- id: OP-CONTRACT-004
+  lens: failure-behaviour-fail-closed
+  severity: 3
+  title: UpcastErrorCode set does not cover existing fixture classes; no error precedence; C-shape naming
+    is self-contradictory
+  evidence:
+  - artifact: "design \xA7 1 row C; \xA7 9 'Failure behaviour' table; \xA7 9 'Fixtures'"
+  - code: conformance/fixtures/class_taxonomy/historical_row_raw/in_review_legacy_synonym.json (has event_id,
+      occurred_at, no aggregate/project, to_lane awaiting-review)
+  - code: conformance/fixtures/class_taxonomy/envelope_strict_journal/{skew_major_2,skew_missing_version,local_appender_envelope_5_0_0,envelope_extra_team_slug}.json;
+      envelope_invalid_payload_schema/*.json; strict.py:144 _REQUIRED_SCHEMA_VERSION = '3.0.0'
+  claim: (a) 'Every row in the existing sets becomes an upcaster fixture with an expected CloudEvent or
+    expected error code', but no code exists for a schema_version other than 3.0.0 (skew), a missing schema_version,
+    an unknown extra top-level key, or a payload that fails its payload model. (b) Rows fail several codes
+    at once (the awaiting-review historical row has no mission id, no 'timestamp'/'at' key because it
+    uses occurred_at, and an unknown lane); the design gives no precedence, so two implementations (Python
+    and Java) will report different codes, defeating the shared-fixture claim. (c) Section 1 lists 'bare
+    status entries' (raw_status_entry) as a named C shape, but UPCAST_UNRECOGNISED_SHAPE uses raw_status_entry
+    as its example of a non-named shape. (d) UPCAST_TIME_INVALID names only timestamp/at, not the C-shape
+    key occurred_at (or ts).
+  remediation: Add codes (or state the row is out of scope with a reason) for schema_version skew/missing,
+    unexpected keys, and payload-invalid; fix the raw_status_entry contradiction; list the time keys per
+    shape including occurred_at/ts; define a deterministic check order (shape, then id, then time, then
+    mission id, then type/lane, then conflicts) and make the fixtures assert the code of the first failure.
+    Record whether upcast also payload-validates legacy rows.
+- id: OP-CONTRACT-005
+  lens: field-mapping-completeness
+  severity: 3
+  title: 'Shape A mapping is incomplete or inconsistent: lifting rule only for WPStatusChanged, defaults
+    vs ''never defaulted'', constant attributes unstated, structured actor'
+  evidence:
+  - artifact: "design \xA7 3 (Lifted payload fields; rows for data_tier, schema_version); \xA7 10 shape-A\
+      \ trace ('data_tier (default 0)'); \xA7 9 Determinism/Failure ('never defaulted')"
+  - code: src/spec_kitty_events/models.py:141-146 (schema_version, data_tier have model defaults); conformance/fixtures/class_taxonomy/envelope_valid_canonical/wp_status_changed_planned_to_claimed.json
+      (no data_tier, causation_id, project_slug)
+  - code: 'conformance/fixtures/class_taxonomy/envelope_valid_historical_synthesized/from_pre30_envelope.json
+      (MissionCreated: payload carries mission_id and mission_slug, aggregate mission/<id>)'
+  claim: 'All 14 Event fields and all 15 StatusEvent fields are mapped (counted against models.py:80-146
+    and diary.py:427-444). Gaps: (1) The worked shape-A trace applies ''default 0'' for an absent data_tier
+    while section 9 says rows are never defaulted and output derives only from the row; the strict profile
+    requires explicit values but the model and canonical fixture do not, so the rule for absent data_tier/schema_version/causation_id/project_slug
+    in raw JSON is undefined. (2) mission_slug/actor/execution_mode lifting is stated only for WPStatusChanged,
+    so for other types (MissionCreated carries mission_slug and mission_id in payload) missionslug appears
+    as an extension for lane rows but as `data` content for others, and a payload.mission_id that disagrees
+    with the aggregate segment is not covered by UPCAST_CONFLICTING_FIELDS (which covers only lifted values).
+    (3) specversion, datacontenttype, dataschema and schemaversion for shape A are never stated (only
+    the shape-B table lists them). (4) A structured dict actor in a shape-A WPStatusChanged payload is
+    not handled; the actor/actorbinding rule exists only in the shape-B table.'
+  remediation: State that absent data_tier is mapped to 0 by an explicit table row (and that absence of
+    the others is omission), or fail closed; make the sentence in section 9 consistent. Give the lifted-field
+    rule per type or generally (mission_slug/mission_id always lifted when the aggregate is mission-scoped).
+    Add the constant attributes to the shape-A table, apply the actor rule to shape A, and extend UPCAST_CONFLICTING_FIELDS
+    to any payload field that duplicates an aggregate segment.
+- id: OP-CONTRACT-006
+  lens: id-source-uniqueness
+  severity: 2
+  title: '''Dedupe by id alone ... is stricter and safe'' contradicts the spec''s source+id duplicate
+    rule; ''ids are ULIDs'' ignores accepted UUIDs'
+  evidence:
+  - artifact: "design \xA7 6 ('ids are ULIDs, so uniqueness holds per source; the merge driver dedupes\
+      \ by id alone, which is stricter and safe'); \xA7 15 'Id collapse'"
+  - code: 'ce@v1.0.2 spec.md id/source: ''Consumers MAY assume that Events with identical source and id
+      are duplicates'' (no licence for identical id with different source)'
+  - code: src/spec_kitty_events/models.py:41-52 normalize_event_id accepts 36-char and 32-char UUID forms
+  claim: Deduping by id alone drops a distinct event that shares an id with an event from another source;
+    that is data loss, not a stricter-but-safe rule, and it is not spec-mandated. It is safe only if ids
+    are globally unique, which is not guaranteed while legacy UUID ids and ADR open question 2 option
+    B remain, and a relative `source` makes cross-repo uniqueness weaker. The sentence presents an engineering
+    choice as a conformance property.
+  remediation: 'Reword: spec duplicates are same source+id; this package deliberately treats id as globally
+    unique (an extra invariant) and the merge driver should dedupe by (source, id), or document the global-id
+    invariant and a collision test. Remove ''safe'' or justify it.'
+- id: OP-CONTRACT-007
+  lens: attribute-value-conformance
+  severity: 2
+  title: Example dataschema 'urn:dev.spec-kitty:schema:...' is not a valid URN (dot not allowed in a namespace
+    identifier)
+  evidence:
+  - artifact: "design \xA7 8 (placeholder `urn:dev.spec-kitty:schema:lane.transitioned.v1`); \xA7 10 worked\
+      \ example dataschema"
+  - code: 'RFC 8141 NID = alphanum 0*30(alphanum / ''-'') alphanum, no ''.''; URN namespaces other than
+      registered ones are not allowed; spec.md: dataschema ''MUST be a non-empty URI'''
+  claim: The string parses as a generic RFC 3986 URI, so the dataschema MUST is met textually, but it
+    presents a malformed URN with an unregistered namespace; a strict URN parser rejects it and it will
+    be copied into the registry and fixtures as the canonical form. The spec also says incompatible schema
+    changes SHOULD change the URI, which the .vN suffix satisfies.
+  remediation: Use an https URI placeholder (for example https://schemas.example.invalid/...) or a registered
+    URN form, mark it placeholder, and add a registry test that every dataschema parses as an absolute
+    URI.
+- id: OP-CONTRACT-008
+  lens: time-rfc3339
+  severity: 2
+  title: '''RFC 3339 compatible'' / ''parseable'' is not a testable criterion for UPCAST_TIME_INVALID'
+  evidence:
+  - artifact: "design \xA7 3 `timestamp` row; \xA7 4 `at` row; \xA7 9 UPCAST_TIME_INVALID"
+  - code: 'ce@v1.0.2 spec.md time: ''If present, MUST adhere to the format specified in RFC 3339''; fixture
+      envelope_strict_journal/timestamp_naive.json'
+  claim: '''Copied as written'' means a value Python''s datetime parsing accepts (date-only, basic format,
+    missing offset in some paths) could be copied into `time` and yield a spec-invalid event. The design
+    does not say whether a naive timestamp fails (RFC 3339 requires an offset) nor which grammar is the
+    test, so Python and Java will diverge.'
+  remediation: Define the check as the RFC 3339 date-time production (offset or Z required, 'T' separator)
+    via a regex plus calendar validation, state that naive and date-only values fail with UPCAST_TIME_INVALID,
+    and add fixtures including timestamp_naive and a basic-format value.
+- id: OP-CONTRACT-009
+  lens: attribute-constraints
+  severity: 2
+  title: Non-empty MUSTs (subject, source, extension strings) have no corresponding failure rule
+  evidence:
+  - artifact: "design \xA7 2 (subject 'MUST be a non-empty string' implied by 'always use subject'); \xA7\
+      \ 4 `wp_id` -> subject 'Copied'; \xA7 4 actor projection 'else empty string'"
+  - code: 'ce@v1.0.2 spec.md: subject ''If present, MUST be a non-empty string''; source ''MUST be a non-empty
+      URI-reference''; src/spec_kitty_events/diary.py:251-265 actor_identity_str can return '''''
+  claim: A diary row with an empty wp_id would be copied into an empty `subject`, violating a MUST; the
+    structured-actor projection may emit an empty-string `actor` attribute. No UPCAST code covers empty
+    values.
+  remediation: State that empty wp_id fails closed (existing code, or add UPCAST_EMPTY_VALUE), and omit
+    `actor` rather than writing '' (record the choice).
+- id: OP-GOV-004
+  lens: scope
+  severity: 2
+  title: Two embedded design decisions are not surfaced in the ADR
+  evidence:
+  - artifact: "Design \xA7 4 'Decisions embedded here, for the maintainer to confirm on the PR': snake_case\
+      \ kept inside data; actor and executionmode as extensions (design:143-150)"
+  - artifact: 'ADR header line 18: ''The four open questions below are not decided.'' (ADR:18)'
+  claim: The ADR says only four items are undecided, but the design takes two further choices (data member
+    naming, which attributes become extensions) that conflict with the illustrative fromlane/tolane example
+    in spec-kitty#6117. A maintainer reading only the ADR will not see them.
+  remediation: Add a short note in the ADR (under Decision Outcome or Open questions) pointing to those
+    two design choices as "proposed, confirm on the PR", or add them as questions 5 and 6 with options.
+- id: OP-GOV-006
+  lens: accuracy
+  severity: 2
+  title: Schema count is wrong
+  evidence:
+  - artifact: 'ADR Context line 54: ''The 126 committed JSON Schemas'''
+  - artifact: 'find src/spec_kitty_events/schemas -name ''*.json'' returns 125; the only ''126'' in the
+      repo is the unrelated ''total package exports: 126'' (CHANGELOG.md:1361)'
+  claim: The figure appears to be mistaken for the export count. A public ADR with a wrong, checkable
+    number invites doubt; the repo holds 145 *.schema.json files overall, so no count of 126 holds either
+    way.
+  remediation: Say "125 committed JSON Schemas under src/spec_kitty_events/schemas" or drop the number.
+  merged_ids:
+  - OP-ARCH-011
+- id: OP-GOV-007
+  lens: adr-format
+  severity: 1
+  title: ADR headings differ from the core style
+  evidence:
+  - artifact: 'ADR headings: ''Decision Outcome'', no ''Decision'' or ''Reader'' line; Compatibility is
+      a ### under Consequences (ADR:110,131,184)'
+  - artifact: Core ADR docs/adr/4.x/2026-10-06-1-*.md uses '## Decision', '## Considered Options', '**Reader:**'
+  claim: Content is complete (status, date, deciders, drivers, options, outcome, consequences) but the
+    core style names the section "Decision" and carries a Reader line. The brief also names a "Decision"
+    section.
+  remediation: Rename "Decision Outcome" to "Decision", add a Reader line, and optionally promote Compatibility
+    to its own
+- id: OP-GOV-008
+  lens: consistency
+  severity: 1
+  title: ADR says three version axes, design says four
+  evidence:
+  - artifact: "ADR open question 3, line 242 'Three version axes exist'; Design \xA7 8 table lists four\
+      \ axes (design:212-217)"
+  claim: The two documents count axes differently; the design adds the CloudEvents spec version and payload
+    schema version.
+  remediation: Say "at least three" or list the same axes in both.

@@ -1,0 +1,41 @@
+schema: review-findings/v1
+complete: true
+phase: op
+lens_group: contract
+mission: op-events-cloudevents
+findings:
+  - id: OP-CONTRACT-001
+    lens: field-mapping-completeness
+    severity: 3
+    title: "Annotation-row mapping names optional fields that the annotation model does not have"
+    evidence:
+      - artifact: "design section 4, annotation-row line: 'optional mission_slug, execution_mode ... the two optional fields are copied when present'"
+      - artifact: "src/spec_kitty_events/diary.py InnerStateChanged (dataclass ~line 750; to_dict returns only event_id, kind, wp_id, at, actor, delta; from_dict reads the same six keys)"
+    claim: "The design says annotation rows carry optional mission_slug and execution_mode that are copied to missionslug and executionmode. InnerStateChanged defines neither field, and its to_dict never writes them. The mapping therefore describes inputs the code does not produce. It also leaves open where the annotation row's source and missionid come from, since the row carries no mission identity at all."
+    remediation: "State that annotation rows have six fields (event_id, kind, wp_id, at, actor, delta) and drop the two optional ones, or cite a fixture that has them. Say that source, missionid and missionslug for annotation rows come only from caller context (the meta.json supply already described for lane rows), and that executionmode is omitted."
+  - id: OP-CONTRACT-002
+    lens: spec-claims
+    severity: 1
+    title: "Kafka structured-mode content-type quote drops the condition 'If present'"
+    evidence:
+      - artifact: "design section 12, Structured mode bullet"
+      - artifact: "ce@v1.0.2 kafka-protocol-binding.md 3.3.1: 'If present, the Kafka message header property content-type MUST be set to the media type of an event format.'"
+    claim: "The design says the header 'MUST be set'. The spec makes the MUST conditional on the header being present, so the design overstates the rule."
+    remediation: "Quote the sentence whole, or write 'if a content-type header is present it MUST be the event format media type'."
+  - id: OP-CONTRACT-003
+    lens: spec-claims
+    severity: 2
+    title: "time is required to be RFC 3339, but the diary 'at' field is an untyped string with no stated handling of non-conforming values"
+    evidence:
+      - artifact: "design section 3 and 4: 'Copied as written; must be RFC 3339'"
+      - artifact: "src/spec_kitty_events/diary.py StatusEvent.at: str  # ISO 8601 UTC (no validation); all shipped fixtures end in Z or +hh:mm, so conformance holds only by convention"
+    claim: "The design copies 'at' verbatim into time, and RFC 3339 is a strict profile of ISO 8601 that requires an offset (no naive or basic-format values). The design says what must hold but not what the upcaster does with a row whose 'at' does not conform. Section 9 forbids synthesizing a time, so the outcome is undefined: pass through, fail closed, or write an invalid CloudEvent."
+    remediation: "Add one decision-level sentence. In strict use a non-RFC-3339 'at' is an unmappable row (named error). In permissive local reads it passes through unmapped, not as a CloudEvent with an invalid time. The row-level error code can stay in the implementation mission."
+  - id: OP-CONTRACT-004
+    lens: jsonl-framing
+    severity: 1
+    title: "Worked-example key order is not the sorted order the section 11 text says legacy rows use"
+    evidence:
+      - artifact: "design section 10 output JSON (specversion, id, source, type ...) vs section 11 'today's rows are written with sorted keys'"
+    claim: "The example is labelled pretty-printed and section 11 says serializer byte rules are not fixed, so this is not a contradiction. A reader could still take the example order as the on-disk order."
+    remediation: "Add 'key order shown is illustrative' beside the example."

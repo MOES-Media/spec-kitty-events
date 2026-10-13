@@ -1,0 +1,140 @@
+schema: review-findings/v1
+complete: true
+phase: op
+lens_group: fresh
+mission: op-events-cloudevents
+findings:
+  - id: OP-FRESH2-001
+    lens: code-correspondence / compatibility contract
+    severity: 4
+    title: Permissive mode raises on shape A rows that the reducer ignores today
+    evidence:
+      - artifact: "design § 9 table rows 'schema_version present and not 3.0.0' and 'event_id missing'; § 1 detection step 4"
+      - artifact: "conformance/fixtures/class_taxonomy/envelope_strict_journal/local_appender_envelope_5_0_0.json (note X10: this is the envelope the CLI writes into status.events.jsonl, schema_version 5.0.0, aggregate_type, no build_id)"
+      - artifact: "src/spec_kitty_events/diary.py _is_non_lane_row (any row with event_type is ignored in place)"
+      - artifact: "contracts/versioning-and-compatibility.md: local-CLI compatibility 'Not weakened by any package bump'"
+    claim: >
+      Walking the X10 row through the stated detection order gives shape A (event_type, aggregate_id and payload
+      present), so it never reaches the shape D pass-through. The table then makes a non-3.0.0 schema_version a
+      raised UPCAST_SCHEMA_VERSION_INVALID in permissive mode ("same error"). Today's reducer ignores such a row.
+      The design justifies "same error" by "the reducer rejects it", which is true only for lane rows. The same
+      applies to a shape A row with no event_id. The section 9 claim that permissive is never narrower than today's
+      decode, and that the modes agree on everything the reducer rejects, is therefore false for non-lane shape A
+      rows already present in users' logs.
+    remediation: >
+      In permissive mode, return PassThrough with a named warning for every shape A deviation that is not a lane
+      row (schema version, missing id, missing envelope fields). Or detect lane versus non-lane inside shape A and
+      limit the "same error" rows to lane rows. Add the X10 row to the permissive-path fixture list.
+
+  - id: OP-FRESH2-002
+    lens: contract completeness / error-code table
+    severity: 3
+    title: Missing required fields, invalid CloudEvent input and non-object input have no code or outcome
+    evidence:
+      - artifact: "design § 9 table, 'UpcastErrorCode members are exactly the codes in the table'; § 1 step 1 'validate only'"
+      - artifact: "src/spec_kitty_events/diary.py StatusEvent.from_dict (requires actor, force, execution_mode, from_lane, to_lane, wp_id)"
+      - artifact: "strict.py STRICT_ENVELOPE_KEYS (14 required) versus envelope_valid_canonical fixtures (no causation_id, project_slug, data_tier)"
+      - artifact: "fixtures/class_taxonomy/envelope_invalid_shape/wrong_wrapper_array.json (input is an array)"
+    claim: >
+      No row covers a shape B row missing actor, force, execution_mode or a lane key, or a shape A row missing
+      build_id, node_id, lamport_clock, correlation_id or project_uuid. The table has an unexpected-key row but no
+      missing-key row. A shape A row lacking aggregate_id or payload falls to shape D and passes through silently
+      with no warning. A row with specversion that is not a valid CloudEvent has no code ("validate only"). A
+      non-object input has no outcome, although parse_diary raises DiaryError for it. The design also leaves open
+      whether strict mode requires all 14 keys (as validate_strict_envelope does) or accepts the canonical fixtures,
+      which omit three of them and are listed as expected to upcast to a CloudEvent.
+    remediation: >
+      Add a missing-required-key code (or reuse a named one) with strict and permissive outcomes. State the
+      strict-mode key requirement for shape A. Define the invalid-CloudEvent and non-object outcomes. Say whether a
+      malformed shape A row with event_type is D (and warned) or an error.
+
+  - id: OP-FRESH2-003
+    lens: phase exit criteria / worked example
+    severity: 3
+    title: Phase 2 exit 'round trip reproduces each shape B row' cannot hold as written
+    evidence:
+      - artifact: "design § 14 Phase 2 exit criterion; § 9a decoder 'inverse of section 4'; § 10 worked example"
+      - artifact: "StatusEvent.to_dict (writes mission_id when not None)"
+      - artifact: "all status_diary/replay lane rows lack mission_id"
+    claim: >
+      Every replay fixture row lacks mission_id, so the upcast supplies it from context. The inverse decoder then
+      yields a StatusEvent whose to_dict contains mission_id, which the original row did not have. Further
+      non-reproducible cases: feature_slug rows come back as mission_slug, an empty-string actor is omitted and
+      cannot return, and ids are normalized (spelling). The exit criterion is unachievable as stated, and the
+      reducer-equivalence claim needs the same qualification.
+    remediation: >
+      Reword the exit to "reproduces the StatusEvent the reducer would decode (equal reduced state), modulo
+      context-supplied mission_id and normalized ids", or assert the round trip on a normalized form.
+
+  - id: OP-FRESH2-004
+    lens: mapping completeness
+    severity: 2
+    title: Annotation row mapping is silent on missionslug, missionid, executionmode
+    evidence:
+      - artifact: "design § 4 annotation rows; status_diary_unknown_kinds.jsonl line 5 (keys actor, at, delta, event_id, kind, wp_id; no mission_slug, no execution_mode)"
+      - artifact: "design § 4 mission_slug row: 'Empty or absent: UPCAST_EMPTY_VALUE'; § 9 fixtures: annotation lines expected CloudEvent"
+    claim: >
+      The annotation rows say "same rules as the lane row", listing only four fields. Applying the lane-row rules
+      literally would raise UPCAST_EMPTY_VALUE for the missing mission_slug, contradicting the fixture
+      expectation that annotation lines become CloudEvents. missionid, source and the registered annotation
+      dataschema derivation (context mission id only) are not stated either.
+    remediation: >
+      State that missionslug and executionmode are optional (omitted) for annotation rows, and give the source and
+      missionid rule.
+
+  - id: OP-FRESH2-005
+    lens: CloudEvents 1.0.2 correctness
+    severity: 2
+    title: String attribute values are copied without the spec's character restrictions
+    evidence:
+      - artifact: "design § 3/4 rules 'String, copied' (actor, missionslug, buildid, nodeid, projectslug, subject, executionmode)"
+      - artifact: "ce@v1.0.2 spec.md String type: disallows U+0000-U+001F, U+007F-U+009F, noncharacters, unpaired surrogates"
+    claim: >
+      A legacy value containing a control character is copied into a context attribute, giving a CloudEvent that is
+      not spec-valid. No code exists for it, and "strict output validates against the envelope schema" is claimed.
+    remediation: >
+      Add a string-validity rule (code in strict, warning and pass-through in permissive), or state that the
+      envelope schema enforces it and which code reports it.
+
+  - id: OP-FRESH2-006
+    lens: internal consistency
+    severity: 2
+    title: Named-C table row wording conflicts with the shape B feature_slug mapping
+    evidence:
+      - artifact: "design § 9 table last-but-one row 'including rows carrying feature_slug, legacy_aggregate_id'"
+      - artifact: "design § 4 row for mission_slug (feature_slug accepted on diary rows via a mapping row)"
+    claim: >
+      A diary row carrying feature_slug and no event_version is shape B (step 7) and maps, while the table row
+      reads as though any feature_slug row is named C. Only the event_version plus occurred_at fixtures are C. A
+      reader implementing from the table alone would reject legitimate diary rows in strict mode.
+    remediation: >
+      Reword the row to "rows matching a named C pattern (for example the historical_row_raw fixtures)" and drop
+      the key list, or qualify it with "with event_version and occurred_at".
+
+  - id: OP-FRESH2-007
+    lens: scope / open decisions
+    severity: 2
+    title: ADR and design fix merge-driver and id behaviour in another repository as settled
+    evidence:
+      - artifact: "ADR Compatibility bullet 'The log merge driver uses the upcaster in strict mode ... (source, id)'; design § 6 'keying on id alone ... not adopted'; § 9 'Considered and not adopted: content-hash id'; § 14 Merge driver ('current behaviour is unverified here')"
+    claim: >
+      The design states the driver's behaviour as a requirement although it admits not having read the driver,
+      and the (source, id) key depends on open question 2 (id format) and 4 (source prefix). The "not adopted"
+      rulings are decisions, not options.
+    remediation: >
+      Frame as a proposal for the core repository to confirm, and mark the "not adopted" items as the author's
+      recommendation pending the maintainer.
+
+  - id: OP-FRESH2-008
+    lens: nits
+    severity: 1
+    title: Time rule stricter than RFC 3339; idempotence statement is ill-typed for PassThrough
+    evidence:
+      - artifact: "design § 3 Time rule 'uppercase T'; § 9 'upcast(upcast(x)) == upcast(x)'"
+    claim: >
+      RFC 3339 date-time is case-insensitive in its ABNF (lowercase t and z are allowed), so "matches the
+      production ... uppercase T" is a stricter project rule, not RFC 3339. Idempotence is stated over upcast
+      output, but a PassThrough or error result is not a row, so the equation only makes sense for CloudEvent
+      outputs.
+    remediation: >
+      Say "project rule: uppercase T and Z" and restrict the idempotence statement to CloudEvent outputs.

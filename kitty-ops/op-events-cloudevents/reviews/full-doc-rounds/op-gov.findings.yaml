@@ -1,0 +1,81 @@
+schema: review-findings/v1
+complete: true
+phase: op
+lens_group: gov
+mission: op-events-cloudevents
+findings:
+  - id: OP-GOV-001
+    lens: charter-package-boundary
+    severity: 3
+    title: The upcaster's home ("shared reader library", "event-log library") is never tied to this package
+    evidence:
+      - artifact: "ADR § Compatibility, first bullet: 'Read-time upcaster, in the shared reader library' (docs/adr/2026-10-13-1-cloudevents-envelope.md:186)"
+      - artifact: "Design § 9 line 225 'shared reader library'; § 14 Phase 4 'Event-log library and Read API read through the upcaster'"
+      - artifact: "Charter, Package Boundary: package is the canonical home of 'replay helpers' and 'must remain independent of CLI, SaaS, tracker, and runtime implementation code' (.kittify/charter/charter.md:64-65)"
+    claim: No document says whether the upcaster ships inside spec-kitty-events or in some other library. The ADR also says the CLI merge driver "uses the upcaster" and that spec-kitty-runtime has "same upcaster". A reader cannot tell if the charter boundary (no CLI/SaaS/runtime dependency, consumers via released artifacts) is respected, and an implementation WP would have to guess the package placement.
+    remediation: State in the ADR Compatibility section and design § 9 that the upcaster, error enum and fixtures are published by this package (pure function, no CLI/SaaS imports) and consumers call it through the released artifact; name any separate event-log library as a consumer-side concern or an open item.
+  - id: OP-GOV-002
+    lens: scope
+    severity: 2
+    title: Design drifts into writer, CLI and merge-driver rollout beyond what the envelope needs
+    evidence:
+      - artifact: "Design § 14 phases 4-6 (consumers, 'First command group writes CloudEvents; project schema bump stops older CLIs appending', Kafka/Spring spike) (docs/design/cloudevents-envelope.md:470-472)"
+      - artifact: "ADR § Compatibility 'New rows only as CloudEvents. A project schema bump stops older CLIs...' and 'The log merge driver uses the upcaster' (ADR:192-195)"
+      - artifact: "Design § 12 partitionkey / Key Mapper discussion (design:396-399)"
+    claim: The brief asked for the envelope decision and its compatibility story, with no write-core design beyond what the envelope needs. CLI project-schema gating, merge-driver behaviour and the writer-switch phase are write-core and CLI decisions stated as consequences, not options.
+    remediation: Reword those bullets as "expected consumer-side follow-up, owned by spec-kitty / the write core, not decided here", and trim Phase 5 to a pointer. Keep partitionkey as the already-flagged design item.
+  - id: OP-GOV-003
+    lens: scope
+    severity: 2
+    title: Design text presupposes outcomes of the open questions
+    evidence:
+      - artifact: "Design § 6 line 181: 'ids are ULIDs, so uniqueness holds per source' vs ADR open question 2 option B (ULID and UUID both valid)"
+      - artifact: "Design § 5 lines 170-172: lamportclock/nodeid 'Optional in the schema, because diary writers stamp none today' presupposes options B or C of question 1 over A"
+      - artifact: "Design § 3-4 and § 10 hard-code 'schemaversion 4.0.0' and the 'dev.spec-kitty.*' type/dataschema as constants"
+    claim: The brief requires id format, ordering, timing and prefix to stay options. The design reasons from ULID-only, from a carried clock, and from fixed 4.0.0 as if settled. The prefix and 4.0.0 are marked placeholder in places but not at the § 3 and § 4 constants.
+    remediation: Add "if question 2 option A" / "under options B or C" qualifiers in § 5 and § 6, and mark the 4.0.0 and type constants as subject to questions 3 and 4 at first use in § 3 and § 4.
+  - id: OP-GOV-004
+    lens: scope
+    severity: 2
+    title: Two embedded design decisions are not surfaced in the ADR
+    evidence:
+      - artifact: "Design § 4 'Decisions embedded here, for the maintainer to confirm on the PR': snake_case kept inside data; actor and executionmode as extensions (design:143-150)"
+      - artifact: "ADR header line 18: 'The four open questions below are not decided.' (ADR:18)"
+    claim: The ADR says only four items are undecided, but the design takes two further choices (data member naming, which attributes become extensions) that conflict with the illustrative fromlane/tolane example in spec-kitty#6117. A maintainer reading only the ADR will not see them.
+    remediation: Add a short note in the ADR (under Decision Outcome or Open questions) pointing to those two design choices as "proposed, confirm on the PR", or add them as questions 5 and 6 with options.
+  - id: OP-GOV-005
+    lens: hygiene-attribution
+    severity: 2
+    title: Approval is asserted without the required caveat in the Context
+    evidence:
+      - artifact: "ADR Context line 64: 'The maintainer's reasons for adopting CloudEvents (direction approved 2026-10-13)'"
+      - artifact: "ADR line 102 heading 'CloudEvents 1.0 as the envelope for log rows (chosen)' in a Proposed ADR"
+      - artifact: "Required phrase present exactly once, ADR:17"
+    claim: The exact attribution phrase appears only in the header. Line 64 states approval as fact with no "to be confirmed on the PR"; the "(chosen)" label can read as a finished decision on a Proposed record. No document calls the ADR accepted, so this is a consistency gap only.
+    remediation: Change line 64 to reuse the exact phrase "maintainer approval, 2026-10-13 (to be confirmed on the PR)" and relabel the option "(proposed)".
+  - id: OP-GOV-006
+    lens: accuracy
+    severity: 2
+    title: Schema count is wrong
+    evidence:
+      - artifact: "ADR Context line 54: 'The 126 committed JSON Schemas'"
+      - artifact: "find src/spec_kitty_events/schemas -name '*.json' returns 125; the only '126' in the repo is the unrelated 'total package exports: 126' (CHANGELOG.md:1361)"
+    claim: The figure appears to be mistaken for the export count. A public ADR with a wrong, checkable number invites doubt; the repo holds 145 *.schema.json files overall, so no count of 126 holds either way.
+    remediation: Say "125 committed JSON Schemas under src/spec_kitty_events/schemas" or drop the number.
+  - id: OP-GOV-007
+    lens: adr-format
+    severity: 1
+    title: ADR headings differ from the core style
+    evidence:
+      - artifact: "ADR headings: 'Decision Outcome', no 'Decision' or 'Reader' line; Compatibility is a ### under Consequences (ADR:110,131,184)"
+      - artifact: "Core ADR docs/adr/4.x/2026-10-06-1-*.md uses '## Decision', '## Considered Options', '**Reader:**'"
+    claim: Content is complete (status, date, deciders, drivers, options, outcome, consequences) but the core style names the section "Decision" and carries a Reader line. The brief also names a "Decision" section.
+    remediation: Rename "Decision Outcome" to "Decision", add a Reader line, and optionally promote Compatibility to its own ## heading.
+  - id: OP-GOV-008
+    lens: consistency
+    severity: 1
+    title: ADR says three version axes, design says four
+    evidence:
+      - artifact: "ADR open question 3, line 242 'Three version axes exist'; Design § 8 table lists four axes (design:212-217)"
+    claim: The two documents count axes differently; the design adds the CloudEvents spec version and payload schema version.
+    remediation: Say "at least three" or list the same axes in both.

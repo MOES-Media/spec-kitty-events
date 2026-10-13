@@ -1,0 +1,29 @@
+schema: review-verify/v1
+complete: true
+phase: op
+results:
+  - id: OP-FRESH2-001
+    status: unresolved
+    remaining_severity: 3
+    reason: "The lane-row/non-lane split fixes X10 and non-lane shape A rows (fixture added), but design section 9 defines a shape A WPStatusChanged row as a lane row and keeps 'same error (the reducer rejects it)' for it in the id, time, schema_version and unknown-lane rows; diary.py _is_non_lane_row ignores every row with an event_type, so the reducer ignores shape A WPStatusChanged rows too and permissive still raises where today's reducer does not, leaving the 'never narrower' claim false for that row class."
+  - id: OP-FRESH2-002
+    status: resolved
+    reason: "UPCAST_MISSING_REQUIRED_KEY now covers missing shape A and B keys with strict and permissive outcomes, the strict key set is stated (11 required, 3 optional), step 0 and the CloudEvent-schema row cover non-object and invalid-CloudEvent input, step 6 warns on malformed shape A rows, and fixtures exist; only a nit remains where a missing schema_version is MISSING_REQUIRED_KEY in the required-keys paragraph but SCHEMA_VERSION_INVALID in the table (precedence resolves it)."
+  - id: OP-FRESH2-003
+    status: resolved
+    reason: "Phase 2 exit and section 9a now claim equal reduced state modulo context-supplied mission_id, normalized ids, feature_slug read as mission_slug and omitted empty actor, which matches StatusEvent.to_dict behaviour."
+  - id: OP-FRESH2-004
+    status: resolved
+    reason: "Two new annotation rows make missionslug and executionmode optional (not UPCAST_EMPTY_VALUE) and give the missionid, source and dataschema rules, and the fixture bullet states annotation lines carry neither field."
+  - id: OP-FRESH2-005
+    status: resolved
+    reason: "A String validity rule with new code UPCAST_STRING_INVALID is defined and appears consistently in the section 3 rule, the section 9 table (both modes), the precedence list and the fixture list; the envelope-schema pattern claim is stated (minor nit: projectuuid is a copied string but not in the listed attributes)."
+  - id: OP-FRESH2-006
+    status: resolved
+    reason: "The named-C table row now says 'row matching a named C pattern (for example the historical_row_raw fixtures)' decided at shape detection, and I confirmed the five fixtures' keys match steps 5 (three via event_version plus occurred_at, pre30 via type/ts/wp, raw via wp_id/lane/ts) so shape B feature_slug rows are no longer implicated."
+  - id: OP-FRESH2-007
+    status: resolved
+    reason: "ADR Compatibility and design sections 6, 9 and 14 now frame the merge driver as a proposal for core to confirm and the not-adopted items as author recommendations pending the maintainer, and the cited lines are real at 3847251e0 (event_log_merge.py:73-77 event_id required, :165-174 dedupe and raise, :176-182 sort, :193 and :213 sort_keys serialization; drivers.py:246-250 detect_concurrent_fork then merge_event_log_files)."
+  - id: OP-FRESH2-008
+    status: resolved
+    reason: "The time rule is now labelled a stricter project rule (uppercase T and Z, RFC 3339 allows lowercase) and idempotence is restricted to CloudEvent outputs in section 9, the ADR and the property-test bullet."

@@ -1,0 +1,32 @@
+schema: known-items/v1
+status: known, for PR notes, waived by operator
+items:
+- id: OP-FRESHB-004
+  severity: 2
+  summary: Phase 4b omits the .vN new-type-versioning contract amendment that section 7 and the ADR say lands at
+    4b
+- id: OP-FRESHB-005
+  severity: 2
+  summary: Reducer sort-key change under ordering options B/C has no release classification and sits in an "additive"
+    phase run
+- id: OP-FRESHB-006
+  severity: 2
+  summary: Structured actor projects differently for shape A and shape B but both land in one actor attribute; section
+    3 is silent for A
+- id: OP-FRESHB-007
+  severity: 2
+  summary: Phase 0 exit says every embedded choice has a ruling, but several embedded choices are not on any confirm
+    list
+- id: OP-FRESHB-008
+  severity: 1
+  summary: Mapping for shape B is silent on empty mission_slug and the required force/execution_mode
+- id: OP-FRESHB-009
+  severity: 1
+  summary: Present-tense end-state statements precede the staged rollout
+- id: OP-FRESHB-010
+  severity: 1
+  summary: '''contradicts the ADR'' in the ordering table is ambiguous'
+- id: OP-VERIFY-FINAL-NIT
+  severity: 1
+  summary: ADR heading is still '### 3. Timing' while the question is split into 3a/3b; 'four open questions' now
+    yields five rulings (Phase 0 lists them correctly)

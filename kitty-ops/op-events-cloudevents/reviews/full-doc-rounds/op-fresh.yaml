@@ -1,0 +1,97 @@
+schema: review-findings/v1
+complete: true
+phase: op
+lens_group: fresh
+mission: op-events-cloudevents
+findings:
+  - id: OP-FRESH-001
+    lens: internal-consistency
+    severity: 3
+    title: Named-C shapes - permissive "pass-through" and strict codes contradict the section 9 table and precedence
+    evidence:
+      - artifact: "design § 9 table row 'event_id missing or not a string' (permissive: same error, 'the reducer requires it')"
+      - artifact: "design § 9 Fixtures bullet for class_taxonomy/historical_row_raw/* (permissive expected: PassThrough)"
+      - artifact: "design § 9 Precedence (UPCAST_UNMAPPED_LEGACY_SHAPE not listed; id check precedes event-type/lane)"
+      - artifact: "fixtures pre30_envelope_shape.json and raw_status_entry.json have no event_id/event_version"
+    claim: >
+      pre30_envelope_shape and raw_status_entry carry no event_id. By the table, a missing event_id is
+      UPCAST_ID_INVALID in strict (and a hard error in permissive), and the Precedence list puts id before
+      everything but shape detection, so the stated expectation (strict UPCAST_UNMAPPED_LEGACY_SHAPE;
+      permissive PassThrough) cannot hold. Unexpected keys (ts, wp, lane, occurred_at, event_version) would also
+      fire UPCAST_UNEXPECTED_KEY first. UPCAST_UNMAPPED_LEGACY_SHAPE has no slot in the precedence order, so two
+      implementations could report different codes for the same fixture. The same table row also asserts the
+      reducer "requires" event_id while Phase 2 claims a permissive result for these rows.
+    remediation: >
+      State that a recognised named-C shape short-circuits right after shape detection (before schema-version,
+      key, id and time checks) in both modes, add it to the Precedence list, and make the id/time rows apply to
+      shapes A and B only.
+  - id: OP-FRESH-002
+    lens: internal-consistency
+    severity: 2
+    title: Shape A worked trace lists data_tier as becoming datatier, then says it is absent and omitted
+    evidence:
+      - artifact: "design § 10 'A short shape-A trace' (data_tier (default 0) ... become ... datatier; data_tier, causation_id and project_slug are absent)"
+      - artifact: "design § 3 row data_tier (no default applied)"
+      - artifact: "fixture wp_status_changed_planned_to_claimed.json has no data_tier"
+    claim: >
+      The same sentence names data_tier twice with opposite outcomes. The second reading matches section 3; the
+      first (default 0 becomes datatier) contradicts the "no default" rule.
+    remediation: Remove data_tier (default 0) from the list of attributes that are produced.
+  - id: OP-FRESH-003
+    lens: spec-conformance
+    severity: 2
+    title: 'Optional ones we always use includes subject, which is absent for Mission-level events'
+    evidence:
+      - artifact: "design § 2 'Optional ones we always use: subject, time, datacontenttype, dataschema'"
+      - artifact: "design § 3 Aggregate split ('subject ... absent for Mission-level events')"
+    claim: Section 2 says subject is always used; section 3 omits it for Mission-level events.
+    remediation: Say "always use time, datacontenttype, dataschema; subject when the event is scoped to an entity".
+  - id: OP-FRESH-004
+    lens: internal-consistency
+    severity: 2
+    title: Cutover release is not placed in the phase table; Phase 3/4/5 exits leave the accept/reject boundary change unowned
+    evidence:
+      - artifact: "design § 14 phase table (Phase 3 additive, pin unchanged; Phase 4 'saas accepts the envelope per the cutover option'; Phase 5 first writers)"
+      - artifact: "design § 14 Cutover, ADR Consequences/Versioning, design § 13"
+    claim: >
+      The ADR and section 13 say the package major and the schemaversion 3.0.0 to 4.0.0 flip happen in a single
+      "cutover release", but no phase delivers or exits on it. Phase 4 has saas accept CloudEvents (a boundary
+      change that is major by the versioning contract) against a Phase 3 release that is declared minor, and
+      Phase 5 emits schemaversion 4.0.0 rows while the contract says producers must emit 3.0.0 until the cutover.
+      Phase 2 upcaster output also carries 4.0.0 before the cutover.
+    remediation: >
+      Add an explicit cutover row (or fold it into Phase 4/5) with exit criteria: major bump artifacts, strict pin
+      flip, contract text rewritten, central CLI-SaaS contract updated. State that pre-cutover upcaster output is
+      not produced for emission.
+  - id: OP-FRESH-005
+    lens: code-correspondence
+    severity: 2
+    title: Verbatim-moved lane values conflict with the doing alias accepted by the payload model
+    evidence:
+      - artifact: "design § 3 Merged data shape / 'payload -> data moved verbatim'; § 4 'Unknown lane: UPCAST_UNKNOWN_LANE'"
+      - artifact: "src/spec_kitty_events/status.py LANE_ALIASES {'doing': IN_PROGRESS}; StatusTransitionPayload._normalize_lane_aliases"
+    claim: >
+      StatusTransitionPayload accepts "doing" and normalises it; a verbatim copy would put "doing" into the new
+      data (which must validate Lane) or the upcaster must normalise it. The document says neither whether the
+      alias is resolved, rejected as UPCAST_UNKNOWN_LANE, or passed through, in either mode.
+    remediation: Decide and document alias handling in the shape A rule and the section 9 table, with a fixture.
+  - id: OP-FRESH-006
+    lens: internal-consistency
+    severity: 1
+    title: Section 3 and 4 prose says a bad time or empty value fails closed without the mode qualifier
+    evidence:
+      - artifact: "design § 4 row 'at' ('A row whose at fails the rule fails closed'); § 3 Time rule"
+      - artifact: "design § 9 table (permissive: pass-through with warning)"
+    claim: The mapping prose reads as unconditional; permissive mode passes such rows through.
+    remediation: Add "in strict mode" or reference the section 9 table.
+  - id: OP-FRESH-007
+    lens: scope
+    severity: 1
+    title: Recommendations are given where the brief frames options as open
+    evidence:
+      - artifact: "ADR open questions 1-4 'Recommendation:' lines; ADR status note"
+    claim: >
+      The ADR labels them recommendations and says none is decided, which is acceptable, but question 4
+      "Recommendation: B, decided before the registry is written" and question 3 "B, as proposed in
+      spec-kitty#6117" lean towards a decision. No hard decision found.
+    remediation: Optional - soften to "if asked, the author would choose".

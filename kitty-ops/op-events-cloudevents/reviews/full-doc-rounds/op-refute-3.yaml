@@ -1,0 +1,29 @@
+schema: review-refute/v1
+complete: true
+phase: op
+batch: 3
+verdicts:
+  - id: OP-CONTRACT-007
+    verdict: confirmed
+    reason: "Design lines 209 and 307 use urn:dev.spec-kitty:schema:..., whose NID contains a dot, which RFC 8141 forbids, so the example is a malformed URN even though it is labelled a placeholder."
+  - id: OP-CONTRACT-008
+    verdict: confirmed
+    reason: "Design lines 76 and 260 say only 'RFC 3339 compatible' / 'parseable' with no grammar and no statement on naive or date-only values, so UPCAST_TIME_INVALID is not testable as written."
+  - id: OP-CONTRACT-009
+    verdict: confirmed
+    reason: "Design line 132 explicitly projects actor to an empty string and no UPCAST code covers an empty wp_id/subject, while CloudEvents requires subject to be non-empty when present."
+  - id: OP-CONTRACT-010
+    verdict: refuted
+    reason: "The design's stated rule (line 145) covers only the existing snake_case data fields and the spec does not apply the name rule to data members, so a new actorbinding member breaks no stated rule and the finding itself concedes the context-attribute names all conform."
+  - id: OP-GOV-001
+    verdict: refuted
+    reason: "ADR Decision Outcome (line 115) states the upcaster contract and fixtures are owned by this package and design phase 2 places the upcaster and fixtures in this package's rollout, so the home is tied to this package even if 'shared reader library' is loosely worded."
+  - id: OP-GOV-002
+    verdict: refuted
+    reason: "The brief the finding relies on is not in the artifacts and cannot be checked, and the cited phase 4-6 and Compatibility bullets are a rollout plan and consumer consequences of the envelope decision rather than demonstrably out-of-scope write-core decisions."
+  - id: OP-GOV-003
+    verdict: refuted
+    reason: "The brief constraint cannot be verified, the design already hedges its constants ('at first', 'placeholder prefix', 'subject to ADR open question 1'), and the upcaster accepts both ULID and UUID ids, so only a single sentence at line 181 presupposes ULIDs."
+  - id: OP-GOV-004
+    verdict: confirmed
+    reason: "ADR line 18 says only four questions are open and the ADR never mentions the snake_case-in-data and actor/executionmode-as-extension choices, which only design lines 143-150 flag for confirmation on the PR."

@@ -1,0 +1,26 @@
+schema: review-refute/v1
+complete: true
+phase: op
+batch: 2
+verdicts:
+  - id: OP-ARCH-008
+    verdict: refuted
+    reason: The reducer-equivalence claim is scoped to diary (shape B) rows, whose StatusEvent always carries force and actor; the decode-time default for an omitted force or empty actor is row-level upcaster detail moved to the first implementation mission.
+  - id: OP-ARCH-009
+    verdict: refuted
+    reason: Option 3 is rejected with stated reasons, the maintainer-approved streaming motives are in the Context, the Spring claim is already flagged unverified in ADR and design section 12, and spike ordering is a phasing preference rather than a defect.
+  - id: OP-ARCH-010
+    verdict: confirmed
+    reason: zeitgeist_attrs.py is a live in-package codec built on Event and StatusTransitionPayload, and neither the ADR Consumers list nor the design (no mention of zeitgeist at all) says whether it stays on shape A or gains a CloudEvent input.
+  - id: OP-ARCH-011
+    verdict: refuted
+    reason: The versioning contract requires COMPATIBILITY.md sections only for major bumps, the design deliberately withholds the 3.0.0 wording change until fixtures prove it (section 3 and 13), and Phase 3 already requires additive release artifacts, so this is release-note detail.
+  - id: OP-ARCH-012
+    verdict: confirmed
+    reason: Design section 7 says the .v(N+1) rule matches the contract's major rule for renaming a payload field yet treats the same change as an additive new type, and the design never mentions the contract's capability-gating obligation for new types (no "capability" anywhere in it).
+  - id: OP-ARCH-013
+    verdict: refuted
+    reason: doc_status describes the document lifecycle and status describes the decision, so active/draft next to Proposed is not a contradiction and the index vocabulary covers only decision status.
+  - id: OP-CONTRACT-001
+    verdict: confirmed
+    reason: Design section 4's annotation-row line lists optional mission_slug and execution_mode, but InnerStateChanged (diary.py ~750-775) has only event_id, kind, wp_id, at, actor and delta, so the mapping names inputs the model does not have.
