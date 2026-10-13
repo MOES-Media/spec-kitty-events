@@ -1,0 +1,279 @@
+schema: review-findings/v1
+complete: true
+phase: op
+lens_group: arch
+mission: op-events-cloudevents
+profile_applied: "architect-alphonso: directive 003 (decisions with context, options, rationale), 031 (bounded-context boundaries and explicit translation layers), 043 (close defect classes by construction, no discipline-only constraints), 044 (single canonical surface). Mode: review."
+findings:
+  - id: OP-ARCH-001
+    lens: principles
+    severity: 4
+    title: "Design section 9 puts merge-driver writes under 'fail closed in strict use' and also promises local merge is never narrower; the two bullets contradict"
+    evidence:
+      - artifact: "design section 9, bullet 'Fail closed in strict use' lists 'merge-driver writes'; next bullet says 'Local read and merge never become narrower than today's reducer'"
+      - artifact: "ADR, Compatibility, 'Read-time upcaster': 'In strict use (ingress, merge-driver writes) an unmappable row fails closed'; same paragraph: local reads never narrower"
+      - artifact: "ADR, Compatibility, 'Log merge driver': driver 'runs the upcaster in strict mode'"
+      - code: "spec-kitty main 3847251e0 src/specify_cli/status/event_log_merge.py:73-77 (driver accepts any dict row with a string event_id, no mapping needed); :78-80 accepts rows lacking at/timestamp"
+      - code: "src/spec_kitty_events/diary.py:_is_non_lane_row (about 1724) and parse_diary: the reducer ignores or tolerates rows the strict mapper would not map"
+      - code: "contracts/versioning-and-compatibility.md 'Local-CLI compatibility vs TeamSpace ingress validity': local reads permissive, 'Not weakened by any package bump'"
+    claim: >
+      A git merge of status.events.jsonl is a local operation on the user's own history, yet the
+      proposal runs the upcaster in strict mode there. Today the driver accepts any row with an
+      event_id. Strict mapping would fail the merge for rows it cannot map: pre-3.0 named shapes,
+      diary rows with no mission_id when meta.json is unavailable or pre-dates identity backfill,
+      and rows whose event_id is outside the 26/36/32-char forms (StatusEvent.from_dict does not
+      validate event_id). That makes merge strictly narrower than today, which the principle
+      forbids, and a failed merge leaves a user unable to pull. The ADR and design state both rules
+      without reconciling them. Strictness belongs where events are produced or republished
+      (ingress, new-row writes), not on re-emission of rows already on disk.
+    remediation: >
+      Split 'strict' in section 9 and the ADR into two modes with named scope. Ingress and new-row
+      production are strict. Merge and local read are permissive: an unmappable row is carried
+      through byte-for-byte with a named warning and keyed by its raw event_id. State that the
+      driver never raises for a row it accepts today, and add 'merge never rejects what the current
+      driver accepts' as an exit criterion of Phase 5.
+
+  - id: OP-ARCH-002
+    lens: rollout
+    severity: 4
+    title: "Cutover option A flips the strict pin at 4b while no producer emits 4.0.0 until Phase 5, a self-inflicted ingress outage; option B contradicts the 4b exit criterion"
+    evidence:
+      - artifact: "design section 14, row 4b: '_REQUIRED_SCHEMA_VERSION and the strict profile move to 4.0.0 ... strict pin flipped'; row 5: 'Writers (only after 4b)'"
+      - artifact: "design section 14 'Cutover' option A: saas rejects shape A from that release; option B: saas accepts both for a window or indefinitely"
+      - code: "src/spec_kitty_events/strict.py: _REQUIRED_SCHEMA_VERSION = '3.0.0'; STRICT_ENVELOPE_KEYS is the 14-field Event set"
+      - artifact: "charter: 'live consumers rely on fail-closed compatibility behavior'; contract: 'producers must keep emitting 3.0.0 ... the strict profile rejects anything else'"
+    claim: >
+      Phase 5 puts writers after 4b, so under option A every live 3.0.0 producer is rejected from the
+      cutover release until a 4.0.0 writer exists, with no window in which both are valid. Under
+      option B the 4b exit criterion ('strict pin flipped') cannot hold: accepting both shapes means
+      the package keeps a 3.0.0 validator path or a two-valued pin. Whether that is one major
+      change or two, and whether a package that still accepts 3.0.0 is a major at all by the
+      contract's accept/reject rule, is not stated. The ADR and design leave the decision shape
+      open, but the phase table asserts a single exit criterion that only one option can meet.
+    remediation: >
+      Rewrite 4b as: the package major introduces the 4.0.0 profile and keeps 3.0.0 acceptance as a
+      named legacy profile until a later, separately announced removal; flipping to reject-3.0.0 is
+      a second explicit cutover decision gated on every producer having shipped Phase 5. Drop option
+      A as a same-release behaviour, or reorder so the writers ship before or with the pin flip.
+      State the accept/reject boundary per option, so the major-bump rule is traceable.
+
+  - id: OP-ARCH-003
+    lens: rollout
+    severity: 4
+    title: "Writers can ship before the merge driver accepts CloudEvent rows, and the fork-detection backstop would silently go blind on them"
+    evidence:
+      - artifact: "design section 14 Phase 5: 'First command group writes CloudEvents ... merge driver change proposed to core'; exit 'a mixed old/new log merges'"
+      - artifact: "design section 9 'Merge driver': fork detection reads top-level from_lane, to_lane, wp_id which CloudEvent rows carry under data and subject. ADR Compatibility 'Log merge driver' proposal covers key and bytes only, not fork detection"
+      - code: "spec-kitty main 3847251e0 src/specify_cli/status/event_log_merge.py:73-77 (row without event_id raises); :137-142 (_departures: rows lacking from_lane, to_lane or wp_id are skipped silently, 'annotations / non-transition rows carry no lane edge')"
+      - code: "src/specify_cli/consolidation/drivers.py:246-250 (detect_concurrent_fork then merge)"
+    claim: >
+      The driver today raises on a CloudEvent row (no event_id). If the proposal lands for dedupe
+      but fork detection is not ported, CloudEvent lane rows are skipped as 'non-transition rows',
+      so two clones that independently cancel or reject versus advance the same work package merge
+      cleanly and one decision is buried. That is a fail-open of the #5967 backstop, introduced by
+      the envelope change. Phase 5 treats the driver as a proposal running alongside the writers
+      with no ordering, and the exit criterion tests only that a mixed log merges. The principle
+      that core owns the decision does not remove the package's duty to make the rollout order
+      safe: no writer may emit CloudEvents until the shipped driver handles them.
+    remediation: >
+      Add to Phase 5 a hard precondition: the core driver release that reads the upcast form (id,
+      key, sort, and fork detection on data.from_lane, data.to_lane and subject) ships before any
+      writer emits CloudEvents. Extend the exit criterion with: a concurrent cancel versus advance
+      on CloudEvent rows still raises the fork conflict. Put the fork-detection port in the ADR's
+      driver proposal next to key and bytes, and list it in the Risks as a fail-open hazard.
+
+  - id: OP-ARCH-004
+    lens: principles
+    severity: 3
+    title: "Upcasting shape-A WPStatusChanged rows would fold rows the reducer ignores today; 'equal reduced state' and 'reducer not changed' are not true for them"
+    evidence:
+      - artifact: "design section 1 ('Shape A's payload for a lane change already carries the diary fields, so A and B converge on one CloudEvent type'); section 9 'The reducer is not changed ... equal reduced state is the claim'"
+      - code: "src/spec_kitty_events/diary.py:_is_non_lane_row ends with 'return \"event_type\" in obj': any row with a top-level event_type, which every shape-A Event has, is ignored in place by the reducer"
+      - artifact: "design section 1 row D and ADR Decision: non-lane rows (Decision Point etc.) are passed through, though they are also event_type-bearing Event envelopes"
+    claim: >
+      Today a shape-A WPStatusChanged Event placed in status.events.jsonl is ignored by the
+      reducer, as are Decision Point Events. The design maps A to lane.transitioned, so after the
+      upcaster the same bytes decode into a StatusEvent and change the snapshot. The boundary
+      between 'A, mapped' and 'D, passed through' is drawn only by registry membership, while the
+      reducer draws it by event_type presence. The equivalence claim is therefore false for any log
+      that contains such a row, and for D rows registered later ('additive') it silently flips
+      reduced state.
+    remediation: >
+      State per call context. For diary replay, a row with a top-level event_type is passed through
+      exactly as the reducer treats it today. A-to-CloudEvent mapping applies only at the transport
+      and ingress edge. Add a reducer-equivalence fixture class for A-shaped rows inside a diary,
+      and require that registering a new D type be checked against reduced-state change (it is not
+      purely additive for diary replay).
+
+  - id: OP-ARCH-005
+    lens: principles
+    severity: 3
+    title: "Upcaster normalizes event ids, which changes reducer dedupe and sort behaviour and contradicts 'invents nothing' and 'reducer unchanged'"
+    evidence:
+      - artifact: "design section 3 table: 'id ... Normalized with normalize_event_id'; ADR open question 2: 'The upcaster normalizes ids with the existing rules'"
+      - code: "src/spec_kitty_events/diary.py:1844 sorted(..., key=(e.at, e.event_id)) and _dedup_transitions (1601) group by the raw event_id string; StatusEvent.from_dict (diary.py:~483) does not normalize"
+      - code: "src/spec_kitty_events/models.py:27-56 normalize_event_id lower-cases UUIDs and hyphenates 32-char hex"
+    claim: >
+      The reducer treats a lower-case ULID, an upper-case ULID, and UUID spelling variants as
+      distinct ids (distinct for dedupe, different sort position among equal at). Normalizing in
+      the upcaster, and decoding back, can merge rows the reducer keeps apart or reorder ties, so
+      reduced state differs from the raw row's. The merge-driver sentence that 'compares UUID
+      spelling variants as one id' is a behaviour change to the driver as well. The deterministic
+      and equal-state principles are asserted but this mapping step violates them.
+    remediation: >
+      Keep the raw id as the `id` for local read and merge (pass-through value), and normalize only
+      in the strict ingress mode and for new rows. If normalization is wanted for dedupe, make it an
+      explicit, fixture-pinned behaviour change owned by the Phase 1 and ordering decisions rather
+      than a silent step inside the 'move' mapping. Add the lower-case ULID and UUID-variant cases
+      to the Phase 2 equal-state exit criterion.
+
+  - id: OP-ARCH-006
+    lens: soundness
+    severity: 3
+    title: "Recommended ordering option C is not specified as a total order and contradicts 'no reducer change' in Phase 2"
+    evidence:
+      - artifact: "ADR open question 1, option C and recommendation; design section 5 ('Options B and C change the sort key the reducer uses'); design section 9 and Phase 2 ('with no reducer change')"
+      - code: "src/spec_kitty_events/diary.py:1844 (reduce_parsed sorts (at, event_id))"
+      - artifact: "design section 5: lamportclock optional 'because diary writers stamp none today'"
+    claim: >
+      C compares by Lamport clock where present and falls back to (time, id) where absent. A
+      comparator that mixes the two on a log with clocked and clockless rows is not transitive
+      (A clockless sorts before B by time, B before C by clock, C before A by time), so the sort
+      result depends on input order. That violates the 'deterministic' principle for the very
+      mixed logs this rollout produces. Separately, C is the recommendation but the design says the
+      reducer is untouched through Phase 4, so no phase owns the change. The ordering question is
+      open, which is fine, but the recommendation should not be a hazard.
+    remediation: >
+      Either withdraw the C recommendation until a total order is defined (for example partition
+      rows into a clocked group and a clockless group with a fixed, documented group order, or define
+      clock presence as a per-file or per-mission epoch), or state the total order and add a
+      property test (shuffle invariance) to the exit criteria. Assign the reducer sort-key change to
+      a named phase and a named owner (this package versus core's Lamport wrapper).
+
+  - id: OP-ARCH-007
+    lens: mapping
+    severity: 3
+    title: "Aggregate split assumes mission/<mission_id> with a ULID; real aggregate ids are heterogeneous and the precedence against payload mission_id is unstated"
+    evidence:
+      - artifact: "design section 3 'Aggregate split'"
+      - code: "src/spec_kitty_events/conformance/fixtures: aggregate_id values include mission/replay-mission, mission/M-SJ, mission/m-alpha-001, mission-software-dev, WP01, dp/dp-001, connector/conn-github-001, audit/mission-010/run-001, session/sess-r1, feature/123"
+      - code: "src/spec_kitty_events/strict.py:611-621 checks only the leading segment against forbidden legacy names; no ULID rule on the mission segment"
+    claim: >
+      The strict profile accepts mission/<anything>. The split would put a slug-like segment into
+      the `missionid` extension and into `source` as if it were a ULID, giving a wrong identity (the
+      core identity model says mission_id is the ULID, slug is a separate handle). Unprefixed
+      aggregates (WP01, mission-software-dev) and the dp/, connector/, audit/ prefixes fall under
+      the 'any other prefix' rule but then `subject` becomes an arbitrary full aggregate_id. When
+      payload mission_id and aggregate segment disagree, neither the table nor the lifted-payload
+      paragraph says which wins; this affects (source, id) keying.
+    remediation: >
+      Define the split only for a segment that matches the ULID pattern; otherwise treat as the
+      'other prefix' case, with no `missionid`. State precedence (payload mission_id from the
+      registry-lifted member versus aggregate segment, and meta.json context) and the failing mode
+      on disagreement. Add fixtures for slug-segment and unprefixed aggregates to the mapping
+      exit criterion in Phase 1.
+
+  - id: OP-ARCH-008
+    lens: mapping
+    severity: 2
+    title: "Reverse decode needs defaults the mapping says it never writes (force, empty actor)"
+    evidence:
+      - artifact: "design section 9 'Nothing is invented ... no defaulted field beyond the constants'; section 3 'Members present in only one shape are optional in the union; none is defaulted'; section 4 'an empty string is omitted'"
+      - code: "src/spec_kitty_events/diary.py:StatusEvent.from_dict: force=data['force'], actor=decode_actor(data['actor']), execution_mode=data['execution_mode'] are required keys"
+      - code: "src/spec_kitty_events/status.py:441 StatusTransitionPayload.force defaults to False (shape A may omit it)"
+    claim: >
+      The claim 'a CloudEvent lane row is decoded back to the StatusEvent the reducer would decode'
+      requires force and actor to exist. Shape A rows that omitted force, and rows with an empty
+      actor that the mapping omits, cannot decode without a supplied default. The decoder default
+      is a second place where the principle 'nothing invented' is relaxed without being listed.
+    remediation: >
+      List the decode-time defaults (force=False, actor='') as published constants in section 9 and
+      pin them in fixtures, or write force and the empty actor explicitly in the CloudEvent. Say
+      which.
+
+  - id: OP-ARCH-009
+    lens: options
+    severity: 3
+    title: "Option analysis is asymmetric and the stated drivers omit the actual reasons; one reason is unverified"
+    evidence:
+      - artifact: "ADR Considered Options 3 and 4; Decision Drivers; Context 'The maintainer's reasons' (Kafka, Spring Cloud Stream, UI)"
+      - artifact: "design section 12 'Unverified: that Spring Cloud Stream itself ships first-class CloudEvents handling'; ADR Streaming 'possible, not delivered'"
+    claim: >
+      Option 3 is rejected as 'two envelopes forever', yet option 4 also leaves two shapes readable
+      forever (permanent upcaster, legacy rows never retired; design section 15 first risk). The
+      streaming and UI motives are the load-bearing reason for a major, wire-breaking change
+      across the CLI, core merge driver, Read API and SaaS, but are not Decision Drivers, and the
+      Spring Cloud Stream claim, listed in the Context as a reason, is marked unverified in the
+      design. No option converges the two shapes inside the existing envelope first (fixing #72 by
+      giving the diary the Event clock) or defers the on-disk change until the edge mapping is
+      proven by the Phase 6 spike; Phase 6 (the spike) comes last, after the irreversible steps.
+    remediation: >
+      Add the streaming and UI motives to Decision Drivers, mark the Spring claim as 'to be
+      confirmed by spike' in the Context, and add either an option 'converge A and B first, adopt
+      CloudEvents at the edge, move the on-disk row after the spike' or a recorded reason for
+      rejecting it. Consider moving the Kafka and Spring spike ahead of 4b so the cutover rests
+      on verified behaviour. Restate option 3's cost honestly against option 4's permanent cost.
+
+  - id: OP-ARCH-010
+    lens: consumers
+    severity: 3
+    title: "Consumer-impact list omits the in-package zeitgeist_attrs codec and the Pydantic payload models it decodes against"
+    evidence:
+      - artifact: "ADR Consequences, Consumers; design sections 1 and 3 (out of scope list)"
+      - code: "src/spec_kitty_events/zeitgeist_attrs.py:238 imports StatusTransitionPayload; :432 dispatch WP_STATUS_CHANGED -> StatusTransitionPayload; docstring says decode requires to_lane approved/done payloads to carry evidence"
+      - artifact: "COMPATIBILITY.md ~215: 'SaaS durable ingestion, Zeitgeist relay fan-out, SaaS projections' share the envelope"
+    claim: >
+      Lifting actor, execution_mode, mission_slug, mission_id and wp_id out of data into context
+      attributes means a CloudEvent's data no longer validates against StatusTransitionPayload
+      (acknowledged in section 3). The Zeitgeist relay projection, a live path of this package
+      consumed through to/from_zeitgeist_attrs, is built on that model and on Event. Neither the
+      ADR consumers list, nor the out-of-scope list, nor any phase says what happens to it:
+      stay on shape A, project from the CloudEvent, or move. A Zeitgeist consumer is also not in the
+      versioning section's migration obligations.
+    remediation: >
+      Add the zeitgeist_attrs codec (and any other in-package user of Event and the payload models,
+      such as merge helpers) to the Consumers list and to the Phase 4 exit criterion, with an
+      explicit statement of whether the codec keeps reading shape A or gains a CloudEvent input.
+
+  - id: OP-ARCH-011
+    lens: versioning
+    severity: 2
+    title: "The unreleased-wire interim is undocumented: Phases 2-3 ship a 4.0.0 envelope in minor releases while COMPATIBILITY.md keeps saying 3.0.0 until 4b"
+    evidence:
+      - artifact: "ADR Consequences Versioning ('upcaster's output carries 4.0.0 from the first library release'); design section 13 (COMPATIBILITY.md edited only at cutover); section 14 Phase 3 exit lists only test_compatibility_doc"
+      - code: "COMPATIBILITY.md line 5: 'The on-wire envelope schema version is 3.0.0 and has been unchanged since the cutover'"
+      - artifact: "contracts/versioning-and-compatibility.md: 'Documenting a breaking change as additive' is forbidden; 'Weakening the local-CLI-compatibility wording' is forbidden"
+    claim: >
+      Between the Phase 3 minor release and 4b the package defines and validates a 4.0.0 shape while
+      the compatibility doc says no such shape exists. A consumer reading COMPATIBILITY.md cannot
+      learn that 4.0.0 rows are valid input for the new validator, read-only, and not producible.
+    remediation: >
+      Add to Phases 2 and 3 an additive COMPATIBILITY.md section for those minors: the CloudEvents
+      reader and validator are read/verify-only, 3.0.0 remains the only emitted and ingress-valid
+      envelope, and the intro sentence is qualified rather than rewritten.
+
+  - id: OP-ARCH-012
+    lens: versioning
+    severity: 2
+    title: "Design section 7 says '.v(N+1) matches the contract's rule that renaming a payload field is major', then classifies the same change as additive"
+    evidence:
+      - artifact: "design section 7 bullets 2 and 3"
+      - artifact: "contracts/versioning-and-compatibility.md 'What requires a major package bump': 'Changing a typed payload's required fields, or renaming a field. Producers of the previous shape become invalid'; 'A minor version does not make an unknown event safe for every consumer: producers MUST capability-gate'"
+    claim: >
+      Under the design, a breaking payload change becomes a new type string, kept alongside the old
+      one, and is minor. That is a deliberate reinterpretation, not a match: the contract classifies
+      the in-place change as major, and consumers on the previous package fail closed on the unknown
+      type. The design should say it replaces the contract's major rule with new-type versioning and
+      carry the capability-gating obligation.
+    remediation: >
+      Reword to 'this replaces the major rule for payload changes with a new type', state that the
+      contract text is amended at cutover, and require capability-gated emission of any new .vN type.
+
+  - id: OP-ARCH-013
+    lens: docs
+    severity: 1
+    title: "Front matter status vocabulary differs across the three artifacts"
+    evidence:
+      - artifact: "ADR front matter doc_status: active with status: Proposed; design doc_status: draft; index lists Proposed"
+    claim: "doc_status active for a Proposed ADR and draft for its design may confuse tooling that reads doc_status."
+    remediation: "Align doc_status with the status vocabulary the index defines, or note that doc_status describes the document and not the decision."

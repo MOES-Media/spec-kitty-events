@@ -1,0 +1,17 @@
+schema: review-refute/v1
+complete: true
+phase: op
+batch: 4
+verdicts:
+  - id: OP-GOV-005
+    verdict: refuted
+    reason: The required caveat phrase is present in the header (ADR:17), the status is Proposed, and "Chosen option" is standard MADR wording for the preferred option, so line 64 and the "(chosen)" label do not misstate the decision state.
+  - id: OP-GOV-006
+    verdict: confirmed
+    reason: ADR line 54 says 126 committed JSON Schemas but src/spec_kitty_events/schemas holds exactly 125 *.schema.json files (the 145 repo-wide count includes kitty-specs contracts), so the number is wrong.
+  - id: OP-GOV-007
+    verdict: confirmed
+    reason: The ADR uses "## Decision Outcome" with no "## Decision" heading or Reader line, while the core ADR (2026-10-06-1) uses "## Decision" and "**Reader:**".
+  - id: OP-GOV-008
+    verdict: confirmed
+    reason: ADR open question 3 (line 242) says three version axes and lists package major, envelope schema version and release line, while design section 8 lists four different axes, so the counts and sets are inconsistent.

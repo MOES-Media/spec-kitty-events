@@ -1,0 +1,64 @@
+schema: review-verify/v1
+complete: true
+phase: op
+results:
+  - id: OP-ARCH-001
+    status: resolved
+    reason: 'Design section 9 now defines strict and permissive upcaster modes with a per-deviation table, callers per mode, and permissive-path fixtures; the section 13 claim is gated on those fixtures.'
+  - id: OP-ARCH-002
+    status: resolved
+    reason: 'Shape D (non-lane rows) is defined as PassThrough in both modes, shape detection order is normative so retrospective type rows never reach shape C, annotation rows have mapping rows, and the fixture claim now states CloudEvent, PassThrough or error code.'
+  - id: OP-ARCH-003
+    status: resolved
+    reason: 'Section 3 adds a normative merged lane.transitioned.v1 data model (new model, StatusTransitionPayload kept for legacy), maps summary, from_lane null, review_result and policy_metadata, and extends conflict detection to payload mission_id and wp_id; the ADR driver is qualified.'
+  - id: OP-ARCH-004
+    status: resolved
+    reason: 'Design section 14 Cutover defines the cutover release as the package major that rewrites the 3.0.0 contract text with ingress options A and B, the dangling section reference now resolves, and the ADR makes the explicit cutover decision conditional on ruling open question 3.'
+  - id: OP-ARCH-005
+    status: resolved
+    reason: 'Section 14 and the ADR specify dedupe by (source, id) on the upcast form, retained original bytes, the reducer same-id seed rule cited as _dedup_transitions, spelling-variant and seed-pair fixtures, and mark current driver behaviour unverified.'
+  - id: OP-ARCH-006
+    status: resolved
+    reason: "Section 9 defines 'never defaulted' with an explicit constants list, shape A data_tier is omitted when absent, row-versus-context mission id maps to UPCAST_CONFLICTING_FIELDS, and property tests for determinism, idempotence and id context-independence are listed."
+  - id: OP-ARCH-007
+    status: resolved
+    reason: 'New section 9a states the integration seam (CloudEvent-to-StatusEvent decoder, reducer unchanged, Phase 4) and says Q1 options B and C change the reduce_parsed sort key.'
+  - id: OP-CONTRACT-001
+    status: resolved
+    reason: "The basis is now stated honestly (main-only claims marked 'on main, not in v1.0.2'); I confirmed ce@v1.0.2 sequence wording and documented-extensions 'no official standing' text and that no correlation extension is listed there."
+  - id: OP-CONTRACT-002
+    status: resolved
+    reason: 'Section 2 now cites json-format.md null handling (MAY encode null, MUST decode as unset), and sections 9 and 11 require validators to accept null context attributes as absent while writers omit them.'
+  - id: OP-CONTRACT-003
+    status: resolved
+    reason: 'Section 2 quotes the signed 32-bit Integer range, section 3 adds the range rule with UPCAST_INTEGER_OUT_OF_RANGE, the string-clock alternative, boundary fixtures and a table row.'
+  - id: OP-CONTRACT-004
+    status: resolved
+    reason: 'Codes are added for schema version invalid, unexpected key, payload invalid and unmapped legacy shape, a deterministic precedence order is defined, the raw_status_entry contradiction is fixed, time keys per shape are named, and I verified the fixture shapes route to the stated codes.'
+  - id: OP-CONTRACT-005
+    status: resolved
+    reason: 'Constant attributes, no-default absent data_tier, general lifting rule per registry entry, the structured-actor rule for shape A, and conflict checks on duplicated aggregate segments are all now stated.'
+  - id: OP-CONTRACT-006
+    status: resolved
+    reason: 'Section 6 now says the spec duplicate rule is source+id, dedupes by (source, id), and declines id-alone keying unless a global-id invariant with a collision test is added.'
+  - id: OP-CONTRACT-007
+    status: resolved
+    reason: 'Examples now use an https placeholder URI marked as placeholder, and a registry test asserts every dataschema parses as an absolute URI.'
+  - id: OP-CONTRACT-008
+    status: resolved
+    reason: 'The section 3 time rule defines the RFC 3339 date-time production via regex plus calendar check, states naive, date-only and basic-format values fail, and lists matching fixtures.'
+  - id: OP-CONTRACT-009
+    status: resolved
+    reason: 'Empty wp_id and empty required strings fail with UPCAST_EMPTY_VALUE, empty actor is omitted rather than written, and fixtures cover both.'
+  - id: OP-GOV-004
+    status: resolved
+    reason: "The ADR now has a 'Further choices to confirm on the PR' section and updated header covering snake_case data members and actor/executionmode extensions."
+  - id: OP-GOV-006
+    status: resolved
+    reason: 'ADR now says 125 committed JSON Schemas, which matches the find count I re-ran (125).'
+  - id: OP-GOV-007
+    status: resolved
+    reason: "ADR now uses '## Decision', has a Reader line, and Compatibility is a top-level '##' section."
+  - id: OP-GOV-008
+    status: resolved
+    reason: 'ADR open question 3 and design section 8 both list the same five version axes.'

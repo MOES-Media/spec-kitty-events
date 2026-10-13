@@ -1,0 +1,32 @@
+schema: review-verify/v1
+complete: true
+phase: op
+results:
+  - id: OP-ARCH-001
+    status: resolved
+    reason: Strict is now scoped to ingress and new-row validation, merge/local read are permissive with raw-id carry-through, and the Phase 5 exit says a mixed log merges without rejecting any row the current driver accepts; ADR and design agree and the cited driver lines (73-77, 165-193) check out.
+  - id: OP-ARCH-002
+    status: unresolved
+    remaining_severity: 3
+    reason: The outage is gone (no flip before writers) but option A says the pin flips with or after the first writer release while the 4b exit criterion and phase table put the flip at 4b and writers only after 4b, so the 4b exit cannot be met under option A as written.
+  - id: OP-ARCH-003
+    status: resolved
+    reason: Phase 5 now carries a core-owned precondition (driver reads upcast form incl. fork detection and sort key before any writer), an exit test that cancel-vs-advance on CloudEvent rows still conflicts, the ADR driver proposal includes fork detection, and the fail-open is in Risks; citations 137-142 and drivers.py:246-250 verified.
+  - id: OP-ARCH-006
+    status: resolved
+    reason: Option C is now explicitly conditional on a defined total order with the non-transitivity stated in ADR and design, and Phase 2 owns the reducer sort-key change for B or C, so the recommendation is no longer a hazard.
+  - id: OP-ARCH-007
+    status: resolved
+    reason: The aggregate split applies only to ULID segments, other segments fall to the no-missionid other-prefix rule, disagreement is a named strict error with precedence principle deferred, and slug/unprefixed fixtures are in the Phase 1 exit.
+  - id: OP-ARCH-010
+    status: resolved
+    reason: The zeitgeist_attrs codec is in the ADR Consumers list and the Phase 4 row with an explicit stay-on-shape-A-or-gain-CloudEvent-input settlement.
+  - id: OP-ARCH-012
+    status: resolved
+    reason: Design section 7 now states it deliberately replaces the contract's major rule with new-type versioning, that the contract text is amended at cutover, and that emission of new .vN types is capability-gated.
+  - id: OP-CONTRACT-001
+    status: resolved
+    reason: The annotation-row line now states six fields, drops the nonexistent optional fields, takes source/missionid/missionslug from caller context only, and omits executionmode.
+  - id: OP-CONTRACT-002
+    status: resolved
+    reason: Design section 12 now quotes "If present, ... MUST be set to the media type of an event format", matching ce@v1.0.2 section 3.3.1 as fetched.

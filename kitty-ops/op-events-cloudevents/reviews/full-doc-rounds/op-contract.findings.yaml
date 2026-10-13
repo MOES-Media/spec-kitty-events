@@ -1,0 +1,100 @@
+schema: review-findings/v1
+complete: true
+phase: op
+lens_group: contract
+mission: op-events-cloudevents
+findings:
+  - id: OP-CONTRACT-001
+    lens: spec-claims-primary-source
+    severity: 3
+    title: "Spec claims attributed to ce@v1.0.2 come from unreleased main (Kafka batch sentence, Correlation extension, Sequence quotes)"
+    evidence:
+      - artifact: "design preamble ('latest release tag read was ce@v1.0.2'); design § 3 (Correlation extension); § 5 (sequence quotes); § 12 (Kafka batch)"
+      - code: "https://raw.githubusercontent.com/cloudevents/spec/ce@v1.0.2/cloudevents/extensions/correlation.md and .../v1.0.2/... (404 / no correlationid); ce@v1.0.2 bindings/kafka-protocol-binding.md has no 'batch' text; main has it at lines 74-80"
+      - code: "ce@v1.0.2 extensions/sequence.md says 'MUST be a non-empty lexicographically-orderable string'; the quoted 'a string that can be lexicographically compared' and 'Produces and consumers are free to define an out-of-band agreement' exist only on main"
+    claim: "The design says its spec claims were checked against v1.0 / ce@v1.0.2. I fetched that tag. The Correlation extension (correlationid/causationid) does not exist there, the Kafka 'does not currently support the batch content mode' sentence does not exist there, and the two Sequence-extension quotes (including the typo 'Produces') are from main, not the release. The claims are true of main but are presented as release facts. The 'documented Correlation extension' is not part of any released spec, which weakens the justification for reusing its names."
+    remediation: "State the basis honestly: normative claims from ce@v1.0.2; Correlation, Kafka batch sentence and Sequence quotes marked 'CloudEvents spec main (unreleased as of 2026-10-13)'. Quote Sequence from ce@v1.0.2 or mark main. In section 3 say correlationid/causationid are an unreleased extension, defined here by our own schema either way."
+  - id: OP-CONTRACT-002
+    lens: spec-claims-primary-source
+    severity: 3
+    title: "Design says the spec does not state null-attribute handling; json-format.md states it explicitly"
+    evidence:
+      - artifact: "design § 2 last bullet ('does not say in so many words whether a null attribute value is allowed (not explicitly stated)')"
+      - code: "ce@v1.0.2 cloudevents/formats/json-format.md lines 69-71: 'Unset attributes MAY be encoded to the JSON value of null. When decoding attributes and a null value is encountered, it MUST be treated as the equivalent of unset or omitted.'"
+    claim: "The claim is false for the JSON format, which is the format in use. Writing nulls is permitted; reading them as unset is a MUST. Omitting absent attributes is still a valid writer choice, but the validator and upcaster (an input that is already a CloudEvent is 'validated and returned unchanged') must accept an inbound null attribute as unset, not reject it. Nothing in the design pins that, and the 'fail closed' posture could otherwise reject spec-valid events."
+    remediation: "Replace the bullet with the json-format.md citation. Add to section 9/11: the CloudEvents validator treats a null context attribute as absent (per spec); writers in this repo omit rather than emit null; `data` members are unaffected."
+  - id: OP-CONTRACT-003
+    lens: attribute-type-conformance
+    severity: 3
+    title: "Integer extension attributes (lamportclock, datatier) have no range rule; spec limits Integer to signed 32 bits"
+    evidence:
+      - artifact: "design § 3 rows lamport_clock, data_tier; § 5; § 9 error table"
+      - code: "ce@v1.0.2 spec.md line ~186-189: Integer is 'in the range -2,147,483,648 to +2,147,483,647 inclusive'; event formats 'MUST only use Integer values in this range'"
+      - code: "src/spec_kitty_events/models.py:120-122 lamport_clock: int, ge=0 (unbounded); models.py:144 data_tier ge=0 le=4"
+    claim: "The design quotes the type-system list but not the Integer range. `Event.lamport_clock` is an unbounded Python int, so a legacy row with a clock above 2^31-1 would produce a spec-invalid CloudEvent. No UpcastErrorCode covers it and the 'copied' rule would emit it. This is also an ordering-design fact for open question 1 (a clock that must wrap or fail)."
+    remediation: "In section 2 add the Integer range MUST. In section 3 say lamportclock above 2^31-1 fails closed with a named code (for example UPCAST_INTEGER_OUT_OF_RANGE) or specify an alternative (string-typed clock); add the code to the section 9 table and a boundary fixture (2^31-1 passes, 2^31 fails)."
+  - id: OP-CONTRACT-004
+    lens: failure-behaviour-fail-closed
+    severity: 3
+    title: "UpcastErrorCode set does not cover existing fixture classes; no error precedence; C-shape naming is self-contradictory"
+    evidence:
+      - artifact: "design § 1 row C; § 9 'Failure behaviour' table; § 9 'Fixtures'"
+      - code: "conformance/fixtures/class_taxonomy/historical_row_raw/in_review_legacy_synonym.json (has event_id, occurred_at, no aggregate/project, to_lane awaiting-review)"
+      - code: "conformance/fixtures/class_taxonomy/envelope_strict_journal/{skew_major_2,skew_missing_version,local_appender_envelope_5_0_0,envelope_extra_team_slug}.json; envelope_invalid_payload_schema/*.json; strict.py:144 _REQUIRED_SCHEMA_VERSION = '3.0.0'"
+    claim: "(a) 'Every row in the existing sets becomes an upcaster fixture with an expected CloudEvent or expected error code', but no code exists for a schema_version other than 3.0.0 (skew), a missing schema_version, an unknown extra top-level key, or a payload that fails its payload model. (b) Rows fail several codes at once (the awaiting-review historical row has no mission id, no 'timestamp'/'at' key because it uses occurred_at, and an unknown lane); the design gives no precedence, so two implementations (Python and Java) will report different codes, defeating the shared-fixture claim. (c) Section 1 lists 'bare status entries' (raw_status_entry) as a named C shape, but UPCAST_UNRECOGNISED_SHAPE uses raw_status_entry as its example of a non-named shape. (d) UPCAST_TIME_INVALID names only timestamp/at, not the C-shape key occurred_at (or ts)."
+    remediation: "Add codes (or state the row is out of scope with a reason) for schema_version skew/missing, unexpected keys, and payload-invalid; fix the raw_status_entry contradiction; list the time keys per shape including occurred_at/ts; define a deterministic check order (shape, then id, then time, then mission id, then type/lane, then conflicts) and make the fixtures assert the code of the first failure. Record whether upcast also payload-validates legacy rows."
+  - id: OP-CONTRACT-005
+    lens: field-mapping-completeness
+    severity: 3
+    title: "Shape A mapping is incomplete or inconsistent: lifting rule only for WPStatusChanged, defaults vs 'never defaulted', constant attributes unstated, structured actor"
+    evidence:
+      - artifact: "design § 3 (Lifted payload fields; rows for data_tier, schema_version); § 10 shape-A trace ('data_tier (default 0)'); § 9 Determinism/Failure ('never defaulted')"
+      - code: "src/spec_kitty_events/models.py:141-146 (schema_version, data_tier have model defaults); conformance/fixtures/class_taxonomy/envelope_valid_canonical/wp_status_changed_planned_to_claimed.json (no data_tier, causation_id, project_slug)"
+      - code: "conformance/fixtures/class_taxonomy/envelope_valid_historical_synthesized/from_pre30_envelope.json (MissionCreated: payload carries mission_id and mission_slug, aggregate mission/<id>)"
+    claim: "All 14 Event fields and all 15 StatusEvent fields are mapped (counted against models.py:80-146 and diary.py:427-444). Gaps: (1) The worked shape-A trace applies 'default 0' for an absent data_tier while section 9 says rows are never defaulted and output derives only from the row; the strict profile requires explicit values but the model and canonical fixture do not, so the rule for absent data_tier/schema_version/causation_id/project_slug in raw JSON is undefined. (2) mission_slug/actor/execution_mode lifting is stated only for WPStatusChanged, so for other types (MissionCreated carries mission_slug and mission_id in payload) missionslug appears as an extension for lane rows but as `data` content for others, and a payload.mission_id that disagrees with the aggregate segment is not covered by UPCAST_CONFLICTING_FIELDS (which covers only lifted values). (3) specversion, datacontenttype, dataschema and schemaversion for shape A are never stated (only the shape-B table lists them). (4) A structured dict actor in a shape-A WPStatusChanged payload is not handled; the actor/actorbinding rule exists only in the shape-B table."
+    remediation: "State that absent data_tier is mapped to 0 by an explicit table row (and that absence of the others is omission), or fail closed; make the sentence in section 9 consistent. Give the lifted-field rule per type or generally (mission_slug/mission_id always lifted when the aggregate is mission-scoped). Add the constant attributes to the shape-A table, apply the actor rule to shape A, and extend UPCAST_CONFLICTING_FIELDS to any payload field that duplicates an aggregate segment."
+  - id: OP-CONTRACT-006
+    lens: id-source-uniqueness
+    severity: 2
+    title: "'Dedupe by id alone ... is stricter and safe' contradicts the spec's source+id duplicate rule; 'ids are ULIDs' ignores accepted UUIDs"
+    evidence:
+      - artifact: "design § 6 ('ids are ULIDs, so uniqueness holds per source; the merge driver dedupes by id alone, which is stricter and safe'); § 15 'Id collapse'"
+      - code: "ce@v1.0.2 spec.md id/source: 'Consumers MAY assume that Events with identical source and id are duplicates' (no licence for identical id with different source)"
+      - code: "src/spec_kitty_events/models.py:41-52 normalize_event_id accepts 36-char and 32-char UUID forms"
+    claim: "Deduping by id alone drops a distinct event that shares an id with an event from another source; that is data loss, not a stricter-but-safe rule, and it is not spec-mandated. It is safe only if ids are globally unique, which is not guaranteed while legacy UUID ids and ADR open question 2 option B remain, and a relative `source` makes cross-repo uniqueness weaker. The sentence presents an engineering choice as a conformance property."
+    remediation: "Reword: spec duplicates are same source+id; this package deliberately treats id as globally unique (an extra invariant) and the merge driver should dedupe by (source, id), or document the global-id invariant and a collision test. Remove 'safe' or justify it."
+  - id: OP-CONTRACT-007
+    lens: attribute-value-conformance
+    severity: 2
+    title: "Example dataschema 'urn:dev.spec-kitty:schema:...' is not a valid URN (dot not allowed in a namespace identifier)"
+    evidence:
+      - artifact: "design § 8 (placeholder `urn:dev.spec-kitty:schema:lane.transitioned.v1`); § 10 worked example dataschema"
+      - code: "RFC 8141 NID = alphanum 0*30(alphanum / '-') alphanum, no '.'; URN namespaces other than registered ones are not allowed; spec.md: dataschema 'MUST be a non-empty URI'"
+    claim: "The string parses as a generic RFC 3986 URI, so the dataschema MUST is met textually, but it presents a malformed URN with an unregistered namespace; a strict URN parser rejects it and it will be copied into the registry and fixtures as the canonical form. The spec also says incompatible schema changes SHOULD change the URI, which the .vN suffix satisfies."
+    remediation: "Use an https URI placeholder (for example https://schemas.example.invalid/...) or a registered URN form, mark it placeholder, and add a registry test that every dataschema parses as an absolute URI."
+  - id: OP-CONTRACT-008
+    lens: time-rfc3339
+    severity: 2
+    title: "'RFC 3339 compatible' / 'parseable' is not a testable criterion for UPCAST_TIME_INVALID"
+    evidence:
+      - artifact: "design § 3 `timestamp` row; § 4 `at` row; § 9 UPCAST_TIME_INVALID"
+      - code: "ce@v1.0.2 spec.md time: 'If present, MUST adhere to the format specified in RFC 3339'; fixture envelope_strict_journal/timestamp_naive.json"
+    claim: "'Copied as written' means a value Python's datetime parsing accepts (date-only, basic format, missing offset in some paths) could be copied into `time` and yield a spec-invalid event. The design does not say whether a naive timestamp fails (RFC 3339 requires an offset) nor which grammar is the test, so Python and Java will diverge."
+    remediation: "Define the check as the RFC 3339 date-time production (offset or Z required, 'T' separator) via a regex plus calendar validation, state that naive and date-only values fail with UPCAST_TIME_INVALID, and add fixtures including timestamp_naive and a basic-format value."
+  - id: OP-CONTRACT-009
+    lens: attribute-constraints
+    severity: 2
+    title: "Non-empty MUSTs (subject, source, extension strings) have no corresponding failure rule"
+    evidence:
+      - artifact: "design § 2 (subject 'MUST be a non-empty string' implied by 'always use subject'); § 4 `wp_id` -> subject 'Copied'; § 4 actor projection 'else empty string'"
+      - code: "ce@v1.0.2 spec.md: subject 'If present, MUST be a non-empty string'; source 'MUST be a non-empty URI-reference'; src/spec_kitty_events/diary.py:251-265 actor_identity_str can return ''"
+    claim: "A diary row with an empty wp_id would be copied into an empty `subject`, violating a MUST; the structured-actor projection may emit an empty-string `actor` attribute. No UPCAST code covers empty values."
+    remediation: "State that empty wp_id fails closed (existing code, or add UPCAST_EMPTY_VALUE), and omit `actor` rather than writing '' (record the choice)."
+  - id: OP-CONTRACT-010
+    lens: attribute-naming
+    severity: 1
+    title: "data key `actorbinding` breaks the stated snake_case rule for data members"
+    evidence:
+      - artifact: "design § 4 structured-actor row (`data.actorbinding`) versus 'data keeps the existing snake_case field names'"
+    claim: "All names used as context attributes pass [a-z0-9]{1,20} (checked character by character with a script; the longest, datacontenttype, is 15 characters). The only inconsistency is the data member `actorbinding`, which is a new name not snake_case unlike every other data member."
+    remediation: "Rename to `actor_binding` or state the exception."

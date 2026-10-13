@@ -1,0 +1,25 @@
+schema: review-verify/v1
+complete: true
+phase: op
+results:
+  - id: OP-ARCH-002
+    status: resolved
+    reason: 4b is now a package major that adds the 4.0.0 profile beside a named legacy 3.0.0 profile, writers (CLI, Phase 5) follow, and rejecting 3.0.0 is a separate later retirement step, so the 4b exit criterion and both cutover options are consistent and the accept/reject boundary is stated per step (widened at 4b, narrowed at retirement).
+  - id: OP-FRESH-001
+    status: resolved
+    reason: Release is disambiguated (package at 4b, CLI at Phase 5), the "changes completely" wording is gone from the ADR, and ADR Versioning, open question 3 and design sections 13/14 agree with the contract's major-bump rule (accepting a previously rejected envelope is major).
+  - id: OP-FRESH-002
+    status: resolved
+    reason: Design section 1 now states shape A is mapped only on ingress/shared non-diary reads and stays pass-through inside a diary unless the first implementation mission proves equal reduced state, matching diary.py _is_non_lane_row.
+  - id: OP-FRESH-003
+    status: resolved
+    reason: Section 9 now says the reducer is unchanged only under ordering option A, that B/C change the reduce_parsed sort key owned by Phase 2, and the Phase 2 exit is stated per option.
+  - id: OP-FRESH-004
+    status: resolved
+    reason: The ADR Further choices list and design Phase 0 exit now include the .vN rule with its versioning-contract replacement, the (source,id) dedupe key, the type name and the lifted-member set as proposals to confirm.
+  - id: OP-FRESH-005
+    status: resolved
+    reason: Design section 3 and the section 4 annotation row now give the annotation data an optional actorbinding beside delta, consistent with InnerStateChanged.actor being possibly structured.
+  - id: OP-FRESH-006
+    status: resolved
+    reason: ADR and design both carry doc_status draft with status Proposed; the folder index.md is a living index whose active status is a separate matter.

@@ -1,0 +1,175 @@
+schema: review-findings/v1
+complete: true
+phase: op
+lens_group: fresh
+mission: op-events-cloudevents
+findings:
+  - id: OP-FRESH3-001
+    lens: strict-permissive-consistency
+    severity: 3
+    title: Permissive rows for shape A lane rows claim "the reducer requires/rejects" but parse_diary ignores every event_type row
+    evidence:
+      - artifact: "design section 9 table rows 'event_id missing', 'at/timestamp missing', 'lane not in canonical vocabulary', 'schema_version present and not 3.0.0' and the paragraph defining 'lane row'"
+      - artifact: "src/spec_kitty_events/diary.py _is_non_lane_row: 'return \"event_type\" in obj' (WPStatusChanged rows are skipped in place)"
+      - artifact: "fixtures envelope_invalid_unknown_lane/to_lane_blocked_typo.json, to_lane_uppercase.json"
+    claim: >
+      The doc defines a shape A WPStatusChanged row as a lane row and gives permissive "same error (the reducer
+      rejects it)". The reducer never rejects such a row; any row with an event_type key is ignored in place.
+      Walking envelope_invalid_unknown_lane/* in permissive mode gives UPCAST_UNKNOWN_LANE, where the reducer
+      ignores the row, so the justification is false and permissive is narrower than today's behaviour on a log
+      holding such a row. The invariant is worded only for rows parse_diary accepts, so it hides this.
+    remediation: >
+      Restrict "same error" in permissive mode to shape B rows. Make shape A lane rows pass-through with a warning
+      in permissive mode, like non-lane shape A rows, and fix the rationale sentences and the invariant wording.
+  - id: OP-FRESH3-002
+    lens: fixture-walk
+    severity: 3
+    title: Annotation rows are lane rows, so table row "required key missing" demands force/execution_mode they never carry
+    evidence:
+      - artifact: "design section 9 table row 'required key missing ... shape B actor, force, execution_mode' and definition 'A lane row here is a shape B lane or annotation row'"
+      - artifact: "design section 9 Fixtures: status_diary replay annotation lines expected CloudEvent, no error; section 4 annotation rows"
+      - artifact: "status_diary_unknown_kinds.jsonl line 5: keys actor, at, delta, event_id, kind, wp_id; diary.py InnerStateChanged.from_dict"
+    claim: >
+      Read literally, the annotation line in status_diary_unknown_kinds.jsonl (no force, execution_mode or
+      mission_slug) fails UPCAST_MISSING_REQUIRED_KEY in both modes. The fixture list expects a CloudEvent.
+      The required keys for annotation rows (event_id as ULID, wp_id, at, actor, delta) are never stated.
+    remediation: >
+      List separate required keys for annotation and lane rows in section 4 and the table, and say that
+      annotation event_id must be ULID, matching InnerStateChanged.from_dict.
+  - id: OP-FRESH3-003
+    lens: merge-driver-citations
+    severity: 3
+    title: Merge driver proposal ignores detect_concurrent_fork and the at/timestamp sort key, and mandates strict mode on local history
+    evidence:
+      - artifact: "design section 14 'Merge driver'; ADR Compatibility 'Log merge driver'"
+      - artifact: "core event_log_merge.py:91-160 (detect_concurrent_fork reads top-level from_lane/to_lane/wp_id), :176-182 sort key at or timestamp; drivers.py:246-248"
+    claim: >
+      The cited driver also runs detect_concurrent_fork (#5967), which reads top-level from_lane/to_lane/wp_id.
+      CloudEvent rows carry these in data and subject, so the cancel/rejection fork check would silently stop
+      firing. The sort key reads at/timestamp, not time, so CloudEvent rows would all sort under the empty
+      string. The proposal also runs the strict upcaster inside a driver that merges users' own local history,
+      where legacy rows with no mission_id or a naive at are normal. Strict would raise on them and block
+      git pull, against the local-CLI compatibility domain the doc itself invokes. Neither point is mentioned.
+    remediation: >
+      Add both to the driver proposal (fork detection and sort key must read the upcast form), and choose
+      permissive mode, or pass-through of unmappable rows, for the local driver. Leave the decision to core.
+  - id: OP-FRESH3-004
+    lens: table-vs-prose
+    severity: 2
+    title: Missing schema_version in shape A has two contradictory permissive outcomes
+    evidence:
+      - artifact: "design section 3 'Required keys (shape A)' lists schema_version; section 9 table 'required key missing' (permissive: pass-through) vs 'schema_version missing (shape A)' (permissive: upcast, warning)"
+    claim: >
+      The same input gets "pass-through" from one row and "upcast, warning" from the other. Precedence orders
+      errors only, not the permissive outcome. Strict is resolved (SCHEMA_VERSION_INVALID comes first).
+    remediation: >
+      Drop schema_version from the required-keys list, or state which permissive row wins.
+  - id: OP-FRESH3-005
+    lens: contradictions
+    severity: 2
+    title: Shape detection step 6 makes a shape D row an error and a warning, contradicting "never an error, no warning"
+    evidence:
+      - artifact: "design section 1 step 6 vs section 1 table row D ('never an error') and section 9 'Shape D rows are PassThrough in both modes with no warning'"
+    claim: >
+      A registered event_type missing aggregate_id or payload is classified D, yet carries a warning, and in
+      strict mode it is an error (fixture line: missing aggregate_id). Section 9 says D has neither.
+    remediation: >
+      Reclassify these rows as malformed shape A (with a table row), or reword the D statements to exclude
+      the step 6 carve-out.
+  - id: OP-FRESH3-006
+    lens: claims-vs-code
+    severity: 2
+    title: Shape B null from_lane is "allowed" but the reducer rejects it, and the 9a decoder cannot invert it
+    evidence:
+      - artifact: "design section 4 row from_lane 'Copied (null allowed, section 3)'; section 9a"
+      - artifact: "diary.py StatusEvent._coerce_lane: Lane(None) raises; status.py StatusTransitionPayload.from_lane Optional"
+    claim: >
+      Null from_lane is valid only for shape A. A shape B row with null passes the upcaster and produces a
+      CloudEvent that the CloudEvent-to-StatusEvent decoder cannot decode into the StatusEvent the reducer
+      would build. The section 9 sentence "agree on everything the reducer rejects" is also violated.
+    remediation: >
+      Make null from_lane UPCAST_UNKNOWN_LANE for shape B in both modes, allowed for shape A only.
+  - id: OP-FRESH3-007
+    lens: claims-vs-code
+    severity: 2
+    title: Unknown kind and the kind-before-retrospective order of parse_diary are not reproduced in the detection order
+    evidence:
+      - artifact: "design section 1 steps 2-3, 7"
+      - artifact: "diary.py parse_diary: kind checked first, unknown kind raises DiaryError"
+    claim: >
+      A row with an unknown kind and lane keys falls through to step 7 and is upcast as a lane row, with the
+      unknown kind treated as an unexpected key. A row with kind plus event_name retrospective is D, where
+      the reducer raises. No code, mode outcome or fixture covers an unknown kind.
+    remediation: >
+      Add a step for non-annotation kind (UNRECOGNISED_SHAPE in both modes, matching "fails loud") ahead of
+      step 2, plus a fixture.
+  - id: OP-FRESH3-008
+    lens: permissive-invariant
+    severity: 2
+    title: Permissive errors on inputs the reducer accepts (non-string event_id; undefined "canonical lane vocabulary")
+    evidence:
+      - artifact: "design section 9 table rows 'event_id missing or not a string' (lane row same error) and 'lane not in the canonical vocabulary'"
+      - artifact: "diary.py StatusEvent.from_dict does not type-check event_id; Lane enum includes genesis and uninitialized"
+    claim: >
+      The reducer accepts a lane row whose event_id is a non-string (it only needs the key), yet permissive
+      errors on it. "Canonical vocabulary" is never defined as the Lane enum (including genesis, which the
+      status_diary fixtures use, and uninitialized), so an implementer may reject rows the reducer accepts.
+    remediation: >
+      Make a non-string event_id pass-through with a warning in permissive mode. Define the vocabulary as
+      the Lane enum members.
+  - id: OP-FRESH3-009
+    lens: fixtures-vs-codes
+    severity: 2
+    title: Fixture list has no named case for several defined codes, and replay fixtures lack a stated context
+    evidence:
+      - artifact: "design section 9 Fixtures vs the code table: UPCAST_ID_INVALID (strict), UPCAST_MISSION_ID_UNRESOLVED (strict), forbidden aggregate prefix"
+      - artifact: "status_diary replay lines carry no mission_id"
+    claim: >
+      The generic sentence "every row in the existing sets" does not cover the codes above. All replay shape B
+      lines would return UPCAST_MISSION_ID_UNRESOLVED in strict mode unless a context mission_id is supplied,
+      yet they are listed as "expected: CloudEvent" with no context stated.
+    remediation: >
+      Name fixtures for each code. State that replay fixtures run with a pinned context mission_id.
+  - id: OP-FRESH3-010
+    lens: wording
+    severity: 2
+    title: Requiring 11 of 14 keys is described as "narrower than validate_strict_envelope"; it is looser
+    evidence:
+      - artifact: "design section 3 'Required keys (shape A)'"
+    claim: >
+      The strict upcaster accepts rows that validate_strict_envelope (all 14 keys) rejects, so it is wider.
+      "Narrower" misleads a fail-closed review.
+    remediation: >
+      Say "accepts rows validate_strict_envelope rejects (it omits three keys)", and confirm this is intended
+      for strict mode.
+  - id: OP-FRESH3-011
+    lens: phase-table
+    severity: 2
+    title: Phase 2 exit relies on the inverse decoder that section 9a assigns to Phase 4
+    evidence:
+      - artifact: "design section 14 Phase 2 exit 'upcast-then-inverse round trip' vs section 9a 'the seam is a new CloudEvent-to-StatusEvent decoder ... Phase 4'"
+    claim: >
+      Phase 2 cannot meet its exit criterion without the inverse, which the table schedules two phases later.
+    remediation: >
+      Say the Phase 2 inverse is a test-only helper, or move the round-trip criterion to Phase 4.
+  - id: OP-FRESH3-012
+    lens: reducer-equivalence
+    severity: 1
+    title: Id normalization can change the (time, id) tie-break, not only spelling-variant duplicates
+    evidence:
+      - artifact: "design section 14 Phase 4 exclusion and section 9a; models.normalize_event_id"
+    claim: >
+      Upper-casing a lowercase ULID or hyphenating a bare UUID changes event_id sort order at equal at, so
+      reducer-equivalence can fail on logs with non-canonical ids even without duplicates.
+    remediation: >
+      Widen the exclusion, or note the tie-break difference in section 9a.
+  - id: OP-FRESH3-013
+    lens: claims-sourcing
+    severity: 1
+    title: 'The claim that consumers pin below 11 is asserted without a source'
+    evidence:
+      - artifact: "ADR Consequences, Package version bullet"
+    claim: >
+      No pin was found in this repository; the claim is not marked unverified, unlike other external claims.
+    remediation: >
+      Cite the consumer pin or mark it unverified.

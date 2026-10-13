@@ -1,0 +1,29 @@
+schema: review-refute/v1
+complete: true
+phase: op
+batch: 1
+verdicts:
+  - id: OP-ARCH-001
+    verdict: confirmed
+    reason: Design 9/11 define only a fail-closed upcaster for every read, the word permissive appears nowhere in design or ADR, while versioning-and-compatibility.md:78-93 and COMPATIBILITY.md:762-768 mandate a permissive local reader and design 13 claims the domain is unchanged.
+  - id: OP-ARCH-002
+    verdict: confirmed
+    reason: status_diary_unknown_kinds.jsonl has rows with dp-opened-1/future-1 ids, no at, and an annotation row, which design 4 says map through the registry and design 9 says every line is a fixture, yet no mapping or pass-through is defined and shape detection order is unstated.
+  - id: OP-ARCH-003
+    verdict: confirmed
+    reason: StatusTransitionPayload (status.py:411) is extra=forbid and requires the fields design 3 lifts out, has summary and mission_id and nullable from_lane, and StatusEvent has policy_metadata and review_result; no merged data schema or rule for these is given in the design.
+  - id: OP-ARCH-004
+    verdict: confirmed
+    reason: Design 8 cites a cutover release in section 14 but section 14 contains no such row (grep finds cutover only at line 221), strict.py:144 and the contract still pin 3.0.0, and the ADR calls itself the explicit cutover decision while Q3 is open.
+  - id: OP-ARCH-005
+    verdict: confirmed
+    reason: Design 6 and 15 say the merge driver dedupes by id alone and the driver output form is never stated, while diary.py:1605-1620 resolves same-id seed rows by canonical-minimum and normalize_event_id collapses spelling variants the reducer treats as distinct.
+  - id: OP-ARCH-006
+    verdict: confirmed
+    reason: Design 10 shape-A trace says data_tier (default 0) while design 9 says output derives only from the row and is never defaulted, source depends on caller mission_id context, UPCAST_CONFLICTING_FIELDS covers only in-row values, and idempotence has no listed property test.
+  - id: OP-ARCH-007
+    verdict: confirmed
+    reason: Design 1 puts reducer folding out of scope yet design 9 and Phase 2 require a reducer-equivalence test, and parse_diary/StatusEvent.from_dict (diary.py:1757-1789) decode only legacy dict keys, with no integration seam or sort-key consequence per Q1 option stated.
+  - id: OP-ARCH-008
+    verdict: refuted
+    reason: Its own cited evidence is an unread sibling-repo file and it admits the consumer claims are unverifiable here, and the remaining omission (shape A acceptance at saas ingress) is already covered by OP-ARCH-004 while the ADR explicitly flags the central contract update.

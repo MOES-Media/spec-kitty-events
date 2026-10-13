@@ -1,0 +1,25 @@
+schema: review-verify/v1
+complete: true
+phase: op
+results:
+  - id: OP-FRESH-001
+    status: resolved
+    reason: "Named C now short-circuits at shape-detection step 5 in both modes, is in the Precedence list, and the id/time rows are scoped to shapes A and B; checked against the five real historical_row_raw fixtures (three lack aggregate_id so miss shape A, pre30_envelope_shape matches type/ts/wp, raw_status_entry matches wp_id/lane/ts) and strict/permissive table, prose and fixture list agree; only a nit remains in the Determinism paragraph, whose 'lacks event_id fails in both modes' is unscoped to shapes A and B."
+  - id: OP-FRESH-002
+    status: resolved
+    reason: "The shape-A trace now says data_tier, causation_id and project_slug are absent so datatier/causationid/projectslug are omitted with no datatier of 0, matching the section 3 no-default rule and the fixture."
+  - id: OP-FRESH-003
+    status: resolved
+    reason: "Section 2 now lists only time, datacontenttype and dataschema as always used and says subject is used when entity-scoped and omitted for Mission-level events, matching the section 3 aggregate split."
+  - id: OP-FRESH-004
+    status: resolved
+    reason: "Phase 4b (cutover release) is added to the table with concrete exit criteria and Phase 5 is gated on it, Phase 3 is declared minor with the 3.0.0 pin unchanged, and section 3, the Cutover text, section 13 and the ADR all say pre-cutover 4.0.0 upcaster output is for reading only."
+  - id: OP-FRESH-005
+    status: resolved
+    reason: "Section 3 documents that shape A 'doing' resolves to in_progress in both modes (matches LANE_ALIASES and the before-validator on from_lane/to_lane in status.py), shape B has no alias table and gives UPCAST_UNKNOWN_LANE (matches the empty StatusEvent._LANE_ALIASES), and the section 9 table row and two fixtures pin both, with a very mild residual tension with the 'permissive never writes a repaired value' sentence that is covered by the published-mapping-row wording."
+  - id: OP-FRESH-006
+    status: resolved
+    reason: "The at/time, integer, empty-value, conflicting-fields and Aggregate-split prose now carries 'in strict mode (permissive: pass-through with a warning)' or points to the section 9 table, and the failure-behaviour paragraph says strict fails closed and permissive follows the table."
+  - id: OP-FRESH-007
+    status: resolved
+    reason: "The ADR open questions now read 'Recommendation (open; the maintainer decides)' and question 3 reads 'Possible direction, not a decision', so no option is presented as decided."

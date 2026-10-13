@@ -1,0 +1,100 @@
+schema: review-findings/v1
+complete: true
+phase: op
+lens_group: fresh
+mission: op-events-cloudevents
+findings:
+  - id: OP-FRESH-001
+    lens: internal-consistency / cutover
+    severity: 3
+    title: Phase 4b (cutover) precedes Phase 5 (writers) yet the strict-pin flip is "no earlier than the release in which producers emit CloudEvents"
+    evidence:
+      - artifact: "design § 14 Phase 4b and Phase 5 rows"
+      - artifact: "design § 14 Cutover option A"
+      - artifact: "ADR Consequences / Versioning"
+    claim: >
+      Phase 5 is "only after 4b", but 4b says the strict pin flips no earlier than the release in which
+      producers emit CloudEvents, and option A says the pin flips "with or after the first writer release".
+      Writers only emit in Phase 5, so under option A the flip cannot be in 4b. "Release" is also ambiguous
+      (package release vs CLI release). If the pin is not flipped in 4b (option B), what makes 4b the
+      package major is not stated either (accept-both is still a boundary widening, but ADR says the
+      boundary "changes completely").
+    remediation: >
+      State whether "release" means the package or the CLI, and either allow the writer release to be
+      part of 4b or reorder so the pin flip is its own step after Phase 5 begins. Soften "changes
+      completely" in the ADR to cover option B.
+  - id: OP-FRESH-002
+    lens: claims vs code / local-read compatibility
+    severity: 3
+    title: Upcasting shape A rows found in status.events.jsonl would change reduced state, contradicting the "equal reduced state / pass through what is ignored today" principle
+    evidence:
+      - artifact: "design § 1 (shape A and D), § 9 principles 3 and 4"
+      - artifact: "diary.py _is_non_lane_row (returns True for any row with a top-level event_type)"
+    claim: >
+      Today the reducer skips any diary row carrying a top-level `event_type` (that is what a shape A
+      envelope has), so a WPStatusChanged shape A row in a diary file is ignored. Design § 1 maps A to a
+      lane CloudEvent and § 9 says the reducer must decode it back to the StatusEvent it would decode from
+      the legacy row. These disagree for A rows in a diary: mapping them makes the reducer start counting
+      rows it ignores today, and "anything the reducer ignores today passes through unchanged" would
+      require the opposite. The docs do not say whether A is upcast only on non-diary paths (ingress) or
+      also in diary reads.
+    remediation: >
+      State in § 1/§ 9 the read context in which A is mapped (ingress and shared reader) versus the diary
+      read, and that an A row inside a diary stays pass-through unless the first implementation mission
+      proves equal state.
+  - id: OP-FRESH-003
+    lens: internal-consistency
+    severity: 2
+    title: "Section 9 says the reducer is not changed by this design, which contradicts ordering options B and C"
+    evidence:
+      - artifact: "design § 9 bullet 5"
+      - artifact: "design § 5 (reduce_parsed sort key change), § 14 Phase 2"
+    claim: >
+      § 9 flatly says the reducer is not changed; § 5 and Phase 2 say B/C change the reduce_parsed sort key
+      and Phase 2 owns it. Phase 2's exit ("equal reduced state on a round trip") also cannot be asserted
+      unchanged when the sort key changes for clocked rows.
+    remediation: Qualify the § 9 bullet with "under ordering option A" and state the Phase 2 exit per option.
+  - id: OP-FRESH-004
+    lens: decisions that should stay open / ADR-design correspondence
+    severity: 3
+    title: "The `.vN` new-type versioning rule replaces a clause of the versioning contract, but the ADR neither lists nor mentions it"
+    evidence:
+      - artifact: "design § 7 second bullet"
+      - artifact: "ADR Decision, Open questions, Further choices"
+    claim: >
+      The design states it "deliberately replaces" the contract rule that renaming a typed payload field is
+      major, with new-type versioning and a contract-text amendment at cutover. This is a governance-level
+      change decided in the design only. The ADR's "two further proposed choices" list omits it, and
+      Phase 0's exit criteria omit it. Likewise the (source,id) dedupe key, the lane.transitioned noun/verb
+      type name and the lifted-member set are fixed in prose without being flagged as proposals.
+    remediation: >
+      Add the `.vN` rule (and the versioning-contract amendment) to the ADR's choices to confirm on the PR
+      and to Phase 0, or mark it a recommendation. Mark the type name and lift set as proposals.
+  - id: OP-FRESH-005
+    lens: mapping completeness
+    severity: 2
+    title: Annotation-row mapping leaves a structured actor without a defined data slot
+    evidence:
+      - artifact: "design § 4 annotation rows (last two table rows)"
+      - artifact: "diary.py InnerStateChanged.actor: ActorField"
+    claim: >
+      InnerStateChanged.actor may be a structured dict. The annotation rows say "same mapping as the lane
+      row" but give `data` only `delta`; the structured-actor rule puts the dict in `data.actorbinding`,
+      which is not declared for the annotation type's data. § 3 declares the members only for
+      lane.transitioned.v1.
+    remediation: State that the annotation type's data carries `actorbinding` (optional) beside `delta`, or that it is out of scope.
+  - id: OP-FRESH-006
+    lens: hygiene
+    severity: 1
+    title: Frontmatter doc_status differs between ADR (active) and design (draft) while both are Proposed
+    evidence:
+      - artifact: "ADR frontmatter; design frontmatter"
+    claim: ADR carries doc_status active with status Proposed; design says draft. Not wrong, but inconsistent for a pair.
+    remediation: Align (draft for both until confirmed) or note the convention.
+checks_clean:
+  - "Hygiene grep (the out-of-scope and personal-detail term list) returned nothing in the three files."
+  - "Merge-driver line citations (73-77, 137-142, 165-174, 176-182, 193, 213; drivers.py 246-250) match 3847251e0."
+  - "Event has 14 fields, StatusEvent 15, STRICT_EVENT_TYPES 26, 125 committed schemas, _REQUIRED_SCHEMA_VERSION 3.0.0, package 10.4.4; all match."
+  - "All attribute name-length annotations satisfy ^[a-z0-9]{1,20}$; CloudEvents v1.0.2 name, Integer-range, source+id claims match the spec."
+  - "Worked example matches line 2 of status_diary_fresh_mission.jsonl; ids are 26 chars and valid Crockford."
+  - "Section cross-references resolve; required approval phrase present."

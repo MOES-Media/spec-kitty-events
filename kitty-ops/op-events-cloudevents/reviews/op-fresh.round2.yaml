@@ -1,0 +1,147 @@
+schema: review-findings/v1
+complete: true
+phase: op
+lens_group: fresh
+mission: op-events-cloudevents
+findings:
+  - id: OP-FRESHB-001
+    lens: debugger-debbie (failure-mode correctness)
+    severity: 3
+    title: Merge-driver failure mode is stated two incompatible ways (rejects vs silently fails open)
+    evidence:
+      - artifact: "design § 9 (Merge driver): 'a CloudEvent row ... is rejected as written' (event_log_merge.py:73-77 raises EventLogMergeError on missing event_id)"
+      - artifact: "design § 15 (Merge-driver fail-open) and ADR Compatibility (merge driver bullet): 'on CloudEvent rows it would go silently blind and let a concurrent cancel and advance merge cleanly'"
+      - artifact: "core drivers.py:245-257 at 3847251e0: detect_concurrent_fork runs first, then merge_event_log_files raises -> MergeDriverError"
+    claim: >
+      With the driver unchanged, a CloudEvent row has no event_id, so merge_event_log_files raises and git leaves a
+      conflict (fail-closed, but every mixed log then conflicts). Fork detection is blind there, yet the merge never
+      completes. The silent fail-open only occurs in a half-adopted driver that accepts `id` but whose fork detection
+      still reads top-level from_lane/to_lane/wp_id. Section 15 and the ADR attribute the fail-open to "writers emit
+      CloudEvents before the core driver reads them", which contradicts section 9. Two distinct risks (hard conflict on
+      every mixed merge; fail-open under partial adoption) are merged into one and the first is never named.
+    remediation: >
+      State both modes in section 9/15 and the ADR bullet: unchanged driver = rejects (conflict), partially adopted
+      driver = fork detection blind. Keep the Phase 5 precondition and make its exit criterion cover both.
+  - id: OP-FRESHB-002
+    lens: debugger-debbie (cutover coherence)
+    severity: 3
+    title: Open question 3 options describe a product/writer release, but the text says the question fixes the package cutover release (4b)
+    evidence:
+      - artifact: "ADR Open question 3 (options A/B/C = Spec Kitty 4.0 GA / later in 4.x with first write-core command switch / 5.0; closing paragraph 'The timing also fixes the cutover release (when the package starts accepting 4.0.0)')"
+      - artifact: "design § 14 Phase 4b vs Phase 5 and 'Cutover' (4b = package release, writers are a later CLI release; options there are retire vs keep)"
+    claim: >
+      Per the design, 4b is a package release that gates nothing in the CLI and precedes all writers; the
+      only genuinely open timing items are Phase 5 (writer switch) and the retirement step. The ADR's A/B/C are
+      Spec Kitty product milestones tied to the writer switch ("couples the GA to an unproven write path"), yet the ADR
+      says ruling Q3 fixes the 4b date and the retire/keep choice. Retire-vs-keep (design Cutover A/B) is a
+      different axis from A/B/C and is not an option in the ADR table. A reader cannot tell what ruling "B" decides.
+    remediation: >
+      Split Q3 into the questions it actually carries (when writers switch, product-line mapping; whether and when
+      3.0.0 is retired), or restate the table's options as covering the writer phase only and say that 4b is not gated on it.
+  - id: OP-FRESHB-003
+    lens: debugger-debbie (versioning claim vs contract)
+    severity: 3
+    title: Phase 3 minor release ships a validator that accepts 4.0.0 rows, contradicting "accepting 4.0.0 is the boundary change that makes 4b the major"
+    evidence:
+      - artifact: "design § 14 Phase 3 ('Strict-profile validator for CloudEvents rows beside validate_strict_envelope ... additive (minor) release') vs Phase 4b ('accepting 4.0.0 is the boundary change that makes this a major')"
+      - artifact: "contracts/versioning-and-compatibility.md: 'a previously-rejected envelope accepted' is major; on-wire axis table 'required value enforced by strict.validate_strict_envelope'"
+      - artifact: "ADR Versioning bullet 1 ('Until the cutover release validate_strict_envelope keeps requiring 3.0.0')"
+    claim: >
+      The design places the accept/reject boundary move at 4b, but Phase 3 already publishes a public validator and
+      envelope schema that accept schemaversion 4.0.0 envelopes, and the upcaster emits 4.0.0 from Phase 2. Whether
+      that is additive depends on the unstated assumption that nobody uses the new validator as an ingress gate. The
+      docs never say the Phase 3 validator is not to be used at ingress or by producers, so the minor-vs-major
+      classification rests on an unwritten rule, and the contract's own axis table points at validate_strict_envelope only.
+    remediation: >
+      State explicitly that the Phase 3 validator and 4.0.0 schemas are non-normative until 4b (no consumer is to gate on
+      them), or move the "version axis moves" statement to say the 4.0.0 value is published in Phase 1-3 but only becomes
+      accepted by the strict profile at 4b.
+  - id: OP-FRESHB-004
+    lens: debugger-debbie (completeness of phase exits)
+    severity: 2
+    title: Phase 4b omits the .vN new-type-versioning contract amendment that section 7 and the ADR say lands at 4b
+    evidence:
+      - artifact: "design § 7 ('the contract text is amended at cutover (section 14, Phase 4b)')"
+      - artifact: "ADR 'Further choices' (contract-text amendment at cutover)"
+      - artifact: "design § 14 Phase 4b work/exit mention only rewriting 'producers must emit 3.0.0'"
+    claim: >
+      The .vN rule overrides the contract's 'renaming a typed payload field is major' clause, yet only the
+      3.0.0-producer sentence is listed as rewritten at 4b. Types ending .v1 are registered in Phase 1 and the rule is
+      used for the lane.transitioned.v1 data model from Phase 1, so the contract is contradicted for three phases
+      before the amendment, and 4b's exit does not check it.
+    remediation: >
+      Add the .vN amendment to the 4b work and exit criterion, and say which text governs between Phase 1 and 4b.
+  - id: OP-FRESHB-005
+    lens: debugger-debbie (ordering vs phases)
+    severity: 2
+    title: Reducer sort-key change under ordering options B/C has no release classification and sits in an "additive" phase run
+    evidence:
+      - artifact: "design § 5 / § 9 / § 14 Phase 2 ('a sort-key change under B or C is owned here'); Phase 3 'additive (minor) release'"
+      - artifact: "ADR Open question 1 (B and C change the reducer sort key)"
+    claim: >
+      A change to reduce_parsed's sort key is a behaviour change for local reads; the docs say it is owned by Phase 2 but
+      never say whether that release is minor or major, and Phase 2-4 are described as additive ('neither changes the pin').
+      For C the claim is "no breakage of existing logs", for B legacy rows with no clock have no defined order at all.
+      The ADR's ordering table and Phase 2 do not tie the sort-key change to the versioning contract's rule that
+      behaviour change for any role is major.
+    remediation: >
+      In Q1 or Phase 2, state which release class a B/C sort-key change takes and that equal-state is asserted before it ships.
+  - id: OP-FRESHB-006
+    lens: debugger-debbie (code correspondence)
+    severity: 2
+    title: Structured actor projects differently for shape A and shape B but both land in one actor attribute; section 3 is silent for A
+    evidence:
+      - artifact: "design § 4 (structured actor -> actor_identity_str: tool, else role; diary.py:251-265)"
+      - artifact: "design § 3 'Lifted payload fields' (A actor lifted with no projection); status.py StatusTransitionPayload.actor_label prefers profile, role, display_name, actor_id"
+    claim: >
+      For the same structured actor, the A-derived and B-derived CloudEvent would carry different actor strings
+      (tool vs profile). The same CloudEvent type is meant to be indistinguishable regardless of source shape, and the
+      Phase 4 equal-snapshot exit depends on it. Section 3 does not say which projection A uses.
+    remediation: >
+      Name the projection for shape A in section 3 (and whether it must equal B's) or flag it as a deferred contract item.
+  - id: OP-FRESHB-007
+    lens: debugger-debbie (decisions that should be listed)
+    severity: 2
+    title: Phase 0 exit says every embedded choice has a ruling, but several embedded choices are not on any confirm list
+    evidence:
+      - artifact: "design § 3 (aggregate split into source/subject/missionid; source = /spec-kitty/missions/<id> relative URI-ref), § 6, § 2 ('schemaversion' as an extension attribute, datacontenttype always set)"
+      - artifact: "ADR 'Further choices to confirm on the PR'; design § 14 Phase 0 exit"
+    claim: >
+      The ADR and design enumerate their proposals (snake_case data, extension placement, .vN, (source,id), type name).
+      The aggregate_id split, the relative-source shape, and carrying the envelope version as a schemaversion
+      extension are equally load-bearing, stated as mappings rather than proposals, and are absent from the list that Phase 0
+      must rule on. They would pass Phase 0 un-ruled.
+    remediation: >
+      Add them to the ADR list and the Phase 0 work, or mark them in section 3 as proposals to confirm.
+  - id: OP-FRESHB-008
+    lens: debugger-debbie (code correspondence)
+    severity: 1
+    title: Mapping for shape B is silent on empty mission_slug and the required force/execution_mode
+    evidence:
+      - artifact: "design § 4 table; diary.py StatusEvent.from_dict (mission_slug defaults to '', force and execution_mode are required keys)"
+    claim: >
+      from_dict can yield mission_slug '' (neither key present) and raises on missing force or execution_mode, whereas the
+      table says 'Copied' and omits empty strings only for actor. Rows the reducer rejects today are not discussed. Row-level
+      detail is deferred, so this is only a gap marker.
+    remediation: >
+      One sentence noting that the empty-string and missing-key cases are in the deferred row-level contract.
+  - id: OP-FRESHB-009
+    lens: debugger-debbie (tense / staging)
+    severity: 1
+    title: Present-tense end-state statements precede the staged rollout
+    evidence:
+      - artifact: "ADR Decision ('New producers do not emit it', 'New rows in status.events.jsonl are CloudEvents'); Compatibility ('New rows only as CloudEvents') vs Versioning ('producers keep emitting 3.0.0' until cutover) and Phase 5"
+    claim: >
+      The Decision reads as already in force while the same ADR says no live path changes before Q3 is ruled.
+    remediation: >
+      Prefix with 'After Phase 5' or 'once adopted'.
+  - id: OP-FRESHB-010
+    lens: debugger-debbie (ambiguous reference)
+    severity: 1
+    title: "'contradicts the ADR' in the ordering table is ambiguous"
+    evidence:
+      - artifact: "ADR Open question 1, table option A ('contradicts the ADR')"
+    claim: >
+      Inside this ADR, 'the ADR' reads as itself; the intended referent is core ADR 2026-02-09-3.
+    remediation: >
+      Write 'contradicts core ADR 2026-02-09-3'.

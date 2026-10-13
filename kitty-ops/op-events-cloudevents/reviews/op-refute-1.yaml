@@ -1,0 +1,26 @@
+schema: review-refute/v1
+complete: true
+phase: op
+batch: 1
+verdicts:
+  - id: OP-ARCH-001
+    verdict: confirmed
+    reason: Design section 9 and the ADR Compatibility text list merge-driver writes under fail-closed strict use while the next bullet says local merge never becomes narrower than today, and the core driver (event_log_merge.py:73-80) accepts any row with a string event_id, so the two rules are unreconciled at decision level.
+  - id: OP-ARCH-002
+    verdict: confirmed
+    reason: Phase 5 writers come only after 4b, and cutover option A makes saas reject shape A at 4b while every producer still emits 3.0.0 until Phase 5, so the phase table has no window in which option A is coherent.
+  - id: OP-ARCH-003
+    verdict: confirmed
+    reason: Verified in the core driver that a row without event_id raises (73-77) and _departures skips rows lacking top-level from_lane/to_lane/wp_id (137-142), yet Phase 5 lets writers ship with the driver change merely proposed and the ADR driver proposal omits fork detection, a decision-level rollout ordering hole.
+  - id: OP-ARCH-004
+    verdict: refuted
+    reason: Section 9 already binds that anything the reducer ignores today (including top-level event_type rows, which _is_non_lane_row confirms) passes through unchanged, so how a shape-A row inside a diary is classified is row-level upcaster detail deferred to the first implementation mission.
+  - id: OP-ARCH-005
+    verdict: refuted
+    reason: Id normalization is stated as the existing rule and is tied to ADR open question 2, which the maintainer rules, and case-variant id fixtures and dedupe equivalence are row-level contract detail deferred to the implementation mission.
+  - id: OP-ARCH-006
+    verdict: confirmed
+    reason: The ADR recommends option C (Lamport where present, (time,id) fallback) without a defined total order, a mixed clocked/clockless comparator is not transitive, and no phase owns the reducer sort-key change while Phase 2 says no reducer change.
+  - id: OP-ARCH-007
+    verdict: confirmed
+    reason: Design section 3 defines missionid and source from the mission/<segment> of aggregate_id with no ULID condition, while the conformance fixtures hold slug-like segments (mission/M-SJ, mission/replay-mission, mission/m-alpha-001) and the table states no precedence against payload mission_id, so the core identity mapping is wrong for real aggregates.
