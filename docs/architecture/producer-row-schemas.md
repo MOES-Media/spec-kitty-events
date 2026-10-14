@@ -53,7 +53,8 @@ All are inputs from #6185, not choices made here. Items marked INTERIM are the A
 "further choices", adopted by the operator and awaiting maintainer confirmation.
 
 - Type string: `ai.spec-kitty.<name>.v<N>`. The prefix is the operator's ruling on ADR open
-  question 4. Registry key `type_prefix` holds it once; changing it later is breaking.
+  question 4; it is a third option beside the ADR's A (`dev.spec-kitty`) and B (a domain the
+  project controls), and still needs the maintainer to name a controlled domain. Registry key `type_prefix` holds it once; changing it later is breaking.
 - `dataschema` base: the design's placeholder `https://schemas.example.invalid/spec-kitty/`
   is kept, in one registry field (`dataschema_base`), because the maintainer has to name a
   domain the project controls (ADR question 4, option B). The URI is an identifier, not a
@@ -106,7 +107,8 @@ A registry entry:
 
 ## 4. The total order
 
-Rows are CloudEvents attribute dictionaries (the upcast form). For a row `r`:
+Rows are CloudEvents attribute dictionaries (the upcast form). The tie-break bytes of a
+group are ASCII-escaped, sorted-key, compact JSON text. For a row `r`:
 
 ```
 key(r) = ( h(r), c(r), t(r), i(r), s(r) )
@@ -148,6 +150,21 @@ Minor bump, `10.4.6` to `10.5.0`. `COMPATIBILITY.md` gets a `10.5.0` section; `C
 gets `[10.5.0]` under Added. The schemas are published ahead of the cutover and are
 non-normative until the major release of #92; emission of these types stays gated by the
 consumer, as the versioning contract already says for new event types.
+
+## 5a. Notes on the envelope subset and the schemas
+
+- The producer subset of the envelope requires `lamportclock` and `nodeid` (the design says
+  "optional in the schema, because diary writers stamp none today"). The producer stamps
+  both on every row it writes; #92 reconciles this when it absorbs the subset. The total
+  order still defines clockless rows, which come from legacy and upcast rows.
+- Eight of the 27 data schemas (lane, annotation, reviewer self-approval, significance,
+  denied, the three retrospective rows) have no typed model in this package to compare
+  with. Their member and required lists are pinned by hand-written lists in the tests.
+- The lane schema carries the members of the diary row only. The design's shape-A `summary`
+  member is left to #92, which can add it to `lane.transitioned.v1` before the cutover.
+- A run-journal legacy line validates only after the write-time stamp (`event_id`,
+  `row_version`) that #6185 adds to the existing writer.
+- `contracts/total-order.md` is also shipped in the package, next to the schemas.
 
 ## 6. Open maintainer confirmations (carried to the PR body)
 

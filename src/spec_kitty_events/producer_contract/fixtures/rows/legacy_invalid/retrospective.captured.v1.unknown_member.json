@@ -1,0 +1,37 @@
+{
+  "class": "producer_row_legacy_invalid",
+  "expected": "invalid",
+  "type": "ai.spec-kitty.retrospective.captured.v1",
+  "base": "retrospective.captured.v1",
+  "violation": "unknown_member",
+  "expected_error_path": "",
+  "expected_keyword": "additionalProperties",
+  "input": {
+    "type": "RetrospectiveCaptured",
+    "schema_version": 1,
+    "event_id": "01J0000000000000000000F029",
+    "lamport": 3,
+    "at": "2026-01-01T00:00:00+00:00",
+    "actor": {
+      "kind": "runtime",
+      "id": "retro-runner",
+      "display": null
+    },
+    "mission_id": "01J0000000000000000000MSN1",
+    "mission_slug": "041-reducer-unification",
+    "wp_id": null,
+    "force": false,
+    "execution_mode": "main",
+    "findings_status": "has_findings",
+    "record_path": "kitty-specs/demo/retrospective.yaml",
+    "generator_version": "4.0.0",
+    "policy_source": {
+      "timing": "default"
+    },
+    "provenance_kind": "runtime_post_completion",
+    "proposal_count": 2,
+    "evidence_ref_count": 5,
+    "zz_unknown": 1
+  },
+  "notes": "A persisted line with a member the schema does not know."
+}

@@ -1,0 +1,28 @@
+{
+  "class": "producer_row_legacy_invalid",
+  "expected": "invalid",
+  "type": "ai.spec-kitty.project.initialized.v1",
+  "base": "project.initialized.v1",
+  "violation": "unknown_member",
+  "expected_error_path": "/payload",
+  "expected_keyword": "additionalProperties",
+  "input": {
+    "event_id": "01J0000000000000000000F006",
+    "event_type": "ProjectInitialized",
+    "aggregate_id": "5c0f6f0e-3b1a-4d8e-9a55-0d7e3f2b9c11",
+    "aggregate_type": "Project",
+    "schema_version": "5.0.0",
+    "timestamp": "2026-01-01T00:00:00+00:00",
+    "payload": {
+      "project_uuid": "5c0f6f0e-3b1a-4d8e-9a55-0d7e3f2b9c11",
+      "project_slug": "demo",
+      "actor": "cli",
+      "runtime_version": "4.0.0",
+      "initialized_at": "2026-01-01T00:00:00Z",
+      "zz_unknown": 1
+    },
+    "project_uuid": "5c0f6f0e-3b1a-4d8e-9a55-0d7e3f2b9c11",
+    "project_slug": "demo"
+  },
+  "notes": "A persisted line with a member the schema does not know."
+}

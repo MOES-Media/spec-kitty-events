@@ -1,0 +1,37 @@
+{
+  "class": "producer_row_legacy_invalid",
+  "expected": "invalid",
+  "type": "ai.spec-kitty.decision.opened.v1",
+  "base": "decision.opened.v1",
+  "violation": "unknown_member",
+  "expected_error_path": "/payload",
+  "expected_keyword": "additionalProperties",
+  "input": {
+    "event_id": "01J0000000000000000000F019",
+    "at": "2026-01-01T00:00:00+00:00",
+    "event_type": "DecisionPointOpened",
+    "payload": {
+      "origin_surface": "planning_interview",
+      "decision_point_id": "01J0000000000000000000DP01",
+      "mission_id": "01J0000000000000000000MSN1",
+      "run_id": "01J0000000000000000000DP01",
+      "mission_slug": "041-reducer-unification",
+      "mission_type": "software-dev",
+      "phase": "SPECIFY",
+      "origin_flow": "specify",
+      "question": "Which store?",
+      "options": [
+        "sqlite",
+        "files"
+      ],
+      "input_key": "store",
+      "step_id": "specify-q1",
+      "actor_id": "claude",
+      "actor_type": "human",
+      "state_entered_at": "2026-01-01T00:00:00Z",
+      "recorded_at": "2026-01-01T00:00:00Z",
+      "zz_unknown": 1
+    }
+  },
+  "notes": "A persisted line with a member the schema does not know."
+}

@@ -109,7 +109,7 @@
                   },
                   "commit": {
                     "type": "string",
-                    "pattern": "^[0-9a-fA-F]{7,40}$"
+                    "pattern": "^[0-9a-fA-F]{7,40}(?![\\s\\S])"
                   },
                   "files_touched": {
                     "type": "array",
@@ -204,12 +204,6 @@
         "null"
       ]
     },
-    "summary": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
     "actorbinding": {
       "type": "object",
       "properties": {
@@ -253,5 +247,5 @@
     "to_lane"
   ],
   "additionalProperties": false,
-  "description": "Lane transition of a work package. The lifted members (event_id, at, mission_slug, mission_id, wp_id, actor, execution_mode) are context attributes, not data. 'doing' is resolved to 'in_progress' before it is written. 'summary' belongs to the 3.0.0 transport shape and is carried so one schema serves producer rows and upcast legacy rows; the producer does not emit it."
+  "description": "Lane transition of a work package. The lifted members (event_id, at, mission_slug, mission_id, wp_id, actor, execution_mode) are context attributes, not data. 'doing' is resolved to 'in_progress' before it is written."
 }

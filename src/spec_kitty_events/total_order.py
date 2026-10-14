@@ -122,24 +122,24 @@ class OrderResult:
         }
 
 
-def _serialize(row: Mapping[str, Any]) -> bytes:
-    """Compact, sorted-key, UTF-8 serialisation: the survivor's tie-break bytes."""
-    return json.dumps(row, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode(
-        "utf-8"
-    )
+def _serialize(row: Any) -> bytes:
+    """Compact, sorted-key, ASCII-escaped JSON text: the survivor's tie-break bytes.
+
+    Non-ASCII is written as ``\\uXXXX`` (lower-case hex, surrogate pairs for astral code
+    points), so a lone surrogate from ``"\\ud800"`` serialises like any other character
+    and every implementation can reproduce the bytes.
+    """
+    return json.dumps(row, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("ascii")
 
 
-def _serialize_any(value: Any) -> bytes:
-    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode(
-        "utf-8"
-    )
+_serialize_any = _serialize
 
 
 def _parse_instant(value: Any) -> Fraction:
     """Parse an RFC 3339 timestamp to an exact count of seconds since the epoch."""
     if not isinstance(value, str):
         raise UnorderableRow(REASON_TIME, "time is not a string")
-    match = _RFC3339.match(value)
+    match = _RFC3339.fullmatch(value)
     if match is None:
         raise UnorderableRow(REASON_TIME, "time is not an RFC 3339 timestamp")
     fraction_digits = match.group("fraction") or ""
@@ -229,7 +229,7 @@ def order_rows(rows: Iterable[Any]) -> OrderResult:
     Steps: (1) key every row, setting aside those that cannot be keyed as
     :class:`ErrorRow` with their input position; (2) group the keyable rows by
     ``(source, normalized id)``; (3) keep, of each group, the row whose compact
-    sorted-key UTF-8 serialisation has the smallest bytes, count the others as collapsed,
+    sorted-key ASCII-escaped serialisation has the smallest bytes, count the others as collapsed,
     and report the group as a conflict if its rows differ in any member other than
     ``id``; (4) sort the survivors by key. Because ``(source, id)`` is unique after step 3,
     no two survivors have equal keys, so the order is total.

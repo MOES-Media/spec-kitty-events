@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/spec-kitty/mission.plan.completed.v1.legacy",
+  "title": "ai.spec-kitty.mission.plan.completed.v1 legacy row form",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "event_type": {
+      "type": "string",
+      "const": "PlanCompleted"
+    },
+    "aggregate_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "aggregate_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schema_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}[Tt][0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?([Zz]|[+-][0-9]{2}:[0-9]{2})(?![\\s\\S])"
+    },
+    "project_uuid": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "project_slug": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "payload": {
+      "additionalProperties": false,
+      "description": "The plan phase of a Mission completed.",
+      "properties": {
+        "mission_slug": {
+          "description": "Canonical mission slug.",
+          "minLength": 1,
+          "type": "string"
+        },
+        "mission_number": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Canonical mission number; ``None`` pre-merge."
+        },
+        "actor": {
+          "description": "Actor driving the phase transition.",
+          "minLength": 1,
+          "type": "string"
+        },
+        "at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}[Tt][0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?([Zz]|[+-][0-9]{2}:[0-9]{2})(?![\\s\\S])"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Wall-clock timestamp for the phase transition."
+        },
+        "artifact_path": {
+          "description": "Repo-relative path to the plan artifact (e.g. plan.md).",
+          "minLength": 1,
+          "type": "string"
+        },
+        "summary": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Optional one-line summary of the completed plan."
+        }
+      },
+      "required": [
+        "mission_slug",
+        "actor",
+        "artifact_path"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "event_id",
+    "event_type",
+    "aggregate_id",
+    "aggregate_type",
+    "schema_version",
+    "timestamp",
+    "payload"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/spec-kitty/run.decision.denied.v1.legacy",
+  "title": "ai.spec-kitty.run.decision.denied.v1 legacy row form",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}(?![\\s\\S])"
+    },
+    "row_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "event_type": {
+      "type": "string",
+      "const": "DecisionAuthorityDenied"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}[Tt][0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?([Zz]|[+-][0-9]{2}:[0-9]{2})(?![\\s\\S])"
+    },
+    "payload": {
+      "type": "object",
+      "properties": {
+        "run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decision_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "actor_type": {
+          "type": "string",
+          "enum": [
+            "human",
+            "llm",
+            "service"
+          ]
+        },
+        "actor_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authority_role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rationale_linkage": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "raci_source": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "override_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "run_id",
+        "decision_id",
+        "actor_type",
+        "actor_id",
+        "authority_role",
+        "rationale_linkage",
+        "reason"
+      ],
+      "additionalProperties": false,
+      "description": "An actor was denied authority over a decision."
+    }
+  },
+  "required": [
+    "event_id",
+    "row_version",
+    "event_type",
+    "timestamp",
+    "payload"
+  ],
+  "additionalProperties": false
+}

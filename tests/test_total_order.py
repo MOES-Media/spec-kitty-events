@@ -50,9 +50,7 @@ def _row(**members: Any) -> Dict[str, Any]:
 
 
 def _ser(row: Any) -> bytes:
-    return json.dumps(row, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode(
-        "utf-8"
-    )
+    return json.dumps(row, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("ascii")
 
 
 # --------------------------------------------------------------------- parsing rules
@@ -667,3 +665,21 @@ def test_the_key_order_is_transitive_and_total_on_valid_rows(rows: List[Any]) ->
             for c in keys[:5]:
                 if a <= b <= c:
                     assert a <= c
+
+
+# ------------------------------------------------------- guards added after the squad round
+def test_a_lone_surrogate_does_not_crash_the_order() -> None:
+    row = _row(x=json.loads('"\\ud800"'))
+    result = order_rows([row, dict(row)])
+    assert (len(result.ordered), result.collapsed) == (1, 1)
+    assert result.canonical()["read"] == 2
+
+
+def test_a_trailing_newline_is_not_an_rfc_3339_timestamp() -> None:
+    with pytest.raises(UnorderableRow):
+        order_key(_row(time="2026-10-13T10:00:00Z\n"))
+
+
+def test_year_zero_is_not_parseable_everywhere_so_it_is_not_parseable() -> None:
+    with pytest.raises(UnorderableRow):
+        order_key(_row(time="0000-01-01T00:00:00Z"))

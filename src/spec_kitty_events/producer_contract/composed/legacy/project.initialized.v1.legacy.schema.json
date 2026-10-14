@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/spec-kitty/project.initialized.v1.legacy",
+  "title": "ai.spec-kitty.project.initialized.v1 legacy row form",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "event_type": {
+      "type": "string",
+      "const": "ProjectInitialized"
+    },
+    "aggregate_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "aggregate_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schema_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}[Tt][0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?([Zz]|[+-][0-9]{2}:[0-9]{2})(?![\\s\\S])"
+    },
+    "project_uuid": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "project_slug": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "payload": {
+      "additionalProperties": false,
+      "description": "A project was initialized.",
+      "properties": {
+        "project_uuid": {
+          "description": "Canonical machine identity for the project (UUID string).",
+          "minLength": 1,
+          "type": "string"
+        },
+        "project_slug": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Human-readable project slug, if any."
+        },
+        "actor": {
+          "description": "Actor that initialized the project (e.g. CLI user or agent).",
+          "minLength": 1,
+          "type": "string"
+        },
+        "runtime_version": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "CLI / runtime version recorded at init time."
+        },
+        "initialized_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}[Tt][0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?([Zz]|[+-][0-9]{2}:[0-9]{2})(?![\\s\\S])"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Wall-clock timestamp when the project was initialized."
+        }
+      },
+      "required": [
+        "project_uuid",
+        "actor"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "event_id",
+    "event_type",
+    "aggregate_id",
+    "aggregate_type",
+    "schema_version",
+    "timestamp",
+    "payload"
+  ],
+  "additionalProperties": false
+}

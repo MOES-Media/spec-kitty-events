@@ -25,6 +25,11 @@ them as canonical lane values.
 `Lane` enum is the single source of truth. Consumers import from
 `spec_kitty_events`.
 
+The producer contract (`src/spec_kitty_events/producer_contract/`) mirrors this enum in the
+`lane.transitioned.v1` data schema and in the `wp.innerstate.changed.v1` subtask values (plus
+`skipped`). `tests/test_producer_contract.py::test_lane_schema_matches_the_canonical_enum`
+pins the copies to `Lane`; changing a lane changes both, and is major as below.
+
 ## Vocabulary
 
 Ten canonical lanes, in enum order:

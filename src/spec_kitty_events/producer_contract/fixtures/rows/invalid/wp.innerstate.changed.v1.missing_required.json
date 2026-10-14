@@ -1,0 +1,34 @@
+{
+  "class": "producer_row_invalid",
+  "expected": "invalid",
+  "type": "ai.spec-kitty.wp.innerstate.changed.v1",
+  "base": "wp.innerstate.changed.v1",
+  "violation": "data_missing_required",
+  "expected_error_path": "/data",
+  "expected_keyword": "required",
+  "input": {
+    "specversion": "1.0",
+    "id": "01J0000000000000000000F004",
+    "source": "/spec-kitty/missions/01J0000000000000000000MSN1",
+    "type": "ai.spec-kitty.wp.innerstate.changed.v1",
+    "time": "2026-01-01T00:00:00+00:00",
+    "datacontenttype": "application/json",
+    "dataschema": "https://schemas.example.invalid/spec-kitty/wp.innerstate.changed.v1",
+    "schemaversion": "4.0.0",
+    "lamportclock": 4,
+    "nodeid": "0123456789ab",
+    "subject": "WP01",
+    "missionid": "01J0000000000000000000MSN1",
+    "missionslug": "041-reducer-unification",
+    "actor": "claude",
+    "data": {
+      "actorbinding": {
+        "role": "reviewer",
+        "profile": "reviewer-renata",
+        "tool": "claude",
+        "model": "claude-opus"
+      }
+    }
+  },
+  "notes": "data member delta is required."
+}

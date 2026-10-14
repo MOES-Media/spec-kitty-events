@@ -103,7 +103,8 @@ def test_built_wheel_contains_f1_t1_package_data(tmp_path: Path) -> None:
     contract_root = _REPO_ROOT / "src" / "spec_kitty_events" / "producer_contract"
     on_disk = {
         "spec_kitty_events/producer_contract/" + path.relative_to(contract_root).as_posix()
-        for path in contract_root.rglob("*.json")
+        for pattern in ("*.json", "*.md")
+        for path in contract_root.rglob(pattern)
     }
     assert on_disk, "no producer_contract data files found on disk"
     absent = sorted(on_disk - names)

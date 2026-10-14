@@ -11,16 +11,16 @@
     },
     "id": {
       "type": "string",
-      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}(?![\\s\\S])",
       "description": "Upper-case 26-character ULID."
     },
     "source": {
       "type": "string",
-      "pattern": "^/spec-kitty/(missions|projects)/[^/]+$"
+      "pattern": "^/spec-kitty/(missions|projects)/[^/\\s]+(?![\\s\\S])"
     },
     "type": {
       "type": "string",
-      "pattern": "^ai\\.spec-kitty\\.[a-z0-9]+(\\.[a-z0-9]+)*\\.v[0-9]+$"
+      "pattern": "^ai\\.spec-kitty\\.[a-z0-9]+(\\.[a-z0-9]+)*\\.v[0-9]+(?![\\s\\S])"
     },
     "subject": {
       "type": "string",
@@ -29,7 +29,7 @@
     "time": {
       "type": "string",
       "format": "date-time",
-      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}[Tt][0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?([Zz]|[+-][0-9]{2}:[0-9]{2})$"
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}[Tt][0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?([Zz]|[+-][0-9]{2}:[0-9]{2})(?![\\s\\S])"
     },
     "datacontenttype": {
       "type": "string",
@@ -46,7 +46,7 @@
     },
     "missionid": {
       "type": "string",
-      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}(?![\\s\\S])"
     },
     "missionslug": {
       "type": "string",
@@ -67,7 +67,7 @@
     },
     "nodeid": {
       "type": "string",
-      "pattern": "^[0-9a-f]{12}$"
+      "pattern": "^[0-9a-f]{12}(?![\\s\\S])"
     },
     "data": {
       "type": "object"
@@ -87,7 +87,7 @@
     "data"
   ],
   "propertyNames": {
-    "pattern": "^[a-z0-9]{1,20}$"
+    "pattern": "^[a-z0-9]{1,20}(?![\\s\\S])"
   },
   "additionalProperties": false
 }

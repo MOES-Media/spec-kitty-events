@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/spec-kitty/run.completed.v1.legacy",
+  "title": "ai.spec-kitty.run.completed.v1 legacy row form",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}(?![\\s\\S])"
+    },
+    "row_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "event_type": {
+      "type": "string",
+      "const": "MissionRunCompleted"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}[Tt][0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?([Zz]|[+-][0-9]{2}:[0-9]{2})(?![\\s\\S])"
+    },
+    "payload": {
+      "additionalProperties": false,
+      "description": "A mission run completed.",
+      "properties": {
+        "run_id": {
+          "description": "Run identifier",
+          "minLength": 1,
+          "type": "string"
+        },
+        "mission_type": {
+          "description": "Mission workflow/template type that completed",
+          "minLength": 1,
+          "type": "string"
+        },
+        "actor": {
+          "additionalProperties": false,
+          "description": "Actor context for the completion",
+          "properties": {
+            "actor_id": {
+              "description": "Unique actor identifier",
+              "minLength": 1,
+              "type": "string"
+            },
+            "actor_type": {
+              "description": "Actor category",
+              "pattern": "^(human|llm|service)(?![\\s\\S])",
+              "type": "string"
+            },
+            "display_name": {
+              "description": "Human-readable display name",
+              "type": "string"
+            },
+            "provider": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Provider (e.g., 'anthropic', 'openai')"
+            },
+            "model": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Model identifier (e.g., 'claude-opus-4-6')"
+            },
+            "tool": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Tool identifier"
+            }
+          },
+          "required": [
+            "actor_id",
+            "actor_type"
+          ],
+          "type": "object"
+        },
+        "mission_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Canonical machine-facing mission identity (ULID) the run belongs to"
+        },
+        "mission_slug": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Canonical mission slug (display; mission_id is the identity)"
+        }
+      },
+      "required": [
+        "run_id",
+        "mission_type",
+        "actor"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "event_id",
+    "row_version",
+    "event_type",
+    "timestamp",
+    "payload"
+  ],
+  "additionalProperties": false
+}

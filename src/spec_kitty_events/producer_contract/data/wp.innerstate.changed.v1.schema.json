@@ -28,7 +28,8 @@
               "approved",
               "done",
               "blocked",
-              "canceled"
+              "canceled",
+              "skipped"
             ]
           }
         },

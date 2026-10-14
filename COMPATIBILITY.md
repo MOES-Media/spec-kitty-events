@@ -69,6 +69,10 @@ lifted members; and a placeholder `dataschema` base URI
 the project controls is named. The prefix and the base are part of every type string and
 `dataschema`, so changing either after emission is breaking.
 
+**Between this release and the cutover** the schemas, the registry and the order are
+non-normative and may change in a minor release, announced in `CHANGELOG.md`; only the
+cutover release fixes them. Consumers should pin the exact version they validated against.
+
 **Roles.** Producers: nothing changes until you choose to emit; the schemas are the
 contract to write against. Consumers: nothing changes; the `3.0.0` and diary readers and
 the reducer are untouched. Local-CLI compatibility is not weakened.

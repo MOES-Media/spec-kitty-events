@@ -1,0 +1,31 @@
+{
+  "class": "producer_row_legacy_invalid",
+  "expected": "invalid",
+  "type": "ai.spec-kitty.run.started.v1",
+  "base": "run.started.v1",
+  "violation": "unknown_member",
+  "expected_error_path": "/payload",
+  "expected_keyword": "additionalProperties",
+  "input": {
+    "event_id": "01J0000000000000000000F021",
+    "row_version": 1,
+    "event_type": "MissionRunStarted",
+    "timestamp": "2026-01-01T00:00:00+00:00",
+    "payload": {
+      "run_id": "01J0000000000000000000RUN1",
+      "mission_type": "software-dev",
+      "actor": {
+        "actor_id": "agent-1",
+        "actor_type": "llm",
+        "display_name": "Agent 1",
+        "provider": null,
+        "model": null,
+        "tool": null
+      },
+      "mission_id": "01J0000000000000000000MSN1",
+      "mission_slug": "041-reducer-unification",
+      "zz_unknown": 1
+    }
+  },
+  "notes": "A persisted line with a member the schema does not know."
+}

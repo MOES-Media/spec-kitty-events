@@ -36,7 +36,7 @@
         },
         "actor_type": {
           "description": "Actor category",
-          "pattern": "^(human|llm|service)$",
+          "pattern": "^(human|llm|service)(?![\\s\\S])",
           "type": "string"
         },
         "display_name": {

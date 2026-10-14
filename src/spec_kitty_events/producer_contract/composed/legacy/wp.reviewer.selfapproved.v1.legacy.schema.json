@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/spec-kitty/wp.reviewer.selfapproved.v1.legacy",
+  "title": "ai.spec-kitty.wp.reviewer.selfapproved.v1 legacy row form",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "event_type": {
+      "type": "string",
+      "const": "ReviewerSelfApproval"
+    },
+    "aggregate_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "aggregate_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schema_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}[Tt][0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?([Zz]|[+-][0-9]{2}:[0-9]{2})(?![\\s\\S])"
+    },
+    "project_uuid": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "project_slug": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "payload": {
+      "type": "object",
+      "properties": {
+        "mission_slug": {
+          "type": "string",
+          "minLength": 1
+        },
+        "wp_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "implementing_actor": {
+          "type": "string",
+          "minLength": 1
+        },
+        "intended_reviewer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "failure_reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fallback_approved": {
+          "type": "boolean"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}[Tt][0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?([Zz]|[+-][0-9]{2}:[0-9]{2})(?![\\s\\S])"
+        }
+      },
+      "required": [
+        "mission_slug",
+        "wp_id",
+        "implementing_actor",
+        "intended_reviewer",
+        "failure_reason",
+        "fallback_approved",
+        "timestamp"
+      ],
+      "additionalProperties": false,
+      "description": "A work package was approved by its implementing actor after the intended reviewer failed."
+    }
+  },
+  "required": [
+    "event_id",
+    "event_type",
+    "aggregate_id",
+    "aggregate_type",
+    "schema_version",
+    "timestamp",
+    "payload"
+  ],
+  "additionalProperties": false
+}

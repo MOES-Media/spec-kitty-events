@@ -1,0 +1,35 @@
+{
+  "class": "producer_row_legacy_invalid",
+  "expected": "invalid",
+  "type": "ai.spec-kitty.retrospective.skipped.v1",
+  "base": "retrospective.skipped.v1",
+  "violation": "unknown_member",
+  "expected_error_path": "",
+  "expected_keyword": "additionalProperties",
+  "input": {
+    "type": "RetrospectiveSkipped",
+    "schema_version": 1,
+    "event_id": "01J0000000000000000000F031",
+    "lamport": 3,
+    "at": "2026-01-01T00:00:00+00:00",
+    "actor": {
+      "kind": "runtime",
+      "id": "retro-runner",
+      "display": null
+    },
+    "mission_id": "01J0000000000000000000MSN1",
+    "mission_slug": "041-reducer-unification",
+    "wp_id": null,
+    "force": false,
+    "execution_mode": "main",
+    "skip_reason": "operator request",
+    "skip_reason_source": "cli_flag",
+    "policy_source": {
+      "timing": "strict"
+    },
+    "bypassed_provenance_kind": "runtime_strict_gate",
+    "would_have_attempted": true,
+    "zz_unknown": 1
+  },
+  "notes": "A persisted line with a member the schema does not know."
+}

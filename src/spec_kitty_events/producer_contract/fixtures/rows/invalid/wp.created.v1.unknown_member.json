@@ -1,0 +1,36 @@
+{
+  "class": "producer_row_invalid",
+  "expected": "invalid",
+  "type": "ai.spec-kitty.wp.created.v1",
+  "base": "wp.created.v1",
+  "violation": "data_unknown_member",
+  "expected_error_path": "/data",
+  "expected_keyword": "additionalProperties",
+  "input": {
+    "specversion": "1.0",
+    "id": "01J0000000000000000000F015",
+    "source": "/spec-kitty/missions/01J0000000000000000000MSN1",
+    "type": "ai.spec-kitty.wp.created.v1",
+    "time": "2026-01-01T00:00:00+00:00",
+    "datacontenttype": "application/json",
+    "dataschema": "https://schemas.example.invalid/spec-kitty/wp.created.v1",
+    "schemaversion": "4.0.0",
+    "lamportclock": 15,
+    "nodeid": "0123456789ab",
+    "subject": "WP01",
+    "missionid": "01J0000000000000000000MSN1",
+    "missionslug": "041-reducer-unification",
+    "data": {
+      "mission_slug": "041-reducer-unification",
+      "mission_number": null,
+      "wp_id": "WP01",
+      "wp_title": "Build it",
+      "wp_path": "tasks/WP01.md",
+      "depends_on": [],
+      "actor": "claude",
+      "created_at": "2026-01-01T00:00:00Z",
+      "zz_unknown": 1
+    }
+  },
+  "notes": "An undeclared data member."
+}

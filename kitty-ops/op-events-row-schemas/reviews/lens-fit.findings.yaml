@@ -1,0 +1,16 @@
+lens: fit-with-6185
+reviewer: sonnet subagent; built the wheel and validated with a stdlib-plus-jsonschema script
+findings:
+  - {id: F1, severity: MAJOR, topic: format date-time never asserted, disposition: fixed (RFC 3339 pattern beside every date-time; tests)}
+  - {id: F2, severity: MAJOR, topic: composition rules only in Python, disposition: fixed (composed row and legacy schemas committed and shipped, equal to the functions by test; README)}
+  - {id: F3, severity: MAJOR, topic: attribute sources and actor projections not in a data file, disposition: fixed (producer_contract/README.md, shipped)}
+  - {id: F4, severity: MAJOR, topic: lane schema carried summary the row never has (AC-029), disposition: fixed (removed; left to #92)}
+  - {id: F5, severity: MAJOR, topic: invalid fixtures covered 5 of 27 types, disposition: fixed (unknown_member for every type, missing_required where required, legacy unknown_member for every type)}
+  - {id: F6, severity: MINOR, topic: $ accepts trailing newline, disposition: fixed (lookahead end anchor)}
+  - {id: F7, severity: MINOR, topic: contract not in wheel, canonical bytes, disposition: fixed (copy shipped, byte-equal test; ASCII-escaped serialisation)}
+  - {id: F8, severity: MINOR, topic: source tie-break sound; dedupe hazard on re-fire under another source, disposition: documented in the contract; key unchanged}
+  - {id: F9, severity: MINOR, topic: prefix, base and schemaversion repeated, disposition: documented (read per entry); single-source script deferred}
+  - {id: F10, severity: MINOR, topic: no registry schema; deferred ids free text, disposition: key reference in README; schema deferred to #92}
+  - {id: F11, severity: MINOR, topic: journal legacy form needs the write-time stamp, disposition: by design; stated in the design note}
+  - {id: F12, severity: MINOR, topic: raci_source member name, disposition: escalated to the operator in the hand-off}
+  - {id: F13, severity: MINOR, topic: envelope closed, disposition: documented}

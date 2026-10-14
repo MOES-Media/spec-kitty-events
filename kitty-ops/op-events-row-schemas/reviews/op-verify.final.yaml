@@ -1,0 +1,9 @@
+refute: each MAJOR was reproduced or argued by the orchestrator before fixing; K4 and K9 were narrowed or refuted as recorded in the lens files.
+fixer: one pass by the orchestrator (single commit after the squad).
+verify:
+  make_test_fast: "3299 passed, 2 skipped"
+  conformance_pyargs: "664 passed"
+  wheel_contents_test: "1 passed (with setuptools and wheel)"
+  lint: "ruff check and format clean; check_version_not_amended ok; mypy --strict clean on the two new modules"
+  survivors_rechecked: "nested additionalProperties, required-member and lifted-list mutants now killed"
+open_majors: 0

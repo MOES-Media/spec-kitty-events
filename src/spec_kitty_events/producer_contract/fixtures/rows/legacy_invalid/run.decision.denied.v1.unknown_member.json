@@ -1,0 +1,28 @@
+{
+  "class": "producer_row_legacy_invalid",
+  "expected": "invalid",
+  "type": "ai.spec-kitty.run.decision.denied.v1",
+  "base": "run.decision.denied.v1",
+  "violation": "unknown_member",
+  "expected_error_path": "/payload",
+  "expected_keyword": "additionalProperties",
+  "input": {
+    "event_id": "01J0000000000000000000F028",
+    "row_version": 1,
+    "event_type": "DecisionAuthorityDenied",
+    "timestamp": "2026-01-01T00:00:00+00:00",
+    "payload": {
+      "run_id": "01J0000000000000000000RUN1",
+      "decision_id": "d1",
+      "actor_type": "llm",
+      "actor_id": "agent-1",
+      "authority_role": "mission_owner",
+      "rationale_linkage": null,
+      "reason": "audit decisions need a human owner",
+      "raci_source": null,
+      "override_reason": null,
+      "zz_unknown": 1
+    }
+  },
+  "notes": "A persisted line with a member the schema does not know."
+}
