@@ -1,6 +1,6 @@
 # Compatibility Guide
 
-**Current package version**: `10.4.6`
+**Current package version**: `10.5.0`
 
 The on-wire envelope schema version is `3.0.0` and has been unchanged since
 the cutover. The package version and the envelope schema version move
@@ -23,6 +23,55 @@ This document is the public compatibility policy for consumers of:
 - `spec-kitty-saas`
 - `spec-kitty`
 
+
+## `10.5.0` — producer row schemas, the producer registry and the total order
+
+`10.5.0` (spec-kitty-events#92, step 2 of the Mission Write API; spec-kitty/spec-kitty#6185
+needs it) is a **minor**, additive release. No existing contract changes: every envelope,
+payload and fixture that was accepted before is accepted now, and every one that was
+rejected is rejected. The on-wire envelope schema `3.0.0` is unchanged, and
+`validate_strict_envelope` still requires it. Nothing here is a reducer change.
+
+What is new:
+
+- **`spec_kitty_events.producer_contract`**: a registry of the 27 row kinds the Spec Kitty
+  producer emits (`ai.spec-kitty.<name>.v1`), one self-contained JSON Schema (2020-12) per
+  kind for the CloudEvents `data` member, a minimal envelope schema for rows the producer
+  writes, and loaders. `row_schema()` composes the schema of a whole CloudEvents line of one
+  type; `legacy_row_form_schema()` composes the schema of the persisted legacy line from the
+  same data schema and the registry's lifted members, so no schema is authored twice.
+- **Producer conformance fixtures** under `producer_contract/fixtures/rows/`: valid
+  CloudEvents lines with their legacy rows, invalid lines that each pin the path and keyword
+  they must fail on, and invalid legacy lines.
+- **`spec_kitty_events.total_order`** and `contracts/total-order.md`: the total order over
+  rows in CloudEvents form (Lamport clock, then time, then id, then source; clockless rows
+  first), a reference implementation, and thirteen fixtures (the nine worked examples of
+  #6185 and four edge cases).
+- Packaged tests, so `pytest --pyargs spec_kitty_events.conformance` runs both fixture sets.
+
+What this release does not do, and #92 keeps: the envelope validator and the upcaster for
+legacy rows, the legacy fixture corpus, the full type registry, a Java binding, the reducer
+sort-key switch, and the `3.0.0` to `4.0.0` envelope cutover with its major release.
+
+**Status: non-normative.** The schemas, the registry and the order are published ahead of
+the cutover release of ADR 0001 (still Proposed). No consumer or producer gates on them:
+`schemaversion` `4.0.0` is the CloudEvents form and the strict profile does not accept it.
+Per the versioning contract a new event type is additive, and a minor version does not
+make an unknown type safe for every consumer: a producer must keep emission of these types
+gated until each intended consumer can validate it.
+
+**Interim choices, awaiting maintainer confirmation.** They come from the spec-kitty
+operator for #6185: the type prefix `ai.spec-kitty`; ordering option C with `source` as the
+final tie-break; ULID-only ids for new events; snake_case `data` members; `actor` and
+`executionmode` as extension attributes; `.vN` new-type versioning; the type names and
+lifted members; and a placeholder `dataschema` base URI
+(`https://schemas.example.invalid/spec-kitty/`) kept in one registry field until a domain
+the project controls is named. The prefix and the base are part of every type string and
+`dataschema`, so changing either after emission is breaking.
+
+**Roles.** Producers: nothing changes until you choose to emit; the schemas are the
+contract to write against. Consumers: nothing changes; the `3.0.0` and diary readers and
+the reducer are untouched. Local-CLI compatibility is not weakened.
 
 ## `10.4.6` — status-diary reducer: an equal-`at` `approved -> done` settles its approval
 
