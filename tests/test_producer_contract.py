@@ -211,12 +211,10 @@ def test_lane_schema_matches_the_canonical_enum() -> None:
     data = pc.data_schema("lane.transitioned.v1")["properties"]
     assert data["to_lane"]["enum"] == lanes
     assert data["from_lane"]["anyOf"][0]["enum"] == lanes
-    assert (
-        pc.data_schema("wp.innerstate.changed.v1")["properties"]["delta"]["properties"]["subtasks"][
-            "additionalProperties"
-        ]["enum"]
-        == lanes
-    )
+    subtask_values = pc.data_schema("wp.innerstate.changed.v1")["properties"]["delta"][
+        "properties"
+    ]["subtasks"]["additionalProperties"]["enum"]
+    assert subtask_values == lanes + ["skipped"]  # SubtaskValue = Lane | SubtaskStatus.skipped
     assert "uninitialized" not in lanes and "doing" not in lanes
 
 
@@ -509,3 +507,246 @@ def test_load_does_not_need_jsonschema() -> None:
     """Loading is stdlib only; the module must not import jsonschema."""
     source = Path(pc.__file__).read_text(encoding="utf-8")
     assert "jsonschema" not in re.sub(r'""".*?"""', "", source, flags=re.S).replace("# ", "")
+
+
+# --------------------------------------------------- guards added after the squad round
+_COMMON_RETRO = ["schema_version", "lamport", "wp_id", "force", "execution_mode", "actorbinding"]
+# Hand-listed from the real writers, for the types that have no typed model to compare with.
+EXPECTED_REQUIRED: Dict[str, List[str]] = {
+    "lane.transitioned.v1": ["from_lane", "to_lane"],
+    "wp.innerstate.changed.v1": ["delta"],
+    "wp.reviewer.selfapproved.v1": [
+        "mission_slug",
+        "wp_id",
+        "implementing_actor",
+        "intended_reviewer",
+        "failure_reason",
+        "fallback_approved",
+        "timestamp",
+    ],
+    "run.significance.evaluated.v1": [
+        "run_id",
+        "decision_id",
+        "step_id",
+        "significance_score",
+        "effective_band",
+        "actor",
+    ],
+    "run.decision.denied.v1": [
+        "run_id",
+        "decision_id",
+        "actor_type",
+        "actor_id",
+        "authority_role",
+        "rationale_linkage",
+        "reason",
+    ],
+    "retrospective.captured.v1": _COMMON_RETRO
+    + [
+        "findings_status",
+        "record_path",
+        "generator_version",
+        "policy_source",
+        "provenance_kind",
+        "proposal_count",
+        "evidence_ref_count",
+    ],
+    "retrospective.capturefailed.v1": _COMMON_RETRO
+    + [
+        "failure_category",
+        "failure_message",
+        "remediation_hint",
+        "policy_source",
+        "attempted_provenance_kind",
+        "missing_artifacts",
+    ],
+    "retrospective.skipped.v1": _COMMON_RETRO
+    + [
+        "skip_reason",
+        "skip_reason_source",
+        "policy_source",
+        "bypassed_provenance_kind",
+        "would_have_attempted",
+    ],
+}
+
+
+@pytest.mark.parametrize("name", sorted(EXPECTED_REQUIRED))
+def test_required_members_of_the_types_without_a_model(name: str) -> None:
+    assert sorted(pc.data_schema(name)["required"]) == sorted(EXPECTED_REQUIRED[name])
+
+
+_LIFE = ["id", "time", "type"]
+EXPECTED_LIFTED: Dict[str, List[str]] = {
+    "lane.transitioned.v1": [
+        "id",
+        "time",
+        "missionslug",
+        "missionid",
+        "subject",
+        "actor",
+        "executionmode",
+    ],
+    "wp.innerstate.changed.v1": ["id", "subject", "time", "actor"],
+    "retrospective.captured.v1": ["id", "time", "actor", "missionid", "missionslug"],
+    "retrospective.capturefailed.v1": ["id", "time", "actor", "missionid", "missionslug"],
+    "retrospective.skipped.v1": ["id", "time", "actor", "missionid", "missionslug"],
+    "wp.created.v1": _LIFE + ["subject"],
+    "wp.reviewer.selfapproved.v1": _LIFE + ["subject"],
+}
+
+
+@pytest.mark.parametrize("name", sorted(EXPECTED_NAMES))
+def test_lifted_attributes_match_the_type_table(name: str) -> None:
+    got = sorted(item["attribute"] for item in pc.get_entry(name)["lifted"])
+    assert got == sorted(EXPECTED_LIFTED.get(name, _LIFE)), name
+
+
+def _open_objects(node: Any, path: str = "") -> Iterator[str]:
+    if isinstance(node, dict):
+        if "properties" in node and node.get("additionalProperties") is not False:
+            yield path
+        for key, value in node.items():
+            yield from _open_objects(value, f"{path}/{key}")
+    elif isinstance(node, list):
+        for index, value in enumerate(node):
+            yield from _open_objects(value, f"{path}/{index}")
+
+
+def test_every_nested_object_is_closed_except_the_one_taken_from_a_model_that_is_open() -> None:
+    open_ones = {
+        (name, path) for name in EXPECTED_NAMES for path in _open_objects(pc.data_schema(name))
+    }
+    # ParticipantIdentity is an open model in decisionpoint.py; the schema mirrors it.
+    assert open_ones == {("decision.resolved.v1", "/properties/actual_participants/items")}
+
+
+def test_nested_stray_members_are_rejected() -> None:
+    lane = _validator(pc.data_schema("lane.transitioned.v1"))
+    review = {"reviewer": "r", "verdict": "approved", "reference": "x"}
+    assert lane.is_valid(
+        {"from_lane": "approved", "to_lane": "done", "evidence": {"review": review}}
+    )
+    assert not lane.is_valid(
+        {"from_lane": "approved", "to_lane": "done", "evidence": {"review": dict(review, zz=1)}}
+    )
+    assert not lane.is_valid(
+        {"from_lane": "approved", "to_lane": "done", "evidence": {"review": review, "zz": 1}}
+    )
+    assert not lane.is_valid(
+        {
+            "from_lane": "a",
+            "to_lane": "done",
+            "actorbinding": {"role": None, "profile": None, "tool": None, "model": None, "zz": 1},
+        }
+    )
+
+
+def test_skipped_subtask_is_accepted() -> None:
+    schema = pc.data_schema("wp.innerstate.changed.v1")
+    assert _validator(schema).is_valid({"delta": {"subtasks": {"T001": "skipped", "T002": "done"}}})
+
+
+def _all_nodes(node: Any) -> Iterator[Dict[str, Any]]:
+    if isinstance(node, dict):
+        yield node
+        for value in node.values():
+            yield from _all_nodes(value)
+    elif isinstance(node, list):
+        for value in node:
+            yield from _all_nodes(value)
+
+
+def test_every_date_time_has_a_pattern_that_rejects_non_timestamps() -> None:
+    sources: List[Any] = [pc.data_schema(n) for n in EXPECTED_NAMES]
+    sources += [pc.load_registry(), pc.envelope_schema()]
+    seen = 0
+    for source in sources:
+        for node in _all_nodes(source):
+            if node.get("format") == "date-time":
+                seen += 1
+                assert "pattern" in node, node
+                assert re.search(node["pattern"], "2026-01-01T00:00:00+00:00")
+                assert re.search(node["pattern"], "2026-01-01T00:00:00.123456Z")
+                for bad in (
+                    "yesterday",
+                    "2026-01-01",
+                    "2026-01-01T00:00:00",
+                    "2026-01-01T00:00:00Z\n",
+                ):
+                    assert not re.search(node["pattern"], bad), bad
+    assert seen > 20
+    created = pc.data_schema("wp.created.v1")
+    bad_row = {
+        "mission_slug": "m",
+        "wp_id": "WP01",
+        "wp_title": "t",
+        "actor": "a",
+        "created_at": "yesterday",
+    }
+    assert not _validator(created).is_valid(bad_row)
+
+
+@pytest.mark.parametrize("attribute", ["id", "nodeid", "missionid", "source", "time"])
+def test_a_trailing_newline_is_not_accepted(attribute: str) -> None:
+    row = copy.deepcopy(_fixture("lane.transitioned.v1")["input"])
+    assert _validator(pc.row_schema("lane.transitioned.v1")).is_valid(row)
+    row[attribute] = row[attribute] + "\n"
+    assert not _validator(pc.row_schema("lane.transitioned.v1")).is_valid(row)
+
+
+def test_time_fraction_is_bounded_to_nine_digits() -> None:
+    row = copy.deepcopy(_fixture("lane.transitioned.v1")["input"])
+    validator = _validator(pc.row_schema("lane.transitioned.v1"))
+    row["time"] = "2026-01-01T00:00:00.123456789Z"
+    assert validator.is_valid(row)
+    row["time"] = "2026-01-01T00:00:00.1234567890Z"
+    assert not validator.is_valid(row)
+
+
+def test_mission_scoped_types_on_a_project_source_need_the_fallback_shape() -> None:
+    created = _validator(pc.row_schema("mission.created.v1"))
+    fallback = _fixture("mission.created.v1.unresolved_mission")["input"]
+    assert created.is_valid(fallback)
+    assert not created.is_valid({k: v for k, v in fallback.items() if k != "subject"})
+    wp = _validator(pc.row_schema("wp.created.v1"))
+    row = copy.deepcopy(_fixture("wp.created.v1")["input"])
+    row.pop("missionid")
+    row["source"] = "/spec-kitty/projects/P1"
+    assert wp.is_valid(row)
+    row.pop("subject")
+    assert not wp.is_valid(row)
+
+
+def test_composed_schemas_on_disk_equal_what_the_functions_return() -> None:
+    for name in EXPECTED_NAMES:
+        rows = json.loads(
+            (_ROOT / "composed" / "rows" / f"{name}.row.schema.json").read_text(encoding="utf-8")
+        )
+        legacy = json.loads(
+            (_ROOT / "composed" / "legacy" / f"{name}.legacy.schema.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        assert rows == pc.row_schema(name), name
+        assert legacy == pc.legacy_row_form_schema(name), name
+    assert len(list((_ROOT / "composed").rglob("*.json"))) == 54
+
+
+def test_the_packaged_total_order_contract_is_a_copy_of_the_contract() -> None:
+    repo = Path(__file__).resolve().parent.parent
+    assert (_ROOT / "total-order.md").read_bytes() == (
+        repo / "contracts" / "total-order.md"
+    ).read_bytes()
+
+
+def test_every_type_has_invalid_fixtures_in_both_forms() -> None:
+    invalid = {
+        json.loads(p.read_text(encoding="utf-8"))["type"]
+        for p in (_ROWS / "invalid").glob("*.json")
+    }
+    legacy = {
+        json.loads(p.read_text(encoding="utf-8"))["type"]
+        for p in (_ROWS / "legacy_invalid").glob("*.json")
+    }
+    assert invalid == set(pc.registered_types()) == legacy

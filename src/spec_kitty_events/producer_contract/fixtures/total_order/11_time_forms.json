@@ -1,7 +1,7 @@
 {
   "class": "total_order",
   "id": "11-time-forms",
-  "description": "RFC 3339 only. A leap second (:60) is the next second; t and z may be lower case; up to nine fractional digits. Ten fractional digits, a space separator, a missing offset, a date alone and hour 24 are error rows. LEAP, NEXT and LOWER are one instant: id decides.",
+  "description": "RFC 3339 only. A leap second (:60) is the next second; t and z may be lower case; up to nine fractional digits. Ten fractional digits, a space separator, a missing offset, a date alone, hour 24, a trailing newline and year 0000 are error rows. LEAP, NEXT and LOWER are one instant: id decides.",
   "rows": [
     {
       "label": "LEAP",
@@ -83,6 +83,24 @@
         "type": "ai.spec-kitty.lane.transitioned.v1",
         "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
       }
+    },
+    {
+      "label": "NEWLINE",
+      "row": {
+        "id": "01J00000000000000000000ABK",
+        "time": "2026-07-01T00:00:00Z\n",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
+      }
+    },
+    {
+      "label": "YEAR0",
+      "row": {
+        "id": "01J00000000000000000000ABM",
+        "time": "0000-01-01T00:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
+      }
     }
   ],
   "expected": {
@@ -97,10 +115,12 @@
       "SPACE": "time_unparseable",
       "NOOFF": "time_unparseable",
       "DATE": "time_unparseable",
-      "H24": "time_unparseable"
+      "H24": "time_unparseable",
+      "NEWLINE": "time_unparseable",
+      "YEAR0": "time_unparseable"
     },
     "collapsed": 0,
     "conflicts": [],
-    "read": 9
+    "read": 11
   }
 }

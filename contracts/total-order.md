@@ -56,7 +56,7 @@ the one #6185 requires, and a clock must never be silently defaulted.
 `time` must be an RFC 3339 `date-time`: `YYYY-MM-DD`, `T` or `t`, `hh:mm:ss`, optional
 fraction of one to nine digits, then `Z`, `z` or `+hh:mm` / `-hh:mm`. A leap second
 (`:60`) is the following second. Space separators, basic format, a missing offset, hour
-24 and a fraction of more than nine digits are not accepted (`time_unparseable`; nine is
+24, trailing characters (a newline included), year `0000` and a fraction of more than nine digits are not accepted (`time_unparseable`; nine is
 the precision of Go's `RFC3339Nano` and Java's `Instant`, so every implementation can
 agree). An absent, `null`, empty or non-string `time` is also `time_unparseable`. The
 instant is exact: `12:00:00+02:00` equals `10:00:00Z`, and nanoseconds are not rounded.
@@ -72,7 +72,8 @@ so the order is defined for every JSON input.)
 
 ## Procedure
 
-Given the rows as read, in file order:
+Given the rows as read, in file order (each a parsed JSON value: objects with string keys,
+as a JSON parser returns them; other host objects are outside the domain):
 
 1. **Set aside error rows.** A row that cannot be keyed is set aside with its position
    in the input and a reason. The checks run in this order, so a row with several defects
@@ -81,7 +82,7 @@ Given the rows as read, in file order:
 2. **Group** the remaining rows by `(s, i)`. Two spellings of one id in one source (case,
    hyphenation) are one group.
 3. **Collapse.** Of each group, the survivor is the row whose serialisation (members
-   sorted by key, separators `,` and `:`, UTF-8, non-ASCII not escaped) has the smallest
+   sorted by key, separators `,` and `:`, every non-ASCII character escaped as `\uXXXX` with lower-case hex and surrogate pairs for astral code points, so a lone surrogate serialises too; integers and strings are exact, other numbers use the shortest round-trip form) has the smallest
    bytes, so the choice never depends on input position. Every other row of the group
    counts as collapsed. If the rows of a group differ in any member other than `id`, the
    group is also reported as a *conflict*, by its `(s, i)` key. A conflict is a report,
@@ -111,6 +112,9 @@ per producer, and equal clocks on different nodes are separated by `time` and `i
 One consequence the maintainer should know: a legacy row (no `source`) and the same event
 re-emitted later as a sourced CloudEvent have different `(s, i)`, so they do not collapse.
 Giving legacy rows their `source` is the upcaster's job (#92), after which they do.
+Likewise a row first written under the project-scoped fallback source and later re-fired with a
+mission source has two keys: a producer that wants one row per id dedupes on `id` alone within its
+own log, and a reader that wants to notice the collision can compare ids across sources.
 
 ## Fixtures
 

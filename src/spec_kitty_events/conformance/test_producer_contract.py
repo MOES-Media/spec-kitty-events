@@ -24,7 +24,10 @@ import pytest
 
 from spec_kitty_events import producer_contract as pc
 
-jsonschema = pytest.importorskip("jsonschema")
+jsonschema = pytest.importorskip(
+    "jsonschema",
+    reason="producer conformance needs the conformance extra: pip install spec-kitty-events[conformance]",
+)
 
 _ROWS_DIR = Path(pc.__file__).resolve().parent / "fixtures" / "rows"
 

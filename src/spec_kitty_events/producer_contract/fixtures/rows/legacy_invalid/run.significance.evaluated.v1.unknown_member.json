@@ -1,0 +1,34 @@
+{
+  "class": "producer_row_legacy_invalid",
+  "expected": "invalid",
+  "type": "ai.spec-kitty.run.significance.evaluated.v1",
+  "base": "run.significance.evaluated.v1",
+  "violation": "unknown_member",
+  "expected_error_path": "/payload",
+  "expected_keyword": "additionalProperties",
+  "input": {
+    "event_id": "01J0000000000000000000F027",
+    "row_version": 1,
+    "event_type": "SignificanceEvaluated",
+    "timestamp": "2026-01-01T00:00:00+00:00",
+    "payload": {
+      "run_id": "01J0000000000000000000RUN1",
+      "decision_id": "d1",
+      "step_id": "specify",
+      "significance_score": {
+        "composite": 9,
+        "band": "medium",
+        "effective_band": "medium",
+        "hard_trigger_classes": []
+      },
+      "hard_trigger_classes": [],
+      "effective_band": "medium",
+      "actor": {
+        "actor_type": "service",
+        "actor_id": "runtime"
+      },
+      "zz_unknown": 1
+    }
+  },
+  "notes": "A persisted line with a member the schema does not know."
+}

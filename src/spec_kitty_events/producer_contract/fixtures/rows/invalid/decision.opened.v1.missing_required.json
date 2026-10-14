@@ -1,0 +1,44 @@
+{
+  "class": "producer_row_invalid",
+  "expected": "invalid",
+  "type": "ai.spec-kitty.decision.opened.v1",
+  "base": "decision.opened.v1",
+  "violation": "data_missing_required",
+  "expected_error_path": "/data",
+  "expected_keyword": "required",
+  "input": {
+    "specversion": "1.0",
+    "id": "01J0000000000000000000F019",
+    "source": "/spec-kitty/missions/01J0000000000000000000MSN1",
+    "type": "ai.spec-kitty.decision.opened.v1",
+    "time": "2026-01-01T00:00:00+00:00",
+    "datacontenttype": "application/json",
+    "dataschema": "https://schemas.example.invalid/spec-kitty/decision.opened.v1",
+    "schemaversion": "4.0.0",
+    "lamportclock": 19,
+    "nodeid": "0123456789ab",
+    "missionid": "01J0000000000000000000MSN1",
+    "missionslug": "041-reducer-unification",
+    "data": {
+      "decision_point_id": "01J0000000000000000000DP01",
+      "mission_id": "01J0000000000000000000MSN1",
+      "run_id": "01J0000000000000000000DP01",
+      "mission_slug": "041-reducer-unification",
+      "mission_type": "software-dev",
+      "phase": "SPECIFY",
+      "origin_flow": "specify",
+      "question": "Which store?",
+      "options": [
+        "sqlite",
+        "files"
+      ],
+      "input_key": "store",
+      "step_id": "specify-q1",
+      "actor_id": "claude",
+      "actor_type": "human",
+      "state_entered_at": "2026-01-01T00:00:00Z",
+      "recorded_at": "2026-01-01T00:00:00Z"
+    }
+  },
+  "notes": "data member origin_surface is required."
+}

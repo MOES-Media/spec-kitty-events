@@ -1,0 +1,14 @@
+lens: correctness-of-schemas-and-comparator
+reviewer: sonnet subagent, mutated copies only
+mutants: {killed: [1,2,3,4,5,6,7,8,9,10], survived_before_fix: [7b nested additionalProperties on lane evidence, 8b lifted event_type->type on run.decision.denied, 10b lane required reduced, 58 required-member removals on model-less types], survived_after_fix: []}
+findings:
+  - {id: K1, severity: MAJOR, topic: subtask value "skipped" falsely rejected, disposition: fixed (enum + fixture value + test)}
+  - {id: K2, severity: MAJOR, topic: lone surrogate crashes the comparator, disposition: fixed (ASCII-escaped serialisation, contract and test)}
+  - {id: K3, severity: MAJOR, topic: required lists of model-less types unguarded, disposition: fixed (hand-listed EXPECTED_REQUIRED)}
+  - {id: K4, severity: MAJOR, topic: scope not enforced for mission-scoped types on a project source, disposition: partly fixed (fallback source now requires subject); a project source with no missionid is the intended OD-MISSIONID fallback, so a mission source is not forced}
+  - {id: K5, severity: MAJOR, topic: nested additionalProperties and lifted lists unguarded, disposition: fixed (open-object census test, nested stray tests, EXPECTED_LIFTED)}
+  - {id: K6, severity: MINOR, topic: trailing newline accepted by time regex, disposition: fixed (fullmatch, fixture, test)}
+  - {id: K7, severity: MINOR, topic: envelope time pattern unbounded fraction, disposition: fixed ({1,9})}
+  - {id: K8, severity: MINOR, topic: schema accepts 5.0 as integer, disposition: documented in producer_contract/README.md}
+  - {id: K9, severity: MINOR, topic: RecursionError and non-string keys, disposition: refuted as a defect; domain is parsed JSON, stated in the contract}
+  - {id: K10, severity: MINOR, topic: year 0000, disposition: pinned in the contract and a fixture}

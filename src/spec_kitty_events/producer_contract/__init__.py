@@ -128,7 +128,7 @@ def row_schema(type_or_name: str) -> Dict[str, Any]:
 
     conditions: List[Dict[str, Any]] = []
     if entry["scope"] == "project":
-        props["source"] = {"type": "string", "pattern": _PROJECT_SOURCE + "[^/]+$"}
+        props["source"] = {"type": "string", "pattern": _PROJECT_SOURCE + "[^/\\s]+(?![\\s\\S])"}
         conditions.append({"not": {"required": ["subject"]}})
         conditions.append({"not": {"required": ["missionid"]}})
     else:
@@ -150,6 +150,8 @@ def row_schema(type_or_name: str) -> Dict[str, Any]:
                         "required": ["source"],
                     },
                     "then": {"not": {"required": ["subject"]}},
+                    # project-scoped fallback source: the subject is the aggregate
+                    "else": {"required": ["subject"]},
                 }
             )
     row["allOf"] = conditions

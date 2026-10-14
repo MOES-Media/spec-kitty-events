@@ -1,0 +1,13 @@
+lens: contract-and-versioning
+reviewer: sonnet subagent, read-only
+base: 5599380
+head: 134b638
+result: no MAJOR; release class (minor) confirmed
+findings:
+  - {id: C1, severity: MINOR, topic: lane enum copied into the producer schema; lane-vocabulary.md silent, disposition: fixed (sentence added to contracts/lane-vocabulary.md)}
+  - {id: C2, severity: MINOR, topic: release class of changes to the non-normative artifacts before cutover not stated, disposition: fixed (COMPATIBILITY.md)}
+  - {id: C3, severity: MINOR, topic: ai.spec-kitty is a third option beside ADR Q4 A and B, disposition: fixed (design note, COMPATIBILITY.md)}
+  - {id: C4, severity: MINOR, topic: packaged producer gate skips silently without jsonschema, disposition: fixed (explicit skip reason naming the conformance extra); other conformance tests unchanged}
+  - {id: C5, severity: MINOR, topic: envelope subset requires lamportclock and nodeid, design says optional, disposition: fixed (design note 5a)}
+  - {id: C6, severity: MINOR, topic: 8 of 27 schemas have no typed model to pin them, disposition: fixed (hand-listed required members in tests; design note 5a)}
+  - {id: C7, severity: NIT, topic: scope and counts verified, disposition: none needed}
