@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/spec-kitty/wp.reviewer.selfapproved.v1",
+  "title": "ai.spec-kitty.wp.reviewer.selfapproved.v1 data",
+  "type": "object",
+  "properties": {
+    "mission_slug": {
+      "type": "string",
+      "minLength": 1
+    },
+    "wp_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "implementing_actor": {
+      "type": "string",
+      "minLength": 1
+    },
+    "intended_reviewer": {
+      "type": "string",
+      "minLength": 1
+    },
+    "failure_reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fallback_approved": {
+      "type": "boolean"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "mission_slug",
+    "wp_id",
+    "implementing_actor",
+    "intended_reviewer",
+    "failure_reason",
+    "fallback_approved",
+    "timestamp"
+  ],
+  "additionalProperties": false,
+  "description": "A work package was approved by its implementing actor after the intended reviewer failed."
+}

@@ -1,0 +1,39 @@
+{
+  "class": "producer_row_invalid",
+  "expected": "invalid",
+  "type": "ai.spec-kitty.lane.transitioned.v1",
+  "base": "lane.transitioned.v1",
+  "violation": "subject_missing",
+  "expected_error_path": "",
+  "expected_keyword": "required",
+  "input": {
+    "specversion": "1.0",
+    "id": "01J0000000000000000000F001",
+    "source": "/spec-kitty/missions/01J0000000000000000000MSN1",
+    "type": "ai.spec-kitty.lane.transitioned.v1",
+    "time": "2026-01-01T00:00:00+00:00",
+    "datacontenttype": "application/json",
+    "dataschema": "https://schemas.example.invalid/spec-kitty/lane.transitioned.v1",
+    "schemaversion": "4.0.0",
+    "lamportclock": 1,
+    "nodeid": "0123456789ab",
+    "missionid": "01J0000000000000000000MSN1",
+    "missionslug": "041-reducer-unification",
+    "actor": "claude",
+    "executionmode": "worktree",
+    "data": {
+      "from_lane": "planned",
+      "to_lane": "claimed",
+      "force": false,
+      "reason": null,
+      "review_ref": null,
+      "evidence": null,
+      "policy_metadata": {
+        "agent": "claude",
+        "shell_pid": 4242,
+        "shell_pid_created_at": "2026-01-01T00:00:00+00:00"
+      }
+    }
+  },
+  "notes": "A work-package type requires subject."
+}

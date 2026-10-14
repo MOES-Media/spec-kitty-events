@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/spec-kitty/wp.created.v1",
+  "title": "ai.spec-kitty.wp.created.v1 data",
+  "additionalProperties": false,
+  "description": "A work package was created.",
+  "properties": {
+    "mission_slug": {
+      "description": "Canonical mission slug owning this WP.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "mission_number": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Canonical mission number; ``None`` pre-merge."
+    },
+    "wp_id": {
+      "description": "Work-package identifier (e.g. ``WP01``).",
+      "minLength": 1,
+      "type": "string"
+    },
+    "wp_title": {
+      "description": "Human-readable WP title.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "wp_path": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Repo-relative path to the WP task file, if persisted on disk."
+    },
+    "depends_on": {
+      "description": "IDs of work-packages this WP depends on.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "actor": {
+      "description": "Actor that created the WP.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "created_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Wall-clock timestamp of WP creation."
+    }
+  },
+  "required": [
+    "mission_slug",
+    "wp_id",
+    "wp_title",
+    "actor"
+  ],
+  "type": "object"
+}

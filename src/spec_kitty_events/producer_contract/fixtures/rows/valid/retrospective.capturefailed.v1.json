@@ -1,0 +1,70 @@
+{
+  "class": "producer_row_valid",
+  "expected": "valid",
+  "type": "ai.spec-kitty.retrospective.capturefailed.v1",
+  "input": {
+    "specversion": "1.0",
+    "id": "01J0000000000000000000F030",
+    "source": "/spec-kitty/missions/01J0000000000000000000MSN1",
+    "type": "ai.spec-kitty.retrospective.capturefailed.v1",
+    "time": "2026-01-01T00:00:00+00:00",
+    "datacontenttype": "application/json",
+    "dataschema": "https://schemas.example.invalid/spec-kitty/retrospective.capturefailed.v1",
+    "schemaversion": "4.0.0",
+    "lamportclock": 30,
+    "nodeid": "0123456789ab",
+    "missionid": "01J0000000000000000000MSN1",
+    "missionslug": "041-reducer-unification",
+    "actor": "retro-runner",
+    "data": {
+      "schema_version": 1,
+      "lamport": 3,
+      "wp_id": null,
+      "force": false,
+      "execution_mode": "main",
+      "failure_category": "missing_artifacts",
+      "failure_message": "spec.md missing",
+      "remediation_hint": null,
+      "policy_source": {
+        "timing": "default"
+      },
+      "attempted_provenance_kind": "runtime_post_completion",
+      "missing_artifacts": [
+        "spec.md"
+      ],
+      "actorbinding": {
+        "kind": "runtime",
+        "id": "retro-runner",
+        "display": null
+      }
+    }
+  },
+  "legacy_row": {
+    "type": "RetrospectiveCaptureFailed",
+    "schema_version": 1,
+    "event_id": "01J0000000000000000000F030",
+    "lamport": 3,
+    "at": "2026-01-01T00:00:00+00:00",
+    "actor": {
+      "kind": "runtime",
+      "id": "retro-runner",
+      "display": null
+    },
+    "mission_id": "01J0000000000000000000MSN1",
+    "mission_slug": "041-reducer-unification",
+    "wp_id": null,
+    "force": false,
+    "execution_mode": "main",
+    "failure_category": "missing_artifacts",
+    "failure_message": "spec.md missing",
+    "remediation_hint": null,
+    "policy_source": {
+      "timing": "default"
+    },
+    "attempted_provenance_kind": "runtime_post_completion",
+    "missing_artifacts": [
+      "spec.md"
+    ]
+  },
+  "notes": "Capture failed."
+}

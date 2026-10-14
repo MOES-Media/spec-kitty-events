@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/spec-kitty/mission.created.v1",
+  "title": "ai.spec-kitty.mission.created.v1 data",
+  "additionalProperties": false,
+  "description": "A Mission was created.",
+  "properties": {
+    "mission_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Canonical machine-facing mission identity (ULID); optional, rides alongside mission_slug so a consumer can join this moment against PhaseEntered (whose frame ref is mission_id) for the same mission aggregate (spec-kitty-events#69)"
+    },
+    "mission_slug": {
+      "description": "Canonical mission slug",
+      "minLength": 1,
+      "type": "string"
+    },
+    "mission_number": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Canonical mission number"
+    },
+    "mission_type": {
+      "description": "Canonical mission workflow/template type",
+      "minLength": 1,
+      "type": "string"
+    },
+    "target_branch": {
+      "description": "Target branch for the mission planning artifacts",
+      "minLength": 1,
+      "type": "string"
+    },
+    "wp_count": {
+      "description": "Work-package count at mission creation time",
+      "minimum": 0,
+      "type": "integer"
+    },
+    "actor": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Opaque actor identifier of who created the mission (broadcast under the moment's ``actor`` key)"
+    },
+    "friendly_name": {
+      "description": "Human-friendly mission title",
+      "minLength": 1,
+      "type": "string"
+    },
+    "purpose_tldr": {
+      "description": "One-line stakeholder-facing mission summary",
+      "minLength": 1,
+      "type": "string"
+    },
+    "purpose_context": {
+      "description": "Short stakeholder-facing context paragraph",
+      "minLength": 1,
+      "type": "string"
+    },
+    "created_at": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Mission creation timestamp"
+    }
+  },
+  "required": [
+    "mission_slug",
+    "mission_number",
+    "mission_type",
+    "target_branch",
+    "wp_count",
+    "friendly_name",
+    "purpose_tldr",
+    "purpose_context"
+  ],
+  "type": "object"
+}

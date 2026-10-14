@@ -1,0 +1,49 @@
+{
+  "class": "producer_row_valid",
+  "expected": "valid",
+  "type": "ai.spec-kitty.wp.reviewer.selfapproved.v1",
+  "input": {
+    "specversion": "1.0",
+    "id": "01J0000000000000000000F016",
+    "source": "/spec-kitty/missions/01J0000000000000000000MSN1",
+    "type": "ai.spec-kitty.wp.reviewer.selfapproved.v1",
+    "time": "2026-01-01T00:00:00+00:00",
+    "datacontenttype": "application/json",
+    "dataschema": "https://schemas.example.invalid/spec-kitty/wp.reviewer.selfapproved.v1",
+    "schemaversion": "4.0.0",
+    "lamportclock": 16,
+    "nodeid": "0123456789ab",
+    "subject": "WP01",
+    "missionid": "01J0000000000000000000MSN1",
+    "missionslug": "041-reducer-unification",
+    "data": {
+      "mission_slug": "041-reducer-unification",
+      "wp_id": "WP01",
+      "implementing_actor": "claude",
+      "intended_reviewer": "renata",
+      "failure_reason": "reviewer unavailable",
+      "fallback_approved": true,
+      "timestamp": "2026-01-01T00:00:00+00:00"
+    }
+  },
+  "legacy_row": {
+    "event_id": "01J0000000000000000000F016",
+    "event_type": "ReviewerSelfApproval",
+    "aggregate_id": "WP01",
+    "aggregate_type": "WorkPackage",
+    "schema_version": "5.0.0",
+    "timestamp": "2026-01-01T00:00:00+00:00",
+    "payload": {
+      "mission_slug": "041-reducer-unification",
+      "wp_id": "WP01",
+      "implementing_actor": "claude",
+      "intended_reviewer": "renata",
+      "failure_reason": "reviewer unavailable",
+      "fallback_approved": true,
+      "timestamp": "2026-01-01T00:00:00+00:00"
+    },
+    "project_uuid": "5c0f6f0e-3b1a-4d8e-9a55-0d7e3f2b9c11",
+    "project_slug": "demo"
+  },
+  "notes": "Self-approval after a reviewer failure."
+}

@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/spec-kitty/run.decision.denied.v1",
+  "title": "ai.spec-kitty.run.decision.denied.v1 data",
+  "type": "object",
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "decision_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "actor_type": {
+      "type": "string",
+      "enum": [
+        "human",
+        "llm",
+        "service"
+      ]
+    },
+    "actor_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authority_role": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rationale_linkage": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "raci_source": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "override_reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "run_id",
+    "decision_id",
+    "actor_type",
+    "actor_id",
+    "authority_role",
+    "rationale_linkage",
+    "reason"
+  ],
+  "additionalProperties": false,
+  "description": "An actor was denied authority over a decision."
+}

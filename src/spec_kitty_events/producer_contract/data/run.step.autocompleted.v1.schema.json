@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/spec-kitty/run.step.autocompleted.v1",
+  "title": "ai.spec-kitty.run.step.autocompleted.v1 data",
+  "additionalProperties": false,
+  "description": "The runtime auto-completed a step.",
+  "properties": {
+    "run_id": {
+      "description": "Run identifier",
+      "minLength": 1,
+      "type": "string"
+    },
+    "step_id": {
+      "description": "Step that completed",
+      "minLength": 1,
+      "type": "string"
+    },
+    "agent_id": {
+      "description": "Agent that completed the step",
+      "minLength": 1,
+      "type": "string"
+    },
+    "result": {
+      "description": "Step result (e.g., 'success', 'failed')",
+      "minLength": 1,
+      "type": "string"
+    },
+    "actor": {
+      "additionalProperties": false,
+      "description": "Actor context for the completion",
+      "properties": {
+        "actor_id": {
+          "description": "Unique actor identifier",
+          "minLength": 1,
+          "type": "string"
+        },
+        "actor_type": {
+          "description": "Actor category",
+          "pattern": "^(human|llm|service)$",
+          "type": "string"
+        },
+        "display_name": {
+          "description": "Human-readable display name",
+          "type": "string"
+        },
+        "provider": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Provider (e.g., 'anthropic', 'openai')"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Model identifier (e.g., 'claude-opus-4-6')"
+        },
+        "tool": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Tool identifier"
+        }
+      },
+      "required": [
+        "actor_id",
+        "actor_type"
+      ],
+      "type": "object"
+    },
+    "mission_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Canonical machine-facing mission identity (ULID) the run belongs to"
+    },
+    "mission_slug": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Canonical mission slug (display; mission_id is the identity)"
+    }
+  },
+  "required": [
+    "run_id",
+    "step_id",
+    "agent_id",
+    "result",
+    "actor"
+  ],
+  "type": "object"
+}

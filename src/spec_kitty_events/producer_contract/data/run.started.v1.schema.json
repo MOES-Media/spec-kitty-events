@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/spec-kitty/run.started.v1",
+  "title": "ai.spec-kitty.run.started.v1 data",
+  "additionalProperties": false,
+  "description": "A mission run started.",
+  "properties": {
+    "run_id": {
+      "description": "Unique run identifier",
+      "minLength": 1,
+      "type": "string"
+    },
+    "mission_type": {
+      "description": "Mission workflow/template type being executed",
+      "minLength": 1,
+      "type": "string"
+    },
+    "actor": {
+      "additionalProperties": false,
+      "description": "Actor who started the run",
+      "properties": {
+        "actor_id": {
+          "description": "Unique actor identifier",
+          "minLength": 1,
+          "type": "string"
+        },
+        "actor_type": {
+          "description": "Actor category",
+          "pattern": "^(human|llm|service)$",
+          "type": "string"
+        },
+        "display_name": {
+          "description": "Human-readable display name",
+          "type": "string"
+        },
+        "provider": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Provider (e.g., 'anthropic', 'openai')"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Model identifier (e.g., 'claude-opus-4-6')"
+        },
+        "tool": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Tool identifier"
+        }
+      },
+      "required": [
+        "actor_id",
+        "actor_type"
+      ],
+      "type": "object"
+    },
+    "mission_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Canonical machine-facing mission identity (ULID) the run belongs to"
+    },
+    "mission_slug": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Canonical mission slug (display; mission_id is the identity)"
+    }
+  },
+  "required": [
+    "run_id",
+    "mission_type",
+    "actor"
+  ],
+  "type": "object"
+}

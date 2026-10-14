@@ -1,0 +1,29 @@
+{
+  "class": "producer_row_legacy_invalid",
+  "expected": "invalid",
+  "type": "ai.spec-kitty.run.started.v1",
+  "base": "run.started.v1",
+  "violation": "missing_required",
+  "expected_error_path": "",
+  "expected_keyword": "required",
+  "input": {
+    "event_id": "01J0000000000000000000F021",
+    "event_type": "MissionRunStarted",
+    "timestamp": "2026-01-01T00:00:00+00:00",
+    "payload": {
+      "run_id": "01J0000000000000000000RUN1",
+      "mission_type": "software-dev",
+      "actor": {
+        "actor_id": "agent-1",
+        "actor_type": "llm",
+        "display_name": "Agent 1",
+        "provider": null,
+        "model": null,
+        "tool": null
+      },
+      "mission_id": "01J0000000000000000000MSN1",
+      "mission_slug": "041-reducer-unification"
+    }
+  },
+  "notes": "A stamped journal row carries row_version."
+}

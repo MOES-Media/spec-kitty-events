@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/spec-kitty/mission.followup.recorded.v1",
+  "title": "ai.spec-kitty.mission.followup.recorded.v1 data",
+  "additionalProperties": false,
+  "description": "A follow-up commit or pull request was recorded against a Mission.",
+  "properties": {
+    "mission_id": {
+      "description": "Canonical machine identity (ULID); attribution key.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "mission_slug": {
+      "description": "Human handle (display).",
+      "minLength": 1,
+      "type": "string"
+    },
+    "follow_up_type": {
+      "description": "Discriminator: 'commit' (requires commit_sha) or 'pr' (requires pr_number).",
+      "enum": [
+        "commit",
+        "pr"
+      ],
+      "type": "string"
+    },
+    "commit_sha": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Commit SHA; required iff follow_up_type == 'commit'."
+    },
+    "pr_number": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "PR number; required iff follow_up_type == 'pr'."
+    },
+    "recorded_by": {
+      "description": "Detected actor who recorded the follow-up.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "recorded_at": {
+      "description": "Event time (ISO-8601 UTC).",
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "mission_id",
+    "mission_slug",
+    "follow_up_type",
+    "recorded_by",
+    "recorded_at"
+  ],
+  "type": "object"
+}

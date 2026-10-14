@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/spec-kitty/project.initialized.v1",
+  "title": "ai.spec-kitty.project.initialized.v1 data",
+  "additionalProperties": false,
+  "description": "A project was initialized.",
+  "properties": {
+    "project_uuid": {
+      "description": "Canonical machine identity for the project (UUID string).",
+      "minLength": 1,
+      "type": "string"
+    },
+    "project_slug": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Human-readable project slug, if any."
+    },
+    "actor": {
+      "description": "Actor that initialized the project (e.g. CLI user or agent).",
+      "minLength": 1,
+      "type": "string"
+    },
+    "runtime_version": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "CLI / runtime version recorded at init time."
+    },
+    "initialized_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Wall-clock timestamp when the project was initialized."
+    }
+  },
+  "required": [
+    "project_uuid",
+    "actor"
+  ],
+  "type": "object"
+}

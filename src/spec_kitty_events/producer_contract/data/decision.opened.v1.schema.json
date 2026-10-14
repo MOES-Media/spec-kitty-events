@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/spec-kitty/decision.opened.v1",
+  "title": "ai.spec-kitty.decision.opened.v1 data",
+  "additionalProperties": false,
+  "description": "A planning-interview decision point was opened.",
+  "properties": {
+    "origin_surface": {
+      "const": "planning_interview",
+      "type": "string"
+    },
+    "decision_point_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "mission_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "run_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "mission_slug": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "mission_type": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "phase": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "origin_flow": {
+      "description": "Spec-kitty flow that originated the decision point.",
+      "enum": [
+        "charter",
+        "specify",
+        "plan"
+      ],
+      "type": "string"
+    },
+    "question": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "options": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 0,
+      "type": "array"
+    },
+    "input_key": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "step_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "actor_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "actor_type": {
+      "enum": [
+        "human",
+        "llm",
+        "service"
+      ],
+      "type": "string"
+    },
+    "state_entered_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "recorded_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "origin_surface",
+    "decision_point_id",
+    "mission_id",
+    "run_id",
+    "mission_slug",
+    "mission_type",
+    "phase",
+    "origin_flow",
+    "question",
+    "options",
+    "input_key",
+    "step_id",
+    "actor_id",
+    "actor_type",
+    "state_entered_at",
+    "recorded_at"
+  ],
+  "type": "object"
+}

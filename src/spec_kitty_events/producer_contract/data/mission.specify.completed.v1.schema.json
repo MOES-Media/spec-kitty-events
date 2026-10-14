@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/spec-kitty/mission.specify.completed.v1",
+  "title": "ai.spec-kitty.mission.specify.completed.v1 data",
+  "additionalProperties": false,
+  "description": "The specify phase of a Mission completed.",
+  "properties": {
+    "mission_slug": {
+      "description": "Canonical mission slug.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "mission_number": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Canonical mission number; ``None`` pre-merge."
+    },
+    "actor": {
+      "description": "Actor driving the phase transition.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Wall-clock timestamp for the phase transition."
+    },
+    "artifact_path": {
+      "description": "Repo-relative path to the spec artifact (e.g. spec.md).",
+      "minLength": 1,
+      "type": "string"
+    },
+    "summary": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Optional one-line summary of the completed spec."
+    }
+  },
+  "required": [
+    "mission_slug",
+    "actor",
+    "artifact_path"
+  ],
+  "type": "object"
+}

@@ -1,0 +1,32 @@
+{
+  "class": "producer_row_legacy_invalid",
+  "expected": "invalid",
+  "type": "ai.spec-kitty.mission.created.v1",
+  "base": "mission.created.v1",
+  "violation": "payload_invalid",
+  "expected_error_path": "/payload",
+  "expected_keyword": "required",
+  "input": {
+    "event_id": "01J0000000000000000000F007",
+    "event_type": "MissionCreated",
+    "aggregate_id": "01J0000000000000000000MSN1",
+    "aggregate_type": "Mission",
+    "schema_version": "5.0.0",
+    "timestamp": "2026-01-01T00:00:00+00:00",
+    "payload": {
+      "mission_id": "01J0000000000000000000MSN1",
+      "mission_slug": "041-reducer-unification",
+      "mission_number": null,
+      "mission_type": "software-dev",
+      "wp_count": 0,
+      "actor": "claude@example.org",
+      "friendly_name": "Reducer unification",
+      "purpose_tldr": "Unify the reducers.",
+      "purpose_context": "Two reducers ship today.",
+      "created_at": "2026-01-01T00:00:00+00:00"
+    },
+    "project_uuid": "5c0f6f0e-3b1a-4d8e-9a55-0d7e3f2b9c11",
+    "project_slug": "demo"
+  },
+  "notes": "The payload must satisfy the data schema."
+}

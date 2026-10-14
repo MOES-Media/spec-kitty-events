@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/spec-kitty/wp.innerstate.changed.v1",
+  "title": "ai.spec-kitty.wp.innerstate.changed.v1 data",
+  "type": "object",
+  "properties": {
+    "delta": {
+      "type": "object",
+      "properties": {
+        "shell_pid": {
+          "type": "integer"
+        },
+        "shell_pid_created_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subtasks": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "enum": [
+              "genesis",
+              "planned",
+              "claimed",
+              "in_progress",
+              "for_review",
+              "in_review",
+              "approved",
+              "done",
+              "blocked",
+              "canceled"
+            ]
+          }
+        },
+        "note": {
+          "type": "string"
+        },
+        "tracker_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tracker_refs_replace": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "agent": {
+          "type": "string",
+          "minLength": 1
+        },
+        "assignee": {
+          "type": "string",
+          "minLength": 1
+        },
+        "review": {
+          "type": "object",
+          "properties": {
+            "at": {
+              "type": "string"
+            },
+            "actor": {
+              "type": "string"
+            },
+            "wp_id": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "at",
+            "actor",
+            "wp_id",
+            "reason"
+          ],
+          "additionalProperties": false
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "agent_profile": {
+          "type": "string",
+          "minLength": 1
+        },
+        "agent_profile_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provider": {
+          "type": "string",
+          "minLength": 1
+        },
+        "release_runtime_claim": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "additionalProperties": false,
+      "description": "Partial runtime-state delta; an absent member leaves its slot untouched."
+    },
+    "actorbinding": {
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "profile": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tool": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "role",
+        "profile",
+        "tool",
+        "model"
+      ],
+      "additionalProperties": false,
+      "description": "Structured resolved-binding actor, kept whole when the row's actor is an object."
+    }
+  },
+  "required": [
+    "delta"
+  ],
+  "additionalProperties": false,
+  "description": "Off-axis runtime-state annotation of a work package. The row's 'kind' constant is dropped (the type carries it); event_id, at, wp_id and actor are context attributes."
+}

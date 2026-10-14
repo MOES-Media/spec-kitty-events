@@ -1,0 +1,37 @@
+{
+  "class": "producer_row_valid",
+  "expected": "valid",
+  "type": "ai.spec-kitty.wp.innerstate.changed.v1",
+  "input": {
+    "specversion": "1.0",
+    "id": "01J0000000000000000000F005",
+    "source": "/spec-kitty/missions/01J0000000000000000000MSN1",
+    "type": "ai.spec-kitty.wp.innerstate.changed.v1",
+    "time": "2026-01-01T00:00:00+00:00",
+    "datacontenttype": "application/json",
+    "dataschema": "https://schemas.example.invalid/spec-kitty/wp.innerstate.changed.v1",
+    "schemaversion": "4.0.0",
+    "lamportclock": 5,
+    "nodeid": "0123456789ab",
+    "subject": "WP01",
+    "missionid": "01J0000000000000000000MSN1",
+    "missionslug": "041-reducer-unification",
+    "actor": "claude",
+    "data": {
+      "delta": {
+        "note": "waiting on review"
+      }
+    }
+  },
+  "legacy_row": {
+    "event_id": "01J0000000000000000000F005",
+    "kind": "annotation",
+    "wp_id": "WP01",
+    "at": "2026-01-01T00:00:00+00:00",
+    "actor": "claude",
+    "delta": {
+      "note": "waiting on review"
+    }
+  },
+  "notes": "A string actor: no actorbinding in data."
+}

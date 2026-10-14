@@ -1,0 +1,257 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/spec-kitty/lane.transitioned.v1",
+  "title": "ai.spec-kitty.lane.transitioned.v1 data",
+  "type": "object",
+  "properties": {
+    "from_lane": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "genesis",
+            "planned",
+            "claimed",
+            "in_progress",
+            "for_review",
+            "in_review",
+            "approved",
+            "done",
+            "blocked",
+            "canceled"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "to_lane": {
+      "type": "string",
+      "enum": [
+        "genesis",
+        "planned",
+        "claimed",
+        "in_progress",
+        "for_review",
+        "in_review",
+        "approved",
+        "done",
+        "blocked",
+        "canceled"
+      ]
+    },
+    "force": {
+      "type": "boolean"
+    },
+    "reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reason_source": {
+      "type": "string",
+      "enum": [
+        "operator",
+        "synthetic"
+      ]
+    },
+    "review_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "evidence": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "review": {
+              "type": "object",
+              "properties": {
+                "reviewer": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "verdict": {
+                  "type": "string",
+                  "enum": [
+                    "approved",
+                    "changes_requested"
+                  ]
+                },
+                "reference": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "reviewer",
+                "verdict",
+                "reference"
+              ],
+              "additionalProperties": false
+            },
+            "repos": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "repo": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "branch": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "commit": {
+                    "type": "string",
+                    "pattern": "^[0-9a-fA-F]{7,40}$"
+                  },
+                  "files_touched": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "repo",
+                  "branch",
+                  "commit"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "verification": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "command": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "result": {
+                    "type": "string",
+                    "enum": [
+                      "pass",
+                      "fail",
+                      "skip"
+                    ]
+                  },
+                  "summary": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "command",
+                  "result",
+                  "summary"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "review"
+          ],
+          "additionalProperties": false,
+          "description": "Evidence required for done transitions."
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "review_result": {
+      "type": "object",
+      "properties": {
+        "reviewer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "approved",
+            "changes_requested"
+          ]
+        },
+        "reference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "feedback_path": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "reviewer",
+        "verdict",
+        "reference"
+      ],
+      "additionalProperties": false,
+      "description": "Structured review outcome of an outbound in_review transition."
+    },
+    "policy_metadata": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "summary": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "actorbinding": {
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "profile": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tool": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "role",
+        "profile",
+        "tool",
+        "model"
+      ],
+      "additionalProperties": false,
+      "description": "Structured resolved-binding actor, kept whole when the row's actor is an object."
+    }
+  },
+  "required": [
+    "from_lane",
+    "to_lane"
+  ],
+  "additionalProperties": false,
+  "description": "Lane transition of a work package. The lifted members (event_id, at, mission_slug, mission_id, wp_id, actor, execution_mode) are context attributes, not data. 'doing' is resolved to 'in_progress' before it is written. 'summary' belongs to the 3.0.0 transport shape and is carried so one schema serves producer rows and upcast legacy rows; the producer does not emit it."
+}

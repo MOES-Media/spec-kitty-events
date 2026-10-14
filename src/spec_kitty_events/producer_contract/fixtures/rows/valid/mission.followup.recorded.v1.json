@@ -1,0 +1,48 @@
+{
+  "class": "producer_row_valid",
+  "expected": "valid",
+  "type": "ai.spec-kitty.mission.followup.recorded.v1",
+  "input": {
+    "specversion": "1.0",
+    "id": "01J0000000000000000000F018",
+    "source": "/spec-kitty/missions/01J0000000000000000000MSN1",
+    "type": "ai.spec-kitty.mission.followup.recorded.v1",
+    "time": "2026-01-01T00:00:00+00:00",
+    "datacontenttype": "application/json",
+    "dataschema": "https://schemas.example.invalid/spec-kitty/mission.followup.recorded.v1",
+    "schemaversion": "4.0.0",
+    "lamportclock": 18,
+    "nodeid": "0123456789ab",
+    "missionid": "01J0000000000000000000MSN1",
+    "missionslug": "041-reducer-unification",
+    "data": {
+      "mission_id": "01J0000000000000000000MSN1",
+      "mission_slug": "041-reducer-unification",
+      "follow_up_type": "commit",
+      "commit_sha": "0123abc",
+      "pr_number": null,
+      "recorded_by": "claude",
+      "recorded_at": "2026-01-01T00:00:00+00:00"
+    }
+  },
+  "legacy_row": {
+    "event_id": "01J0000000000000000000F018",
+    "event_type": "FollowUpRecorded",
+    "aggregate_id": "01J0000000000000000000MSN1",
+    "aggregate_type": "Mission",
+    "schema_version": "5.0.0",
+    "timestamp": "2026-01-01T00:00:00+00:00",
+    "payload": {
+      "mission_id": "01J0000000000000000000MSN1",
+      "mission_slug": "041-reducer-unification",
+      "follow_up_type": "commit",
+      "commit_sha": "0123abc",
+      "pr_number": null,
+      "recorded_by": "claude",
+      "recorded_at": "2026-01-01T00:00:00+00:00"
+    },
+    "project_uuid": "5c0f6f0e-3b1a-4d8e-9a55-0d7e3f2b9c11",
+    "project_slug": "demo"
+  },
+  "notes": "Follow-up commit."
+}
