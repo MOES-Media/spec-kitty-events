@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/spec-kitty/retrospective.skipped.v1",
+  "title": "ai.spec-kitty.retrospective.skipped.v1 data",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "lamport": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Legacy per-Mission counter; not lamportclock."
+    },
+    "wp_id": {
+      "type": "null"
+    },
+    "force": {
+      "type": "boolean"
+    },
+    "execution_mode": {
+      "type": "string",
+      "enum": [
+        "worktree",
+        "main"
+      ]
+    },
+    "actorbinding": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "human",
+            "agent",
+            "runtime"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "display": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "display"
+      ],
+      "additionalProperties": false,
+      "description": "Retrospective actor: kept whole in data.actorbinding; its id is the actor attribute."
+    },
+    "skip_reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "skip_reason_source": {
+      "type": "string",
+      "enum": [
+        "cli_flag",
+        "config_flag",
+        "ci_environment"
+      ]
+    },
+    "policy_source": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "bypassed_provenance_kind": {
+      "type": "string",
+      "const": "runtime_strict_gate"
+    },
+    "would_have_attempted": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "schema_version",
+    "lamport",
+    "wp_id",
+    "force",
+    "execution_mode",
+    "actorbinding",
+    "skip_reason",
+    "skip_reason_source",
+    "policy_source",
+    "bypassed_provenance_kind",
+    "would_have_attempted"
+  ],
+  "additionalProperties": false,
+  "description": "The strict retrospective gate was bypassed."
+}

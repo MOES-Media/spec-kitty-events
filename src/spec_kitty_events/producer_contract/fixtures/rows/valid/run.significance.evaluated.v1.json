@@ -1,0 +1,60 @@
+{
+  "class": "producer_row_valid",
+  "expected": "valid",
+  "type": "ai.spec-kitty.run.significance.evaluated.v1",
+  "input": {
+    "specversion": "1.0",
+    "id": "01J0000000000000000000F027",
+    "source": "/spec-kitty/missions/01J0000000000000000000MSN1",
+    "type": "ai.spec-kitty.run.significance.evaluated.v1",
+    "time": "2026-01-01T00:00:00+00:00",
+    "datacontenttype": "application/json",
+    "dataschema": "https://schemas.example.invalid/spec-kitty/run.significance.evaluated.v1",
+    "schemaversion": "4.0.0",
+    "lamportclock": 27,
+    "nodeid": "0123456789ab",
+    "missionid": "01J0000000000000000000MSN1",
+    "missionslug": "041-reducer-unification",
+    "data": {
+      "run_id": "01J0000000000000000000RUN1",
+      "decision_id": "d1",
+      "step_id": "specify",
+      "significance_score": {
+        "composite": 9,
+        "band": "medium",
+        "effective_band": "medium",
+        "hard_trigger_classes": []
+      },
+      "hard_trigger_classes": [],
+      "effective_band": "medium",
+      "actor": {
+        "actor_type": "service",
+        "actor_id": "runtime"
+      }
+    }
+  },
+  "legacy_row": {
+    "event_id": "01J0000000000000000000F027",
+    "row_version": 1,
+    "event_type": "SignificanceEvaluated",
+    "timestamp": "2026-01-01T00:00:00+00:00",
+    "payload": {
+      "run_id": "01J0000000000000000000RUN1",
+      "decision_id": "d1",
+      "step_id": "specify",
+      "significance_score": {
+        "composite": 9,
+        "band": "medium",
+        "effective_band": "medium",
+        "hard_trigger_classes": []
+      },
+      "hard_trigger_classes": [],
+      "effective_band": "medium",
+      "actor": {
+        "actor_type": "service",
+        "actor_id": "runtime"
+      }
+    }
+  },
+  "notes": "Significance scored."
+}

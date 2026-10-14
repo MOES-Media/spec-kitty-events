@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/spec-kitty/retrospective.capturefailed.v1",
+  "title": "ai.spec-kitty.retrospective.capturefailed.v1 data",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "lamport": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Legacy per-Mission counter; not lamportclock."
+    },
+    "wp_id": {
+      "type": "null"
+    },
+    "force": {
+      "type": "boolean"
+    },
+    "execution_mode": {
+      "type": "string",
+      "enum": [
+        "worktree",
+        "main"
+      ]
+    },
+    "actorbinding": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "human",
+            "agent",
+            "runtime"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "display": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "display"
+      ],
+      "additionalProperties": false,
+      "description": "Retrospective actor: kept whole in data.actorbinding; its id is the actor attribute."
+    },
+    "failure_category": {
+      "type": "string",
+      "enum": [
+        "missing_artifacts",
+        "generator_exception",
+        "schema_validation_error",
+        "io_error",
+        "other"
+      ]
+    },
+    "failure_message": {
+      "type": "string"
+    },
+    "remediation_hint": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "policy_source": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "attempted_provenance_kind": {
+      "type": "string",
+      "enum": [
+        "runtime_post_completion",
+        "runtime_strict_gate",
+        "runtime_abandoned",
+        "explicit_create",
+        "backfill",
+        "synthesize_fabricate"
+      ]
+    },
+    "missing_artifacts": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "lamport",
+    "wp_id",
+    "force",
+    "execution_mode",
+    "actorbinding",
+    "failure_category",
+    "failure_message",
+    "remediation_hint",
+    "policy_source",
+    "attempted_provenance_kind",
+    "missing_artifacts"
+  ],
+  "additionalProperties": false,
+  "description": "Retrospective generation failed under a warn failure policy."
+}

@@ -101,6 +101,12 @@ spec_kitty_events = [
     "conformance/fixtures/work_observation/invalid/*.json",
     "conformance/fixtures/work_observation/replay/*.jsonl",
     "conformance/fixtures/work_observation/replay/*.json",
+    "producer_contract/*.json",
+    "producer_contract/data/*.json",
+    "producer_contract/fixtures/rows/valid/*.json",
+    "producer_contract/fixtures/rows/invalid/*.json",
+    "producer_contract/fixtures/rows/legacy_invalid/*.json",
+    "producer_contract/fixtures/total_order/*.json",
 ]
 
 [tool.pytest.ini_options]

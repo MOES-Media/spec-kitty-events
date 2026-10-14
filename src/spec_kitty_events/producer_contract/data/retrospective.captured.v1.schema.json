@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/spec-kitty/retrospective.captured.v1",
+  "title": "ai.spec-kitty.retrospective.captured.v1 data",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "lamport": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Legacy per-Mission counter; not lamportclock."
+    },
+    "wp_id": {
+      "type": "null"
+    },
+    "force": {
+      "type": "boolean"
+    },
+    "execution_mode": {
+      "type": "string",
+      "enum": [
+        "worktree",
+        "main"
+      ]
+    },
+    "actorbinding": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "human",
+            "agent",
+            "runtime"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "display": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "display"
+      ],
+      "additionalProperties": false,
+      "description": "Retrospective actor: kept whole in data.actorbinding; its id is the actor attribute."
+    },
+    "findings_status": {
+      "type": "string",
+      "enum": [
+        "has_findings",
+        "ran_no_findings"
+      ]
+    },
+    "record_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generator_version": {
+      "type": "string"
+    },
+    "policy_source": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "provenance_kind": {
+      "type": "string",
+      "enum": [
+        "runtime_post_completion",
+        "runtime_strict_gate",
+        "runtime_abandoned",
+        "explicit_create",
+        "backfill",
+        "synthesize_fabricate"
+      ]
+    },
+    "proposal_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "evidence_ref_count": {
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "required": [
+    "schema_version",
+    "lamport",
+    "wp_id",
+    "force",
+    "execution_mode",
+    "actorbinding",
+    "findings_status",
+    "record_path",
+    "generator_version",
+    "policy_source",
+    "provenance_kind",
+    "proposal_count",
+    "evidence_ref_count"
+  ],
+  "additionalProperties": false,
+  "description": "A retrospective was generated and a record is on disk."
+}

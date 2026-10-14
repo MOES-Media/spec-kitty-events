@@ -1,0 +1,46 @@
+{
+  "class": "producer_row_invalid",
+  "expected": "invalid",
+  "type": "ai.spec-kitty.retrospective.captured.v1",
+  "base": "retrospective.captured.v1",
+  "violation": "enum_violation",
+  "expected_error_path": "/data/actorbinding/kind",
+  "expected_keyword": "enum",
+  "input": {
+    "specversion": "1.0",
+    "id": "01J0000000000000000000F029",
+    "source": "/spec-kitty/missions/01J0000000000000000000MSN1",
+    "type": "ai.spec-kitty.retrospective.captured.v1",
+    "time": "2026-01-01T00:00:00+00:00",
+    "datacontenttype": "application/json",
+    "dataschema": "https://schemas.example.invalid/spec-kitty/retrospective.captured.v1",
+    "schemaversion": "4.0.0",
+    "lamportclock": 29,
+    "nodeid": "0123456789ab",
+    "missionid": "01J0000000000000000000MSN1",
+    "missionslug": "041-reducer-unification",
+    "actor": "retro-runner",
+    "data": {
+      "schema_version": 1,
+      "lamport": 3,
+      "wp_id": null,
+      "force": false,
+      "execution_mode": "main",
+      "findings_status": "has_findings",
+      "record_path": "kitty-specs/demo/retrospective.yaml",
+      "generator_version": "4.0.0",
+      "policy_source": {
+        "timing": "default"
+      },
+      "provenance_kind": "runtime_post_completion",
+      "proposal_count": 2,
+      "evidence_ref_count": 5,
+      "actorbinding": {
+        "kind": "robot",
+        "id": "retro-runner",
+        "display": null
+      }
+    }
+  },
+  "notes": "kind is human, agent or runtime."
+}

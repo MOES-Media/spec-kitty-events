@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/spec-kitty/run.significance.evaluated.v1",
+  "title": "ai.spec-kitty.run.significance.evaluated.v1 data",
+  "type": "object",
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "decision_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "step_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "significance_score": {
+      "type": "object"
+    },
+    "hard_trigger_classes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "effective_band": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    "actor": {
+      "type": "object",
+      "properties": {
+        "actor_type": {
+          "type": "string",
+          "enum": [
+            "human",
+            "llm",
+            "service"
+          ]
+        },
+        "actor_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "actor_type"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "run_id",
+    "decision_id",
+    "step_id",
+    "significance_score",
+    "effective_band",
+    "actor"
+  ],
+  "additionalProperties": false,
+  "description": "The significance of a decision was scored and routed."
+}

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/spec-kitty/mission.reopened.v1",
+  "title": "ai.spec-kitty.mission.reopened.v1 data",
+  "additionalProperties": false,
+  "description": "A merged or closed Mission was returned to an actionable state.",
+  "properties": {
+    "mission_id": {
+      "description": "Canonical machine identity (ULID); lookup key.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "mission_slug": {
+      "description": "Human handle (display).",
+      "minLength": 1,
+      "type": "string"
+    },
+    "reason": {
+      "description": "Audit reason for the re-open (non-empty).",
+      "minLength": 1,
+      "type": "string"
+    },
+    "reopened_by": {
+      "description": "Detected actor who re-opened the mission.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "reopened_at": {
+      "description": "Event time (ISO-8601 UTC).",
+      "minLength": 1,
+      "type": "string"
+    },
+    "cleared_merge": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Snapshot of the merged_* fields cleared from meta.json (for reversibility/audit); null when no merge metadata was cleared."
+    }
+  },
+  "required": [
+    "mission_id",
+    "mission_slug",
+    "reason",
+    "reopened_by",
+    "reopened_at"
+  ],
+  "type": "object"
+}

@@ -1,0 +1,42 @@
+{
+  "class": "producer_row_valid",
+  "expected": "valid",
+  "type": "ai.spec-kitty.project.initialized.v1",
+  "input": {
+    "specversion": "1.0",
+    "id": "01J0000000000000000000F006",
+    "source": "/spec-kitty/projects/5c0f6f0e-3b1a-4d8e-9a55-0d7e3f2b9c11",
+    "type": "ai.spec-kitty.project.initialized.v1",
+    "time": "2026-01-01T00:00:00+00:00",
+    "datacontenttype": "application/json",
+    "dataschema": "https://schemas.example.invalid/spec-kitty/project.initialized.v1",
+    "schemaversion": "4.0.0",
+    "lamportclock": 6,
+    "nodeid": "0123456789ab",
+    "data": {
+      "project_uuid": "5c0f6f0e-3b1a-4d8e-9a55-0d7e3f2b9c11",
+      "project_slug": "demo",
+      "actor": "cli",
+      "runtime_version": "4.0.0",
+      "initialized_at": "2026-01-01T00:00:00Z"
+    }
+  },
+  "legacy_row": {
+    "event_id": "01J0000000000000000000F006",
+    "event_type": "ProjectInitialized",
+    "aggregate_id": "5c0f6f0e-3b1a-4d8e-9a55-0d7e3f2b9c11",
+    "aggregate_type": "Project",
+    "schema_version": "5.0.0",
+    "timestamp": "2026-01-01T00:00:00+00:00",
+    "payload": {
+      "project_uuid": "5c0f6f0e-3b1a-4d8e-9a55-0d7e3f2b9c11",
+      "project_slug": "demo",
+      "actor": "cli",
+      "runtime_version": "4.0.0",
+      "initialized_at": "2026-01-01T00:00:00Z"
+    },
+    "project_uuid": "5c0f6f0e-3b1a-4d8e-9a55-0d7e3f2b9c11",
+    "project_slug": "demo"
+  },
+  "notes": "Project-scoped: source is the project, no subject, no missionid."
+}
