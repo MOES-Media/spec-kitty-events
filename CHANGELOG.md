@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [10.5.0] - 2026-10-14
+
+### Added
+
+- **Producer row schemas and registry (spec-kitty-events#92, for
+  spec-kitty/spec-kitty#6185).** New `spec_kitty_events.producer_contract`: a registry of the
+  27 row kinds the Spec Kitty producer emits (`ai.spec-kitty.<name>.v1`), one
+  self-contained JSON Schema per kind for the CloudEvents `data` member, a minimal envelope
+  schema, and loaders; `row_schema()` and `legacy_row_form_schema()` compose the schema of a
+  whole CloudEvents line and of the persisted legacy line from those pieces. Producer
+  conformance fixtures (valid, invalid, legacy-invalid) ship in the wheel and run under
+  `pytest --pyargs spec_kitty_events.conformance`. Non-normative until the ADR 0001 cutover
+  release; names, prefix, `dataschema` base and lifted members are interim and await
+  maintainer confirmation.
+- **Total order over event-log rows.** New `spec_kitty_events.total_order` and
+  `contracts/total-order.md`: Lamport clock, then time, then id, then source, with every
+  clockless row first, error rows set aside rather than dropped, and deterministic dedupe
+  on `(source, id)`; thirteen packaged fixtures (the nine worked examples of
+  spec-kitty#6185 and four edge cases). No reducer uses it yet.
+
+### Compatibility
+
+- Minor release: additive modules, data files and fixtures. No existing accept/reject
+  boundary moves; the `3.0.0` envelope, `validate_strict_envelope`, the diary reducer and
+  `spec_kitty_events.Lane` are unchanged. See `COMPATIBILITY.md`.
+
 ## [10.4.6] - 2026-10-13
 
 ### Fixed
