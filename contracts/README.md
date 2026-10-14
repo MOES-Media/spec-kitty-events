@@ -15,6 +15,7 @@ recording one application of a policy.
 |---|---|
 | [`lane-vocabulary.md`](./lane-vocabulary.md) | The canonical `Lane` vocabulary, its authoritative location, and the major-bump rule for changing it |
 | [`versioning-and-compatibility.md`](./versioning-and-compatibility.md) | Package version vs on-wire envelope schema version; what requires a major bump; required artifacts on bump |
+| [`total-order.md`](./total-order.md) | The total order over event-log rows in CloudEvents form (Lamport clock, time, id, source), its error rows and dedupe rule (proposed; non-normative until the ADR 0001 cutover) |
 
 See also [`../COMPATIBILITY.md`](../COMPATIBILITY.md) — the public compatibility
 policy and the single declaration of the current package version.

@@ -1,0 +1,106 @@
+{
+  "class": "total_order",
+  "id": "11-time-forms",
+  "description": "RFC 3339 only. A leap second (:60) is the next second; t and z may be lower case; up to nine fractional digits. Ten fractional digits, a space separator, a missing offset, a date alone and hour 24 are error rows. LEAP, NEXT and LOWER are one instant: id decides.",
+  "rows": [
+    {
+      "label": "LEAP",
+      "row": {
+        "id": "01J00000000000000000000ABA",
+        "time": "2026-06-30T23:59:60Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
+      }
+    },
+    {
+      "label": "NEXT",
+      "row": {
+        "id": "01J00000000000000000000ABB",
+        "time": "2026-07-01T00:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
+      }
+    },
+    {
+      "label": "LOWER",
+      "row": {
+        "id": "01J00000000000000000000ABC",
+        "time": "2026-07-01t00:00:00z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
+      }
+    },
+    {
+      "label": "FRAC9",
+      "row": {
+        "id": "01J00000000000000000000ABD",
+        "time": "2026-07-01T00:00:00.000000001Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
+      }
+    },
+    {
+      "label": "FRAC10",
+      "row": {
+        "id": "01J00000000000000000000ABE",
+        "time": "2026-07-01T00:00:00.0000000001Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
+      }
+    },
+    {
+      "label": "SPACE",
+      "row": {
+        "id": "01J00000000000000000000ABF",
+        "time": "2026-07-01 00:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
+      }
+    },
+    {
+      "label": "NOOFF",
+      "row": {
+        "id": "01J00000000000000000000ABG",
+        "time": "2026-07-01T00:00:00",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
+      }
+    },
+    {
+      "label": "DATE",
+      "row": {
+        "id": "01J00000000000000000000ABH",
+        "time": "2026-07-01",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
+      }
+    },
+    {
+      "label": "H24",
+      "row": {
+        "id": "01J00000000000000000000ABJ",
+        "time": "2026-07-01T24:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
+      }
+    }
+  ],
+  "expected": {
+    "ordered": [
+      "LEAP",
+      "NEXT",
+      "LOWER",
+      "FRAC9"
+    ],
+    "errors": {
+      "FRAC10": "time_unparseable",
+      "SPACE": "time_unparseable",
+      "NOOFF": "time_unparseable",
+      "DATE": "time_unparseable",
+      "H24": "time_unparseable"
+    },
+    "collapsed": 0,
+    "conflicts": [],
+    "read": 9
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "class": "total_order",
+  "id": "01-two-clockless",
+  "description": "Two clockless rows at one time: id decides.",
+  "rows": [
+    {
+      "label": "A",
+      "row": {
+        "id": "01J00000000000000000000ABB",
+        "time": "2026-10-13T10:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
+      }
+    },
+    {
+      "label": "B",
+      "row": {
+        "id": "01J00000000000000000000ABA",
+        "time": "2026-10-13T10:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
+      }
+    }
+  ],
+  "expected": {
+    "ordered": [
+      "B",
+      "A"
+    ],
+    "errors": {},
+    "collapsed": 0,
+    "conflicts": [],
+    "read": 2
+  }
+}

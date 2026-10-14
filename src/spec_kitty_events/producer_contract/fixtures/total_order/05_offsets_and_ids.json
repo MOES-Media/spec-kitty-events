@@ -1,0 +1,65 @@
+{
+  "class": "total_order",
+  "id": "05-offsets-and-ids",
+  "description": "Instants, not text: A (12:00+02:00 = 10:00Z) before B (10:00:00.5Z) although the text sorts the other way. Ids are normalised before comparing: lower-case ULID C before D; a legacy UUID (U) sorts before a ULID by code point.",
+  "rows": [
+    {
+      "label": "A",
+      "row": {
+        "id": "01J00000000000000000000ABA",
+        "time": "2026-10-13T12:00:00+02:00",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
+      }
+    },
+    {
+      "label": "B",
+      "row": {
+        "id": "01J00000000000000000000ABB",
+        "time": "2026-10-13T10:00:00.5Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
+      }
+    },
+    {
+      "label": "C",
+      "row": {
+        "id": "01J00000000000000000000abc",
+        "time": "2026-10-13T11:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
+      }
+    },
+    {
+      "label": "D",
+      "row": {
+        "id": "01J00000000000000000000ABD",
+        "time": "2026-10-13T11:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
+      }
+    },
+    {
+      "label": "U",
+      "row": {
+        "id": "0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "time": "2026-10-13T11:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
+      }
+    }
+  ],
+  "expected": {
+    "ordered": [
+      "A",
+      "B",
+      "U",
+      "C",
+      "D"
+    ],
+    "errors": {},
+    "collapsed": 0,
+    "conflicts": [],
+    "read": 5
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "class": "total_order",
+  "id": "12-source-forms",
+  "description": "An absent source, a null source and an empty source are all the empty source: one identity with one id, so they collapse, and since they differ in a member other than id the group is a conflict. The survivor is the row with the smallest bytes (the empty string). A source that is not a string is an error row.",
+  "rows": [
+    {
+      "label": "ABSENT",
+      "row": {
+        "id": "01J00000000000000000000ABA",
+        "time": "2026-10-13T10:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1"
+      }
+    },
+    {
+      "label": "NUL",
+      "row": {
+        "id": "01J00000000000000000000ABA",
+        "time": "2026-10-13T10:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": null
+      }
+    },
+    {
+      "label": "EMPTY",
+      "row": {
+        "id": "01J00000000000000000000ABA",
+        "time": "2026-10-13T10:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": ""
+      }
+    },
+    {
+      "label": "OTHER",
+      "row": {
+        "id": "01J00000000000000000000ABA",
+        "time": "2026-10-13T10:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/M1"
+      }
+    },
+    {
+      "label": "NUM",
+      "row": {
+        "id": "01J00000000000000000000ABB",
+        "time": "2026-10-13T10:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": 5
+      }
+    }
+  ],
+  "expected": {
+    "ordered": [
+      "EMPTY",
+      "OTHER"
+    ],
+    "errors": {
+      "NUM": "source_invalid"
+    },
+    "collapsed": 2,
+    "conflicts": [
+      [
+        "",
+        "01J00000000000000000000ABA"
+      ]
+    ],
+    "read": 5
+  }
+}
