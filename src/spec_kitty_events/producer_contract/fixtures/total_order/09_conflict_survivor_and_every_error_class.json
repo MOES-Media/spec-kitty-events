@@ -1,0 +1,96 @@
+{
+  "class": "total_order",
+  "id": "09-conflict-survivor-and-every-error-class",
+  "description": "G and H share an id and differ in a member: the one with the smaller bytes (G) survives and the group is a conflict. X (same id, empty time) is an error row and cannot displace G. K has no id; M has lamportclock 2^31; N has an id that does not normalise. 7 read = 2 ordered + 4 errors + 1 collapsed.",
+  "rows": [
+    {
+      "label": "G",
+      "row": {
+        "id": "01J00000000000000000000ABA",
+        "time": "2026-10-13T10:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1",
+        "data": {
+          "x": "g"
+        }
+      }
+    },
+    {
+      "label": "H",
+      "row": {
+        "id": "01J00000000000000000000ABA",
+        "time": "2026-10-13T10:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1",
+        "data": {
+          "y": "h"
+        }
+      }
+    },
+    {
+      "label": "X",
+      "row": {
+        "id": "01J00000000000000000000ABA",
+        "time": "",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
+      }
+    },
+    {
+      "label": "K",
+      "row": {
+        "time": "2026-10-13T10:30:00Z",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1",
+        "type": "ai.spec-kitty.lane.transitioned.v1"
+      }
+    },
+    {
+      "label": "M",
+      "row": {
+        "id": "01J00000000000000000000ABB",
+        "time": "2026-10-13T10:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1",
+        "lamportclock": 2147483648
+      }
+    },
+    {
+      "label": "N",
+      "row": {
+        "id": "nope",
+        "time": "2026-10-13T10:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
+      }
+    },
+    {
+      "label": "Z",
+      "row": {
+        "id": "01J00000000000000000000ABC",
+        "time": "2026-10-13T11:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
+      }
+    }
+  ],
+  "expected": {
+    "ordered": [
+      "G",
+      "Z"
+    ],
+    "errors": {
+      "X": "time_unparseable",
+      "K": "id_missing",
+      "M": "clock_out_of_range",
+      "N": "id_not_normalizable"
+    },
+    "collapsed": 1,
+    "conflicts": [
+      [
+        "/spec-kitty/missions/01J0000000000000000000MSN1",
+        "01J00000000000000000000ABA"
+      ]
+    ],
+    "read": 7
+  }
+}

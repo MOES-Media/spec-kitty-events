@@ -1,0 +1,55 @@
+{
+  "class": "total_order",
+  "id": "06-error-row-and-duplicate",
+  "description": "An unparseable time is an error row, never sorted or dropped. D is byte-identical to C and collapses into it. 4 read = 2 ordered + 1 error + 1 collapsed. 'C' in ordered stands for C or D (equal bytes).",
+  "rows": [
+    {
+      "label": "A",
+      "row": {
+        "id": "01J00000000000000000000ABA",
+        "time": "2026-10-13T10:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
+      }
+    },
+    {
+      "label": "B",
+      "row": {
+        "id": "01J00000000000000000000ABB",
+        "time": "yesterday",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
+      }
+    },
+    {
+      "label": "C",
+      "row": {
+        "id": "01J00000000000000000000ABC",
+        "time": "2026-10-13T11:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
+      }
+    },
+    {
+      "label": "D",
+      "row": {
+        "id": "01J00000000000000000000ABC",
+        "time": "2026-10-13T11:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
+      }
+    }
+  ],
+  "expected": {
+    "ordered": [
+      "A",
+      "C"
+    ],
+    "errors": {
+      "B": "time_unparseable"
+    },
+    "collapsed": 1,
+    "conflicts": [],
+    "read": 4
+  }
+}

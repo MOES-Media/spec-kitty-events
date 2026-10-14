@@ -1,0 +1,104 @@
+{
+  "class": "total_order",
+  "id": "10-clock-value-types",
+  "description": "A lamportclock member that is present must be an integer in 0..2^31-1. null, a boolean, a string, a negative number, 2^31 and a number written with a decimal point (5.0) are error rows, not clockless rows. 0 and 2^31-1 are valid.",
+  "rows": [
+    {
+      "label": "Z0",
+      "row": {
+        "id": "01J00000000000000000000AB0",
+        "time": "2026-10-13T10:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1",
+        "lamportclock": 0
+      }
+    },
+    {
+      "label": "MAX",
+      "row": {
+        "id": "01J00000000000000000000AB1",
+        "time": "2026-10-13T10:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1",
+        "lamportclock": 2147483647
+      }
+    },
+    {
+      "label": "NUL",
+      "row": {
+        "id": "01J00000000000000000000AB2",
+        "time": "2026-10-13T10:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1",
+        "lamportclock": null
+      }
+    },
+    {
+      "label": "BOOL",
+      "row": {
+        "id": "01J00000000000000000000AB3",
+        "time": "2026-10-13T10:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1",
+        "lamportclock": true
+      }
+    },
+    {
+      "label": "STR",
+      "row": {
+        "id": "01J00000000000000000000AB4",
+        "time": "2026-10-13T10:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1",
+        "lamportclock": "5"
+      }
+    },
+    {
+      "label": "FLT",
+      "row": {
+        "id": "01J00000000000000000000AB5",
+        "time": "2026-10-13T10:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1",
+        "lamportclock": 5.0
+      }
+    },
+    {
+      "label": "NEG",
+      "row": {
+        "id": "01J00000000000000000000AB6",
+        "time": "2026-10-13T10:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1",
+        "lamportclock": -1
+      }
+    },
+    {
+      "label": "OVF",
+      "row": {
+        "id": "01J00000000000000000000AB7",
+        "time": "2026-10-13T10:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1",
+        "lamportclock": 2147483648
+      }
+    }
+  ],
+  "expected": {
+    "ordered": [
+      "Z0",
+      "MAX"
+    ],
+    "errors": {
+      "NUL": "clock_out_of_range",
+      "BOOL": "clock_out_of_range",
+      "STR": "clock_out_of_range",
+      "FLT": "clock_out_of_range",
+      "NEG": "clock_out_of_range",
+      "OVF": "clock_out_of_range"
+    },
+    "collapsed": 0,
+    "conflicts": [],
+    "read": 8
+  }
+}

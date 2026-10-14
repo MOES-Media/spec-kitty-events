@@ -1,0 +1,44 @@
+{
+  "class": "total_order",
+  "id": "13-rows-that-are-not-objects",
+  "description": "A line that parsed to something other than a JSON object is an error row.",
+  "rows": [
+    {
+      "label": "A",
+      "row": {
+        "id": "01J00000000000000000000ABA",
+        "time": "2026-10-13T10:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
+      }
+    },
+    {
+      "label": "ARR",
+      "row": [
+        1,
+        2
+      ]
+    },
+    {
+      "label": "STR",
+      "row": "text"
+    },
+    {
+      "label": "NUL",
+      "row": null
+    }
+  ],
+  "expected": {
+    "ordered": [
+      "A"
+    ],
+    "errors": {
+      "ARR": "row_not_object",
+      "STR": "row_not_object",
+      "NUL": "row_not_object"
+    },
+    "collapsed": 0,
+    "conflicts": [],
+    "read": 4
+  }
+}

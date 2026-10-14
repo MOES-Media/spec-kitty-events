@@ -1,0 +1,36 @@
+{
+  "class": "total_order",
+  "id": "03-mixed",
+  "description": "Every clockless row sorts before every clocked row, whatever the times.",
+  "rows": [
+    {
+      "label": "A",
+      "row": {
+        "id": "01J00000000000000000000ABA",
+        "time": "2026-10-13T23:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
+      }
+    },
+    {
+      "label": "B",
+      "row": {
+        "id": "01J00000000000000000000ABB",
+        "time": "2026-10-13T08:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1",
+        "lamportclock": 1
+      }
+    }
+  ],
+  "expected": {
+    "ordered": [
+      "A",
+      "B"
+    ],
+    "errors": {},
+    "collapsed": 0,
+    "conflicts": [],
+    "read": 2
+  }
+}

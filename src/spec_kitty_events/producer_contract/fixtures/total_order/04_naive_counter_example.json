@@ -1,0 +1,47 @@
+{
+  "class": "total_order",
+  "id": "04-naive-counter-example",
+  "description": "A comparator that uses the clock only when both rows have one is not transitive here (C<A by clock, A<B by time, B<C by time). The total order is B, C, A for every permutation.",
+  "rows": [
+    {
+      "label": "A",
+      "row": {
+        "id": "01J00000000000000000000ABA",
+        "time": "2026-10-13T10:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1",
+        "lamportclock": 5
+      }
+    },
+    {
+      "label": "B",
+      "row": {
+        "id": "01J00000000000000000000ABB",
+        "time": "2026-10-13T10:30:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1"
+      }
+    },
+    {
+      "label": "C",
+      "row": {
+        "id": "01J00000000000000000000ABC",
+        "time": "2026-10-13T11:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/01J0000000000000000000MSN1",
+        "lamportclock": 3
+      }
+    }
+  ],
+  "expected": {
+    "ordered": [
+      "B",
+      "C",
+      "A"
+    ],
+    "errors": {},
+    "collapsed": 0,
+    "conflicts": [],
+    "read": 3
+  }
+}

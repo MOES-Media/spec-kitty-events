@@ -1,0 +1,47 @@
+{
+  "class": "total_order",
+  "id": "07-source-tie-break",
+  "description": "Same clock, time and id from three sources: source is the final tie-break, the empty source (no source member) first. Without it the permutations disagree.",
+  "rows": [
+    {
+      "label": "A",
+      "row": {
+        "id": "01J00000000000000000000ABA",
+        "time": "2026-10-13T10:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/projects/P1",
+        "lamportclock": 7
+      }
+    },
+    {
+      "label": "B",
+      "row": {
+        "id": "01J00000000000000000000ABA",
+        "time": "2026-10-13T10:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "source": "/spec-kitty/missions/M1",
+        "lamportclock": 7
+      }
+    },
+    {
+      "label": "C",
+      "row": {
+        "id": "01J00000000000000000000ABA",
+        "time": "2026-10-13T10:00:00Z",
+        "type": "ai.spec-kitty.lane.transitioned.v1",
+        "lamportclock": 7
+      }
+    }
+  ],
+  "expected": {
+    "ordered": [
+      "C",
+      "B",
+      "A"
+    ],
+    "errors": {},
+    "collapsed": 0,
+    "conflicts": [],
+    "read": 3
+  }
+}
