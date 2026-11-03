@@ -30,7 +30,7 @@ dev = [
     "mypy>=1.0.0",
     "pyyaml>=6.0,<7",
     "pytest-bdd>=9.0.1,<10",
-    "gherkin-official>=29,!=31.0.0,!=32.0.0",
+    "gherkin-official>=29,!=31.0.0,!=32.0.0,<43",
 ]
 conformance = [
     "jsonschema>=4.21.0,<5.0.0",
@@ -204,5 +204,5 @@ dev = [
     # Scenario suite (tests/scenarios, #197): the reference step binding and the Gherkin
     # parser the contract check (scripts/scenario_contract.py) imports directly.
     "pytest-bdd>=9.0.1,<10",
-    "gherkin-official>=29,!=31.0.0,!=32.0.0",
+    "gherkin-official>=29,!=31.0.0,!=32.0.0,<43",
 ]

@@ -39,8 +39,9 @@ as under `11.3.0`, and the envelope `schema_version` stays `3.0.0`.
 ### Adopting 11.4.0
 
 - **spec-kitty (core)** and **spec-kitty-saas:** nothing to change.
-- **Another binding** (for example the Java binding) can reproduce the envelope verdict by
-  following the documented check order.
+- **A binding of the legacy `Event` envelope** can reproduce the envelope verdict by
+  following the documented check order. The Java binding is not one: it validates
+  CloudEvents rows, so the `envelope/` scenarios are bound in Python only.
 
 ## `11.3.0` — CloudEvents envelope profiles, the full type registry, the legacy-row upcaster and a Java binding (minor)
 
