@@ -136,7 +136,7 @@ In `src/spec_kitty_events/conformance/README.md`:
 ### T008 — `tests/test_class_fixture_verdict.py`
 
 Write one test per point:
-1. **Precedence (FR-019)**: build an envelope from `class_taxonomy/envelope_valid_canonical/mission_created_baseline.json` (load it through `importlib.resources`) and add a forbidden key (take one from `FORBIDDEN_LEGACY_KEYS`, for example `feature_slug`, if it is a member) plus an extra payload field. Assert that the code is `FORBIDDEN_KEY`. Then remove the forbidden key and assert `PAYLOAD_SCHEMA_FAIL`.
+1. **Precedence (FR-019)**: build an envelope from `class_taxonomy/envelope_valid_canonical/mission_created_baseline.json` (load it through `importlib.resources`) and add a forbidden key (take one from `FORBIDDEN_LEGACY_KEYS`, for example `feature_slug`, if it is a member) plus an extra payload field. Assert that the code is `FORBIDDEN_KEY`. Then remove the forbidden key and assert `PAYLOAD_SCHEMA_FAIL`. Add a second case: a forbidden key plus `lamport_clock: "not-an-int"`, which fails the `Event` model, must give `FORBIDDEN_KEY`. That pins check 3 before check 6; the first case only pins 3 before 7 (WP02 review, cycle 1).
 2. A non-object input (`[]`) gives `ENVELOPE_SHAPE_INVALID`. A missing `build_id` gives `ENVELOPE_SHAPE_INVALID`, with `details["missing"] == ["build_id"]`.
 3. `pytest.raises(ValueError)` for `"envelope_strict_journal"` and `"no_such_class"`.
 4. **Delegation (SC-005, class-test side)**: `import tests.test_conformance_classes as m`, then:

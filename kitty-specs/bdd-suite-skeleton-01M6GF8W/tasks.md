@@ -31,10 +31,11 @@ Subtask completion is event-sourced: record it with `spec-kitty agent tasks mark
 | T020 | Coverage cases: skipped, unregistered and removed fixture; an added fixture raises the call count (SC-002, US2) | WP05 | |
 | T021 | Real-tree contract run: 0 errors, ≥1 feature, ≥10 promises (FR-012, SC-003) | WP05 | |
 | T022 | Timing (NFR-001) and determinism (NFR-004) evidence; full blast-radius run | WP05 | |
+| T023 | Declare version 11.4.0: pyproject, lock, `__version__`, README, COMPATIBILITY section, `[Unreleased]` opening paragraph | WP01 | |
 
 ## Phase 1 — Foundations
 
-### WP01 — Dev dependencies and changelog (`tasks/WP01-dev-dependencies-and-changelog.md`)
+### WP01 — Dev dependencies, changelog and the 11.4.0 version declaration (`tasks/WP01-dev-dependencies-and-changelog.md`)
 
 - **Goal**: pytest-bdd and gherkin-official are available in both dev lists and locked, the published base requirements are proven unchanged, and the change is recorded.
 - **Priority**: P1. Every other work package runs on these dependencies.
@@ -43,6 +44,7 @@ Subtask completion is event-sourced: record it with `spec-kitty agent tasks mark
   - T001 Add dev dependencies and relock (WP01)
   - T002 Verify wheel metadata (WP01)
   - T003 Changelog fragment (WP01)
+  - T023 Version 11.4.0 declaration, required by the version-not-amended guard and found in the WP02 review (WP01)
 - **Dependencies**: none.
 - **Risks**: the lock resolves a too-new transitive version. Hold it as research R-3 says.
 

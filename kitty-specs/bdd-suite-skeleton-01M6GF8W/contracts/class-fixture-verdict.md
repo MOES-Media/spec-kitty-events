@@ -44,4 +44,5 @@ def class_fixture_verdict(fixture_class: str, fixture_input: object) -> Validati
   - the class test's helper delegates to this function (identity);
   - the README field list equals the implementation's tuple;
   - a fresh interpreter can `import spec_kitty_events` and then `spec_kitty_events.conformance.class_fixture_verdict`.
-- **README caveat for `historical_row_raw`**: it lists every code the class test accepts: `ENVELOPE_SHAPE_INVALID`, `FORBIDDEN_KEY`, `UNKNOWN_LANE` and `PAYLOAD_SCHEMA_FAIL`.
+- **README caveat for `historical_row_raw`**: it lists every code the validator may emit *instead of* the ideal `RAW_HISTORICAL_ROW`: `ENVELOPE_SHAPE_INVALID`, `FORBIDDEN_KEY`, `UNKNOWN_LANE` and `PAYLOAD_SCHEMA_FAIL`. The class test also accepts the ideal code itself.
+- **Precedence tests must kill reorderings**: an input that has a forbidden key *and* fails the `Event` model (for example `lamport_clock: "not-an-int"`) must give `FORBIDDEN_KEY`, which pins check 3 before check 6. An input with a forbidden key and an extra payload field pins check 3 before check 7 (WP02 review).
