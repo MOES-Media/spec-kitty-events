@@ -59,6 +59,22 @@ def test_forbidden_key_precedes_payload_schema_failure() -> None:
     assert without_forbidden.code is ValidationErrorCode.PAYLOAD_SCHEMA_FAIL
 
 
+def test_forbidden_key_precedes_event_model_failure() -> None:
+    assert "feature_slug" in FORBIDDEN_LEGACY_KEYS
+    envelope = _baseline_envelope()
+    envelope["lamport_clock"] = "not-an-int"
+    envelope["feature_slug"] = "legacy"
+
+    with_forbidden = class_fixture_verdict("envelope_invalid_forbidden_key", envelope)
+    assert with_forbidden is not None
+    assert with_forbidden.code is ValidationErrorCode.FORBIDDEN_KEY
+
+    del envelope["feature_slug"]
+    without_forbidden = class_fixture_verdict("envelope_invalid_shape", envelope)
+    assert without_forbidden is not None
+    assert without_forbidden.code is ValidationErrorCode.ENVELOPE_SHAPE_INVALID
+
+
 def test_non_object_input_is_envelope_shape_invalid() -> None:
     error = class_fixture_verdict("envelope_invalid_shape", [])
     assert error is not None
