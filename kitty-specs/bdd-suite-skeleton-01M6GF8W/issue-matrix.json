@@ -61,7 +61,7 @@
       "wp": null
     },
     "#199": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Follow-up slice D3 (upcast/compat/JVM binding); out of scope per spec.md C-006; corrected by comment when D1 PR opens (spec.md:216)",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -69,7 +69,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
+      "verdict": "not-applicable",
       "wp": null
     }
   },
