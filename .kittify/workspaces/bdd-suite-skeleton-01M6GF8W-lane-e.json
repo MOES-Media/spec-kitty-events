@@ -1,0 +1,23 @@
+{
+  "wp_id": "WP05",
+  "mission_slug": "bdd-suite-skeleton-01M6GF8W",
+  "worktree_path": ".worktrees/bdd-suite-skeleton-01M6GF8W-lane-e",
+  "branch_name": "kitty/mission-bdd-suite-skeleton-01M6GF8W-lane-e",
+  "base_branch": "kitty/mission-bdd-suite-skeleton-01M6GF8W",
+  "base_commit": "cb3b9846eaa7e421b11615090c603201dc51ac48",
+  "dependencies": [
+    "WP03",
+    "WP04"
+  ],
+  "created_at": "2026-11-03T12:04:13.667071+00:00",
+  "created_by": "implement-command-lane",
+  "vcs_backend": "git",
+  "lane_id": "lane-e",
+  "lane_wp_ids": [
+    "WP05"
+  ],
+  "current_wp": "WP05",
+  "lane_test_env": {
+    "SPEC_KITTY_TEST_DB_NAME": "test_bdd_suite_skeleton_01M6GF8W_lane_e"
+  }
+}
