@@ -28,10 +28,10 @@
       "criterion_id": "FR-003",
       "description": "Verify FR-003 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "10 scenarios each one @promise:PR-EVENTS-ENVELOPE-001..010; BAD_PROMISE_ID/DUPLICATE_PROMISE planted trees; tests/test_scenario_contract_real_tree.py",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-11-03T12:28:09.213052+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
