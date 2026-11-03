@@ -1,4 +1,16 @@
 {
+  "acceptance_history": [
+    {
+      "acceptance_mode": "pr",
+      "accepted_at": "2026-11-03T12:29:52.217497+00:00",
+      "accepted_by": "system",
+      "accepted_from_commit": "d3269ac492551a4e7e58c8fc6cb8598b451881ce"
+    }
+  ],
+  "acceptance_mode": "pr",
+  "accepted_at": "2026-11-03T12:29:52.217497+00:00",
+  "accepted_by": "system",
+  "accepted_from_commit": "d3269ac492551a4e7e58c8fc6cb8598b451881ce",
   "coordination_branch": "kitty/mission-bdd-suite-skeleton-01M6GF8W",
   "created_at": "2026-11-03T10:28:57.607582+00:00",
   "flattened": false,
