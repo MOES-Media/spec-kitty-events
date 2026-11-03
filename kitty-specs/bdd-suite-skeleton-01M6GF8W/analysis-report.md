@@ -4,7 +4,7 @@ artifact_type: spec-kitty.analysis-report
 command: /spec-kitty.analyze
 mission_slug: bdd-suite-skeleton-01M6GF8W
 mission_id: 01M6GF8WCN56FHB65F9WVKAGHP
-generated_at: '2026-11-03T11:34:39.829051+00:00'
+generated_at: '2026-11-03T11:47:32.119875+00:00'
 analyzer_agent: unknown
 input_artifacts:
   spec.md:
@@ -21,10 +21,10 @@ input_artifacts:
     sha256: 600f73eed353417fafe3cbe3fde6e10e2d5451eec6edb4afccd78f488c5ed6ee
 verdict: ready
 issue_counts:
-  low: 3
-  medium: 2
   high: 0
+  medium: 2
   critical: 0
+  low: 3
   info: 0
 findings:
 - id: I1
