@@ -1,6 +1,6 @@
 # Compatibility Guide
 
-**Current package version**: `11.3.0`
+**Current package version**: `11.4.0`
 
 The on-wire envelope schema version is `3.0.0` and has been unchanged since
 the cutover. The package version and the envelope schema version move
@@ -23,6 +23,24 @@ This document is the public compatibility policy for consumers of:
 - `spec-kitty-saas`
 - `spec-kitty`
 
+
+## `11.4.0` — envelope verdict made public, contract scenario suite (minor)
+
+`11.4.0` (spec-kitty-events#197) is a **minor** release, and it is additive. No envelope,
+payload, schema, fixture or verdict changes: every fixture is accepted or rejected exactly
+as under `11.3.0`, and the envelope `schema_version` stays `3.0.0`.
+
+- **New public function:** `spec_kitty_events.conformance.class_fixture_verdict` returns the
+  envelope verdict for a conformance fixture. Its check order is documented in
+  [`src/spec_kitty_events/conformance/README.md`](src/spec_kitty_events/conformance/README.md).
+- **Contract scenario suite:** a repository-only Gherkin scenario suite under
+  `tests/scenarios/` exercises the contract. It is not shipped in the package.
+
+### Adopting 11.4.0
+
+- **spec-kitty (core)** and **spec-kitty-saas:** nothing to change.
+- **Another binding** (for example the Java binding) can reproduce the envelope verdict by
+  following the documented check order.
 
 ## `11.3.0` — CloudEvents envelope profiles, the full type registry, the legacy-row upcaster and a Java binding (minor)
 
