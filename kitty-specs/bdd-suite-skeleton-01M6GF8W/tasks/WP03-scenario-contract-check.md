@@ -81,9 +81,15 @@ spec-kitty agent action implement WP03 --agent <name> --mission bdd-suite-skelet
   - Exit 2 on a usage error: an unknown NAME, or a missing directory or file.
   - Print the sorted findings as `<severity> <code> <file>:<line> <message>`, with `file` relative to the features root.
   - Exit 1 if there are any errors, otherwise 0.
-- **Public functions for tests**: `check(features: Path, steps: Mapping[str, Path], index: Path) -> list[Problem]` and `main(argv: Sequence[str] | None = None) -> int`.
-- **Parsing**: use `gherkin.parser.Parser` and `gherkin.token_scanner.TokenScanner`, or the `gherkin` API the installed version exposes.
-  - A parse exception becomes one PARSE_ERROR with its line.
+- **Public functions for tests**:
+  - `check(features: Path, steps: Mapping[str, Path], index: Path) -> list[Problem]`;
+  - `discover(features: Path) -> Discovery`, a frozen dataclass with `feature_files: tuple[str, ...]` and `promise_ids: tuple[str, ...]`, both sorted. WP05's real-tree floor uses it (post-tasks squad P-M1);
+  - `main(argv: Sequence[str] | None = None) -> int`.
+- **Order of work**: T009 → T010 → T011 → T012 → T013, with a planted tree added for each rule as soon as that rule exists. If the WP runs long, land the 18 core rules (T009–T011 and their trees) first and report; do not drop rules.
+- **Parsing**: `Parser().parse(TokenScanner(text))` (gherkin-official 42; prototyped by the squad) returns a dict.
+  - Tags carry `@` and `location.line`. Children are `background`, `rule` and `scenario`. Outlines have `examples[].tableBody[]`. Steps carry `keywordType` (`Context`, `Action`, `Outcome`, `Conjunction`), and keywords keep a trailing space.
+  - Errors raise `CompositeParserException`; take each line from `.errors[i].location`. Each becomes one PARSE_ERROR.
+  - Under `mypy --strict`, narrow children with `typing.cast` to the TypedDicts in `gherkin.parser_types`.
   - Walk Feature → (Rule →) Background, Scenario and Scenario Outline, collecting each scenario's effective tags: the union of Feature, Rule and scenario tags with the `@` stripped. For an outline, tags on an Examples block apply to that block's rows. Model each row as its own instance, as core does.
   - Background steps belong to the scenarios that follow it.
   - `And` and `But` take the keyword of the previous step.
@@ -136,26 +142,38 @@ Notes:
 ### T013 — Planted trees and `tests/test_scenario_contract.py`
 
 - **Location**: one directory per code under `tests/fixtures/scenario_contract/<CODE>/`, holding `features/`, `steps/` and, where needed, `README.md` and `<area>/PROMISES.md`.
+- **The NO_FEATURES tree** contains `features/.gitkeep`, because git tracks no empty directory. The checker ignores non-`.feature` files.
+- **The PARSE_ERROR tree** keeps a second, valid feature that carries the registered promises, so that only PARSE_ERROR fires.
 - **A shared clean baseline**: `tests/fixtures/scenario_contract/_clean/` is a minimal valid tree with one area `demo/`, one behaviour, two scenarios, a `PROMISES.md` and a README index, and its steps in `steps/demo_steps.py`. Each `<CODE>/` tree is the baseline with exactly one defect. Keep the trees tiny.
   - Keep the trees on disk rather than building them in `tmp_path`, so reviewers can read them.
   - A `README.md` in `tests/fixtures/scenario_contract/` explains the layout.
 - **Import**: the test imports the checker as `tests/test_changelog_fragments.py:21-22` does (`sys.path.insert` of `scripts/`, then `import scenario_contract`).
-- **The test** is parametrized over `sorted(os.listdir(...))` excluding `_clean` and `README.md`. For each tree:
+- **The test** is parametrized over `sorted(p.name for p in DIR.iterdir() if p.is_dir() and not p.name.startswith(("_", ".")))`. That excludes `_clean`, `README.md`, `conftest.py` and `__pycache__`. For each tree:
   - run `check(tree/"features", {"python": tree/"steps"}, tree/"README.md")`;
   - assert that the set of error codes equals `{CODE}`, where the directory name is the code;
   - also assert `_clean` gives `[]`.
   - Add a test that the set of directories equals the set of the module's 22 code constants, so no rule goes unplanted.
 - **Ruff-clean Python**: the planted step modules must be valid, ruff-clean Python. The FORBIDDEN_TEST_IMPORT tree's bad import uses `from tests.test_conformance_classes import EIGHT_CLASSES  # noqa: F401`. A PARSE_ERROR tree breaks only the `.feature` file.
 - **Keep pytest from collecting planted steps.** Name planted step modules `*_steps.py` (not `test_*`). They must not import `pytest_bdd` at module import time in a way that registers fixtures globally; the checker reads them statically only, and pytest never imports them because they don't match `test_*.py`. Add `tests/fixtures/scenario_contract/conftest.py` with `collect_ignore_glob = ["*"]` as a belt-and-braces guard.
+- Also test `discover()` on `_clean`: the expected feature files and promise ids.
 - **Also test the CLI**: `main([...])` returns 1 on a planted tree, 0 on `_clean` and 2 on a missing directory.
 
 ## Gates
 
 ```bash
 uv run pytest tests/test_scenario_contract.py --no-cov -q
-uv run ruff check . && uv run ruff format --check .
 uv run mypy --strict scripts/scenario_contract.py   # typed even though it is outside src/
 ```
+
+Every work package also runs the gate set from CLAUDE.md before handoff:
+
+```bash
+make test-fast
+uv run pytest --pyargs spec_kitty_events.conformance -q      # count must equal main's
+uv run ruff check . && uv run ruff format --check .
+uv run python scripts/changelog.py check && uv run python scripts/changelog.py guard
+```
+
 
 ## Definition of Done
 

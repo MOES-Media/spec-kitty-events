@@ -84,8 +84,8 @@ spec-kitty agent action implement WP02 --agent <name> --mission bdd-suite-skelet
 
 1. **Docstring**: say that this is the class-taxonomy envelope verdict (R4, #197), moved from `tests/test_conformance_classes.py`, and point to the README section that holds its check order.
 2. **Imports, from defining submodules only.** This is critical (squad A-M1, reproduced): importing from the root `spec_kitty_events` gives `ImportError: cannot import name 'LANE_ALIASES' from partially initialized module`. The chain is root `__init__` → `strict` → `conformance.validators` → `conformance/__init__` → this module. So:
-   - find where each name is defined with `grep -n "^LANE_ALIASES\|^class Lane\|^MISSION_CREATED\|^class MissionCreatedPayload\|^class StatusTransitionPayload\|^WP_STATUS_CHANGED" -r src/spec_kitty_events/*.py`;
-   - import it from that module (`spec_kitty_events.status`, `.lifecycle` and so on);
+   - import `Lane`, `LANE_ALIASES`, `WP_STATUS_CHANGED` and `StatusTransitionPayload` from `spec_kitty_events.status`. Use **this** `Lane`, the one the package root exports; `diary.py` has another `Lane`, with an extra `uninitialized` value, and must not be used;
+   - import `MISSION_CREATED`, `MISSION_CLOSED`, `MissionCreatedPayload` and `MissionClosedPayload` from `spec_kitty_events.lifecycle`;
    - import `Event` from `spec_kitty_events.models`, `find_forbidden_keys` and `FORBIDDEN_LEGACY_KEYS` from `spec_kitty_events.forbidden_keys`, and `ValidationError` and `ValidationErrorCode` from `spec_kitty_events.validation_errors`;
    - use pydantic's `ValidationError` aliased as `PydanticValidationError`.
 3. **Move the code.** Move `_PAYLOAD_MODELS`, `_REQUIRED_ENVELOPE_FIELDS` (exactly these 10, in this order: `event_id, event_type, aggregate_id, payload, timestamp, build_id, node_id, lamport_clock, correlation_id, project_uuid`), `_CANONICAL_LANE_VALUES`, `_classify_pydantic_error`, `_envelope_verdict` (was `_validate_envelope`) and `_lane_mapping_verdict` (was `_validate_lane_mapping`).
@@ -136,9 +136,12 @@ Write one test per point:
 1. **Precedence (FR-019)**: build an envelope from `class_taxonomy/envelope_valid_canonical/mission_created_baseline.json` (load it through `importlib.resources`) and add a forbidden key (take one from `FORBIDDEN_LEGACY_KEYS`, for example `feature_slug`, if it is a member) plus an extra payload field. Assert that the code is `FORBIDDEN_KEY`. Then remove the forbidden key and assert `PAYLOAD_SCHEMA_FAIL`.
 2. A non-object input (`[]`) gives `ENVELOPE_SHAPE_INVALID`. A missing `build_id` gives `ENVELOPE_SHAPE_INVALID`, with `details["missing"] == ["build_id"]`.
 3. `pytest.raises(ValueError)` for `"envelope_strict_journal"` and `"no_such_class"`.
-4. **Identity (SC-005)**: `import tests.test_conformance_classes as m`, then assert both of these:
-   - `m.class_fixture_verdict is spec_kitty_events.conformance.class_fixture_verdict`. The test module imports the public name.
-   - For all 26 `classes.entries`, `m._validate_for_class(cls, input)` equals `_ValidationOutcome(ok=v is None, error=v)`, where `v = class_fixture_verdict(cls, input)`.
+4. **Delegation (SC-005, class-test side)**: `import tests.test_conformance_classes as m`, then:
+   - assert `m.class_fixture_verdict is spec_kitty_events.conformance.class_fixture_verdict`;
+   - `monkeypatch.setattr(m, "class_fixture_verdict", spy)`, where the spy records its calls and returns a sentinel `ValidationError`;
+   - call `m._validate_for_class("envelope_invalid_shape", {})` and assert the spy was called once with those arguments, and that the result carries the sentinel. This proves the helper holds no verdict logic of its own;
+   - assert that none of `_REQUIRED_ENVELOPE_FIELDS`, `_PAYLOAD_MODELS` or `_classify_pydantic_error` remains as an attribute of `m`.
+   - The step-binding side of SC-005 is proven in WP05 (T020).
 5. **README equals tuple**: parse the README row 2 code list and compare it with `class_verdict._REQUIRED_ENVELOPE_FIELDS`. Importing a module-private name from a test is acceptable here; this is the package's own test.
 6. **Fresh-interpreter import**: run `subprocess.run([sys.executable, "-c", "import spec_kitty_events; import spec_kitty_events.conformance as c; c.class_fixture_verdict"], check=True)`.
 
@@ -152,6 +155,15 @@ make test-fast
 ```
 
 Record the commands and counts in the handoff.
+
+Every work package also runs the gate set from CLAUDE.md before handoff:
+
+```bash
+make test-fast
+uv run pytest --pyargs spec_kitty_events.conformance -q      # count must equal main's
+uv run ruff check . && uv run ruff format --check .
+uv run python scripts/changelog.py check && uv run python scripts/changelog.py guard
+```
 
 ## Definition of Done
 
@@ -168,3 +180,4 @@ Record the commands and counts in the handoff.
 - Grep the diff for `assert` changes.
 - Run the fresh-interpreter import yourself.
 - Confirm that `__all__` gained exactly one name.
+- Note in the handoff that the new public symbol implies a minor version, which the release PR handles. No version or COMPATIBILITY.md edit is made here.

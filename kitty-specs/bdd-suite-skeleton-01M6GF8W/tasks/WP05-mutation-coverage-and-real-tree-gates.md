@@ -86,26 +86,30 @@ In `Makefile`, add `uv run python scripts/scenario_contract.py` to the `lint` ta
 ### T019 — Mutation table and grouped pytester runs (SC-004)
 
 - **File**: `tests/scenarios/test_pinned_verdict_mutations.py`. The repo does not enable `pytester` (there is no `pytest_plugins` in `tests/conftest.py`), and a non-root conftest cannot enable it. So run the inner suite with `pytest.main`, in-process:
-  - call `pytest.main(["tests/scenarios/test_envelope.py", "-p", "no:cacheprovider", "-o", "addopts=", "-q"], plugins=[collector])`, where `collector` is a small object whose `pytest_runtest_logreport(report)` records `(report.nodeid, report.when, report.outcome)`;
+  - call `pytest.main([str(Path(__file__).parent / "test_envelope.py"), "-p", "no:cacheprovider", "-o", "addopts=", "-q", "--tb=no"], plugins=[collector])`, where `collector` is a small object whose `pytest_runtest_logreport(report)` records `(report.nodeid, report.when, report.outcome)`. The path must not depend on the working directory. The squad prototyped four nested runs, including under an outer `--cov`, with no leaks;
   - set `SPEC_KITTY_SCENARIO_FIXTURES` with `monkeypatch.setenv`. The binding reads it at call time (WP04), so a shared `sys.modules` is safe;
   - if in-process runs prove flaky (module state leaking between runs), fall back to `subprocess.run([sys.executable, "-m", "pytest", ...])` with JUnit XML, and record the switch and its timing in the module docstring.
 - **Temporary copy**: `shutil.copytree` of the package fixtures directory, from `importlib.resources.files("spec_kitty_events.conformance") / "fixtures"`, into `tmp_path`, once per run group (a module-scoped fixture copying from a pristine template).
-- **The table**:
+- **The table**. It has two kinds of mutation: *pin* mutations change what a fixture pins, while leaving its input alone; *input* mutations change the input and leave its pin. Taxonomy pins are edited in **both** the register entry and the file, so that the Arrange agreement check passes and the Assert step is what fails.
 
-  | Promise | Mutation (in the tmp copy) | Expected failing scenarios |
-  |---|---|---|
-  | 001 | `envelope_valid_canonical/mission_created_baseline.json`: delete `input.build_id` | {001} |
-  | 002 | one synthesized fixture: delete `input.event_id` | {002} |
-  | 003 | one forbidden-key fixture: set `expected_error_code` to `UNKNOWN_LANE` | {003} |
-  | 004 | one unknown-lane fixture: set the code to `FORBIDDEN_KEY` | {004} |
-  | 005 | one payload-schema fixture: set the code to `ENVELOPE_SHAPE_INVALID` | {005} |
-  | 006 | one shape fixture: set the code to `PAYLOAD_SCHEMA_FAIL` | {006} |
-  | 007 | one historical fixture: flip the **register** entry `expected` from invalid to valid (spec SC-004) | {007} |
-  | 008 | `skew_missing_version.json`: reverse `expected_error_codes` (a multi-code list; check it has ≥2 entries) | {008} |
-  | 009 | `unknown_event_type.json`: set `expected_error_codes` to `["SCHEMA_VERSION_MISSING"]`, or any other code from the closed vocabulary | {008, 009} |
-  | 010 | a lane-mapping valid fixture: change `canonical_lane` | {010} |
+  | Promise | Kind | Mutation (in the tmp copy) | Expected failing scenarios |
+  |---|---|---|---|
+  | 001 | pin | `mission_created_baseline.json`: `expected` → `invalid`, plus `expected_error_code: ENVELOPE_SHAPE_INVALID` | {001} |
+  | 001 | input | `mission_created_baseline.json`: delete `input.build_id` | {001} |
+  | 002 | pin | one synthesized fixture: `expected` → `invalid`, plus a code | {002} |
+  | 002 | input | the same fixture: delete `input.event_id` | {002} |
+  | 003 | pin | one forbidden-key fixture: `expected_error_code` → `UNKNOWN_LANE` | {003} |
+  | 004 | pin | one unknown-lane fixture: code → `FORBIDDEN_KEY` | {004} |
+  | 005 | pin | one payload-schema fixture: code → `ENVELOPE_SHAPE_INVALID` | {005} |
+  | 006 | pin | one shape fixture: code → `PAYLOAD_SCHEMA_FAIL` | {006} |
+  | 007 | pin | one historical fixture: `expected` → `valid` in register **and** file (spec SC-004) | {007} |
+  | 008 | pin | `skew_missing_version.json`: reverse `expected_error_codes` (`[ENVELOPE_SHAPE_INVALID, UNSUPPORTED_SCHEMA_VERSION]`, verified to hold two codes) | {008} |
+  | 009 | pin | `unknown_event_type.json`: `expected_error_codes` → `["UNSUPPORTED_SCHEMA_VERSION"]`, a real `ValidationErrorCode` | {008, 009}: 009's Then step also checks the pin (WP04) |
+  | 009 | input | `unknown_event_type.json`: `input.event_type` → `MissionStarted`, a registered strict type | {008, 009} |
+  | 010 | pin | the invalid lane-mapping fixture: `expected` → `valid` in register and file | {010} |
+  | 010 | input | a valid lane-mapping fixture: change `canonical_lane` | {010} |
 
-- **Groups**: mutations of disjoint classes share one run. 008 and 009 share a class, so put them in different runs. Two or three runs in total.
+- **Groups**: mutations of disjoint classes share one run. Rows of the same class, and all 008/009 rows, go in different runs. Expect about four runs.
 - For each run, assert that the set of failed scenario ids equals the union of the group's expected sets, and that each expected promise's scenario is among them. Map test names to promises with the scenario titles, or by reading the features' `@promise` tags.
 - Also run once with **no** mutation and assert 10 passed. This control proves the copy and the environment variable work.
 
@@ -115,14 +119,21 @@ These are separate runs, or combined into the groups above where the classes are
 
 1. **Unregistered extra file**: copy a canonical fixture to `envelope_valid_canonical/extra.json` without registering it. 001 fails in Arrange with a register/disk mismatch message.
 2. **Removed registered file**: delete one forbidden-key fixture file. 003 fails.
-3. **Added, correctly registered fixture**: copy a canonical fixture under a new name, and append a matching `classes.entries` row to the tmp `manifest.json`. 001 still passes. Then add a second fixture, registered but with a wrong pin; 001 fails. Together the two prove that an added fixture is evaluated without any feature-file edit.
+3. **Added, correctly registered fixture, with a call count (SC-002)**: copy a canonical fixture under a new name and append a matching `classes.entries` row. Monkeypatch `tests.scenarios.steps.envelope_steps.class_fixture_verdict` with a counting spy that delegates to the real function, then run the inner suite. Assert:
+   - 001 passes;
+   - the spy's call count for class `envelope_valid_canonical` is exactly one more than in the unmutated control run.
+
+   This also proves the binding side of SC-005, because the binding really calls the public function.
+3b. **Strict side**: the same spy on `validate_strict_envelope`. Its call count equals the number of strict-journal files on disk, plus 1 for 009.
+3c. **Skipped fixture (SC-002)**: monkeypatch `envelope_steps._evaluate` with a wrapper that silently drops one chosen case id, neither counting nor storing it. Only `Then every selected fixture was evaluated` of the covering scenario fails. Assert exactly that failure.
 4. **Unknown register id**: unit-test the binding's `select_id` helper, imported from `tests.scenarios.steps.envelope_steps`. That is allowed, because it is inside `tests/scenarios`. With an id that does not exist, it raises `pytest.fail.Exception`.
 
 ### T021 — Real-tree contract run (FR-012, SC-003)
 
 Create `tests/test_scenario_contract_real_tree.py`. Import the checker the way `tests/test_changelog_fragments.py:21-22` imports `scripts/changelog.py`: `sys.path.insert(0, <repo>/scripts)`, then `import scenario_contract`. Make WP03's `tests/test_scenario_contract.py` use the same pattern. Then call `check()` with the defaults and assert:
 - 0 error findings;
-- at least 1 feature file and at least 10 distinct promise ids, using a small helper or the parse result the checker exposes. If the checker has no public discovery count, add an optional `stats` out-parameter to `check()`. WP03 owns `scripts/scenario_contract.py`, so making this change here is an out-of-map edit: record it with a one-line rationale.
+- with `discover()` (WP03), at least 1 feature file and at least 10 distinct promise ids;
+- the promise ids are exactly `PR-EVENTS-ENVELOPE-001` to `-010`.
 
 ### T022 — Timing, determinism and blast radius
 
@@ -132,6 +143,16 @@ Create `tests/test_scenario_contract_real_tree.py`. Import the checker the way `
   - `git diff origin/main --stat -- src/spec_kitty_events/schemas src/spec_kitty_events/conformance/fixtures` must be empty;
   - `uv run pytest --pyargs spec_kitty_events.conformance -q` must give the same count as `main`.
 - **Blast radius**: `make test-fast` and `make lint`. Record the commands and counts for the PR (§6).
+- **Reopen path**: if the real-tree check finds a disagreement between WP03's grammar and WP04's README or PROMISES, fix the side that departs from `contracts/scenario-contract-check.md` § "Register and index grammar", as a one-line-rationale out-of-map edit. If the contract itself is ambiguous, STOP and escalate.
+
+Every work package also runs the gate set from CLAUDE.md before handoff:
+
+```bash
+make test-fast
+uv run pytest --pyargs spec_kitty_events.conformance -q      # count must equal main's
+uv run ruff check . && uv run ruff format --check .
+uv run python scripts/changelog.py check && uv run python scripts/changelog.py guard
+```
 
 ## Definition of Done
 

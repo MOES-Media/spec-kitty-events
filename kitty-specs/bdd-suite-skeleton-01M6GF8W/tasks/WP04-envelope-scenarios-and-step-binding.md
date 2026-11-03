@@ -45,6 +45,7 @@ create_intent:
 - tests/scenarios/conftest.py
 - tests/scenarios/README.md
 - tests/scenarios/test_envelope.py
+- tests/scenarios/test_tag_hook.py
 - tests/scenarios/steps/__init__.py
 - tests/scenarios/steps/envelope_steps.py
 - tests/scenarios/envelope/PROMISES.md
@@ -58,6 +59,7 @@ owned_files:
 - tests/scenarios/conftest.py
 - tests/scenarios/README.md
 - tests/scenarios/test_envelope.py
+- tests/scenarios/test_tag_hook.py
 - tests/scenarios/steps/**
 - tests/scenarios/envelope/**
 role: implementer
@@ -132,7 +134,9 @@ spec-kitty agent action implement WP04 --agent <name> --mission bdd-suite-skelet
     - Disk is `sorted((root/"class_taxonomy"/fixture_class).rglob("*.json"))`; recurse, because `lane_mapping_legacy` has `valid/` and `invalid/` sub-folders.
     - Compare the set of register paths with the set of disk paths, relative to `root`. If they differ, call `pytest.fail` listing both differences.
     - If the selection is empty, call `pytest.fail`.
-    - Return ordered `Case` records: id, path, the parsed file, and the pins (`expected`, `expected_error_code` or `expected_error_codes`). For taxonomy classes, `expected` comes from the register entry; check that the file's `expected` agrees, if it has one.
+    - Return ordered `Case` records: id, path, the parsed file, and the pins.
+      - For taxonomy classes, `expected` and `expected_error_code` come from the **register** entry. If the file carries either, it must agree, or `pytest.fail` (the class test does the same around line 396).
+      - For strict-journal, the pins come from the file (`expected`, `expected_error_codes`). The top-level register's `expected_result` must agree with the file's `expected`.
   - `select_id(root, fixture_class, fixture_id)`: the same selection, then the one case whose register id matches. If none matches, call `pytest.fail`.
 - **A context object** shared between steps (a pytest fixture `scenario_ctx` returning a dataclass) holds:
   - `cases`, the selected cases;
@@ -147,13 +151,13 @@ spec-kitty agent action implement WP04 --agent <name> --mission bdd-suite-skelet
     - `When each envelope is validated`: calls `class_fixture_verdict(fixture_class, case.input)` per case and stores `None` or the `ValidationError`;
     - `When each envelope is validated under the strict journal profile`: calls `validate_strict_envelope(case.input)` and stores the list of codes;
     - `When each legacy lane is resolved`: calls `class_fixture_verdict("lane_mapping_legacy", case.input)`.
-    - Each call goes through one wrapper that increments `calls`. Never short-circuit; evaluate every case.
+    - Each call goes through one module-level function, `_evaluate(ctx, verdict_fn, case)`, which increments `ctx.calls` and stores the outcome. Look the verdict function up by module attribute at call time (`class_fixture_verdict`, `validate_strict_envelope`), so a test can monkeypatch it. WP05 monkeypatches both to prove the binding uses them and evaluates every case. Never short-circuit.
   - **Assert**. Each collects every mismatch and fails once, listing them all.
     - `Then each is accepted`: every pin is `valid`, and every outcome is `None` or an empty list.
     - `Then each is refused with exactly the code its fixture pins`: every pin is `invalid`, and each outcome's code equals `expected_error_code`.
     - `Then each is refused`: every pin is `invalid`, and every outcome is not `None`. This is for `historical_row_raw`; its docstring cites the README caveat.
     - `Then each is accepted or refused with exactly the codes its fixture pins`: covers the strict profile, where the ordered code list equals `expected_error_codes`, and the lane mapping, a mix of valid and invalid with one code.
-    - `Then it is refused with the code "{code}"`.
+    - `Then it is refused with the code "{code}"`: the outcome's codes equal `[code]` **and** the fixture's pin equals `[code]`. A pin mutation therefore fails this step as well as 008's (post-tasks squad R-M2).
     - `Then every selected fixture was evaluated`: `calls == disk_count == len(cases)`.
 - Read the shape of `validate_strict_envelope`'s result in `src/spec_kitty_events/strict.py` and in `tests/test_envelope_strict_journal_class.py:70-85`, and compare codes the same way that test does. Do not copy its code; call the public function.
 
@@ -193,17 +197,29 @@ Add a short paragraph stating that `envelope/` is bound in Python only by design
   scenarios("envelope")
   ```
 - Run `uv run pytest tests/scenarios --no-cov -q -W error::pytest.PytestUnknownMarkWarning`. It must show 10 passed and 0 skipped.
-- Run the contract check against the real tree, if WP03 has merged into your lane base: `uv run python scripts/scenario_contract.py`. It must exit 0. Otherwise note it in the handoff; WP05 runs it.
+- The README steps table and the `PROMISES.md` grammar must follow `contracts/scenario-contract-check.md` § "Register and index grammar", the same text WP03 implements. If WP03 has merged into your lane base, run `uv run python scripts/scenario_contract.py`; it must exit 0. Either way, WP05 runs it as the gate.
+- **`tests/scenarios/test_tag_hook.py`** (FR-004 executable check): import the conftest's `pytest_bdd_apply_tag` and apply it to a dummy function.
+  - `wip` adds a `skip` mark and returns `True`.
+  - `manual` adds a `skip` mark.
+  - `promise:PR-X-001`, `wip-owner:a`, `wip-since:2026-11-03`, `qa:x`, `defect:1` and a bare `smoke` return `True` and add no mark.
+  - Add `tests/scenarios/test_tag_hook.py` to this WP's files.
 - Check that the README steps table lists every phrase exactly once, with placeholder names that match the definitions.
 
 ## Gates
 
 ```bash
 uv run pytest tests/scenarios --no-cov -q -W error::pytest.PytestUnknownMarkWarning
-uv run pytest --pyargs spec_kitty_events.conformance -q     # unchanged count
-uv run ruff check . && uv run ruff format --check .
-make test-fast
 ```
+
+Every work package also runs the gate set from CLAUDE.md before handoff:
+
+```bash
+make test-fast
+uv run pytest --pyargs spec_kitty_events.conformance -q      # count must equal main's
+uv run ruff check . && uv run ruff format --check .
+uv run python scripts/changelog.py check && uv run python scripts/changelog.py guard
+```
+
 
 ## Definition of Done
 

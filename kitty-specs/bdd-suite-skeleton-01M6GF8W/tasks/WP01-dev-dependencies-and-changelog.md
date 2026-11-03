@@ -48,7 +48,7 @@ Make `pytest-bdd` and `gherkin-official` available wherever the repo's tests run
 - the `dev` dependency group, used by `uv run` and `make test-fast`;
 - the `[project.optional-dependencies].dev` extra, installed by the required `acceptance` check as `.[dev,conformance]`.
 
-Lock them reproducibly, prove that the published package's base requirements are unchanged, and record the mission's change as a single changelog fragment.
+Lock them reproducibly at pytest-bdd 9.0.1, prove that the published package's base requirements are unchanged, and record the mission's change as a single changelog fragment.
 
 ## Branch Strategy
 
@@ -62,7 +62,7 @@ spec-kitty agent action implement WP01 --agent <name> --mission bdd-suite-skelet
 
 - The lock would change the version of any package already in `uv.lock` other than by adding new ones. `typing-extensions` and `packaging` are already locked and must not move.
 - A runtime dependency (`[project].dependencies`) would need to change.
-- pytest-bdd 9.0.0 cannot resolve against the locked pytest 9.1.1.
+- pytest-bdd 9.0.1 cannot resolve against the locked pytest 9.1.1.
 
 ## Subtasks
 
@@ -73,23 +73,23 @@ spec-kitty agent action implement WP01 --agent <name> --mission bdd-suite-skelet
      ```toml
      # Scenario suite (tests/scenarios, #197): the reference step binding and the Gherkin
      # parser the contract check (scripts/scenario_contract.py) imports directly.
-     "pytest-bdd>=9.0,<10",
+     "pytest-bdd>=9.0.1,<10",
      "gherkin-official>=29,!=31.0.0,!=32.0.0",
      ```
    - In `[project.optional-dependencies].dev`, add the same two lines. `acceptance.yml` installs this extra, not the group.
    - Do not touch `[project].dependencies` or the `conformance` extra.
 2. Relock, holding pytest-bdd at the version vetted in research R-3:
    ```bash
-   uv lock --upgrade-package pytest-bdd==9.0.0
+   uv lock --upgrade-package pytest-bdd==9.0.1
    ```
    - If `parse` resolves to anything newer than 1.22.4, re-run with `--upgrade-package parse==1.22.4`.
    - Record the resolved versions of pytest-bdd, gherkin-official, mako, MarkupSafe, parse, parse-type and six.
 3. Run `git diff uv.lock` and confirm that it only adds packages, plus the root project's dependency lists. The diff must not change any pre-existing package version.
-4. Run `uv sync` and then `uv run python -c "import pytest_bdd, gherkin; print(pytest_bdd.__version__)"`.
+4. Run `uv sync` and then `uv run python -c "import importlib.metadata as m, pytest_bdd, gherkin; print(m.version('pytest-bdd'))"`. pytest-bdd has no `__version__` attribute.
 
 **Validation**:
 - Both lists contain both lines.
-- The lock holds pytest-bdd 9.0.0.
+- The lock holds pytest-bdd 9.0.1. Its floor matters: 9.0.0 breaks on pytest 9.2.0 (`FixtureManager` has no `_arg2fixturedefs`), and `acceptance` installs unlocked (post-tasks squad, I-m1).
 - No existing locked version changes.
 
 ### T002 — Verify the wheel metadata
@@ -116,7 +116,18 @@ section: Added
   - New dev dependencies `pytest-bdd` and `gherkin-official`, in the dependency group and the `dev` extra. Runtime requirements are unchanged.
 ```
 
-Then run `uv run python scripts/changelog.py check && uv run python scripts/changelog.py guard`. Do **not** edit `CHANGELOG.md`.
+Then run `uv run python scripts/changelog.py check && uv run python scripts/changelog.py guard`, and `grep -n 'class_fixture_verdict' docs/changelog/unreleased/197-bdd-suite-skeleton.md`, which is FR-022's executable check. Do **not** edit `CHANGELOG.md`.
+
+**COMPATIBILITY.md**: add no entry. Its sections are written per release, by the release PR, which folds this fragment into the next minor's section. Say so in the handoff.
+
+Every work package also runs the gate set from CLAUDE.md before handoff:
+
+```bash
+make test-fast
+uv run pytest --pyargs spec_kitty_events.conformance -q      # count must equal main's
+uv run ruff check . && uv run ruff format --check .
+uv run python scripts/changelog.py check && uv run python scripts/changelog.py guard
+```
 
 ## Definition of Done
 
