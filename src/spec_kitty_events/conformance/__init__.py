@@ -3,6 +3,7 @@
 Run: pytest --pyargs spec_kitty_events.conformance
 """
 
+from spec_kitty_events.conformance.class_verdict import class_fixture_verdict
 from spec_kitty_events.conformance.loader import (
     FixtureCase,
     load_fixtures,
@@ -36,6 +37,7 @@ __all__ = [
     "assert_payload_conforms",
     "assert_payload_fails",
     "assert_producer_occurrence_preserved",
+    "class_fixture_verdict",
     "load_fixtures",
     "load_reducer_output",
     "load_replay_stream",
