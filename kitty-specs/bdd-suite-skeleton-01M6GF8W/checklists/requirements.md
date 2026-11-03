@@ -37,3 +37,4 @@
 ## Notes
 
 - Iteration 1: all items pass.
+- Iteration 2 (after the post-specify squad, `research/squad-post-specify.md`): spec revision 2; all items pass.
