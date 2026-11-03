@@ -158,10 +158,10 @@
       "criterion_id": "FR-016",
       "description": "Verify FR-016 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "strict-journal-profile.feature (008) green; reversed and second-code-only mutations fail {008}",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-11-03T12:29:16.945823+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
