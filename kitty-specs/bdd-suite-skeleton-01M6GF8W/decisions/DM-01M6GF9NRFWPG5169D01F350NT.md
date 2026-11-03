@@ -4,8 +4,9 @@
 - **Origin flow:** `specify`
 - **Slot key:** `specify.intent.summary-confirmation`
 - **Input key:** `intent_summary_confirmation`
-- **Status:** `open`
+- **Status:** `resolved`
 - **Created:** `2026-11-03T10:29:22.832062+00:00`
+- **Resolved:** `2026-11-03T10:35:36.028927+00:00`
 - **Opened by:** `cli`
 - **Other answer:** `false`
 
@@ -21,7 +22,7 @@ Does the Intent Summary for D1 (#197) capture what we are building: actor, trigg
 
 ## Final answer
 
-_(none)_
+Confirm as written
 
 ## Rationale
 
@@ -30,3 +31,4 @@ _(none)_
 ## Change log
 
 - `2026-11-03T10:29:22.832062+00:00` — opened
+- `2026-11-03T10:35:36.028927+00:00` — resolved (final_answer="Confirm as written")
