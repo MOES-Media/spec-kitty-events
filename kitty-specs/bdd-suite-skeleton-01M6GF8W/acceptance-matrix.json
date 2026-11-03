@@ -198,10 +198,10 @@
       "criterion_id": "FR-020",
       "description": "Verify FR-020 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "pyproject.toml dev group + dev extra (pytest-bdd>=9.0.1,<10, gherkin-official); uv.lock; tests/scenarios/test_envelope.py collected by pytest",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-11-03T12:29:36.491153+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
