@@ -5,7 +5,7 @@
   "friendly_name": "BDD suite skeleton and envelope scenarios",
   "mid8": "01M6GF8W",
   "mission_id": "01M6GF8WCN56FHB65F9WVKAGHP",
-  "mission_number": null,
+  "mission_number": 24,
   "mission_slug": "bdd-suite-skeleton-01M6GF8W",
   "mission_type": "software-dev",
   "pr_bound": true,
