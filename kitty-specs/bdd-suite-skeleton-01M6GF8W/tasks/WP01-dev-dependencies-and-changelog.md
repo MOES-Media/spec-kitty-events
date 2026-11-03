@@ -36,6 +36,7 @@ owned_files:
 - COMPATIBILITY.md
 - README.md
 - CHANGELOG.md
+- java/build.gradle.kts
 role: implementer
 tags: []
 tracker_refs: []
@@ -141,11 +142,13 @@ Edit only the version declarations:
    - add a new section above the `11.3.0` one, headed ``## `11.4.0` — envelope verdict made public, contract scenario suite (minor)``. It says the release is additive: no envelope, payload, schema, fixture or verdict changes. It names the new public `spec_kitty_events.conformance.class_fixture_verdict` and its documented check order (link `src/spec_kitty_events/conformance/README.md`), and notes the repository-only scenario suite (`tests/scenarios/`, not shipped).
    - Add a short `### Adopting 11.4.0` subsection: core and saas need no change; another binding can reproduce the envelope verdict from the documented order.
    - Read the 11.2.1 and 11.3.0 sections for tone and shape, and keep the section-ordering contract that `tests/test_compatibility_doc.py` checks.
+6. `java/build.gradle.kts`: change only line 14, `version = "11.3.0"`, to `"11.4.0"`. ADR 0004 decision 3 keeps one version line for both artifacts, and the `checkVersionMatchesPyproject` task (run by `:java-binding:check`, `make test-java` and `verifyAll`) fails if the two differ (WP01 review, cycle 2). Do **not** touch `StatusReducer.PORTED_EVENTS_VERSION` or the service conformance `manifest.json` `specKittyEventsVersion`; those are tied to the port review, not to pyproject.
 5. `CHANGELOG.md`: change **only** the opening paragraph of `## [Unreleased]` ("…the version stays `11.3.0`…"), which the fragments README allows a version-bumping PR to correct. It should say the version moves to `11.4.0` for a new public conformance function, and keep the sentence about the services. Do **not** touch any `###` subsection; `changelog.py guard` enforces this.
 
 **Validation**:
 - `uv run pytest tests/test_compatibility_doc.py tests/test_version_not_amended.py --no-cov -q` is green.
 - `uv run python scripts/check_version_not_amended.py` exits 0.
+- `make test-java` passes, or, if Maven Central rate-limits the sandbox (HTTP 429), the Python equivalent of `checkVersionMatchesPyproject` passes: `java/build.gradle.kts` `version` equals the `pyproject.toml` `version`. Record which one ran.
 - `changelog.py check` and `guard` are green.
 
 Every work package also runs the gate set from CLAUDE.md before handoff:
