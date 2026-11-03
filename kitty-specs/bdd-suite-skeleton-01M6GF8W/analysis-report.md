@@ -4,7 +4,7 @@ artifact_type: spec-kitty.analysis-report
 command: /spec-kitty.analyze
 mission_slug: bdd-suite-skeleton-01M6GF8W
 mission_id: 01M6GF8WCN56FHB65F9WVKAGHP
-generated_at: '2026-11-03T11:11:43.812687+00:00'
+generated_at: '2026-11-03T11:20:33.450812+00:00'
 analyzer_agent: unknown
 input_artifacts:
   spec.md:
@@ -15,16 +15,16 @@ input_artifacts:
     sha256: e5d82f662568595e43e94ee88dc48a123226391589d1ad56f2b052c12d48782f
   tasks.md:
     path: kitty-specs/bdd-suite-skeleton-01M6GF8W/tasks.md
-    sha256: 37fe9bd01e5c47b69595d41afaf124664eb1cf1577c5c2ea5c31f8bf6c56f40e
+    sha256: 7cc842dfe4372fbb49d2d882ae643d93aa7cdd93fd0db06aeb50e891dcf7cd93
   charter:
     path: .kittify/charter/charter.yaml
     sha256: 600f73eed353417fafe3cbe3fde6e10e2d5451eec6edb4afccd78f488c5ed6ee
 verdict: ready
 issue_counts:
+  high: 0
+  medium: 2
   critical: 0
   low: 3
-  medium: 2
-  high: 0
   info: 0
 findings:
 - id: I1
