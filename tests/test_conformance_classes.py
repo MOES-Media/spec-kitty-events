@@ -4,8 +4,8 @@ eight-class taxonomy, asserts each fixture's expected outcome (and the
 
 This test reads ``manifest.json``'s ``classes.entries`` array (added in
 WP05), runs the public verdict
-:func:`spec_kitty_events.conformance.class_fixture_verdict` (moved here
-from this file's former private helpers, R4 #197) — built on the canonical
+:func:`spec_kitty_events.conformance.class_fixture_verdict` (moved out of
+this file's former private helpers, R4 #197) — built on the canonical
 ``Event`` model in ``spec_kitty_events.models`` — and asserts agreement.
 
 The verdict's order of checks (deterministic; the contract is the
