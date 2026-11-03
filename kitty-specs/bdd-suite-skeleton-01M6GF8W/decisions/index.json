@@ -1,0 +1,30 @@
+{
+  "entries": [
+    {
+      "created_at": "2026-11-03T10:29:22.832062Z",
+      "decision_id": "01M6GF9NRFWPG5169D01F350NT",
+      "final_answer": null,
+      "input_key": "intent_summary_confirmation",
+      "mission_id": "01M6GF8WCN56FHB65F9WVKAGHP",
+      "mission_slug": "bdd-suite-skeleton-01M6GF8W",
+      "opened_by": "cli",
+      "options": [
+        "Confirm as written",
+        "Confirm with adjustments",
+        "Other"
+      ],
+      "origin_flow": "specify",
+      "other_answer": false,
+      "question": "Does the Intent Summary for D1 (#197) capture what we are building: actor, trigger, outcome, invariants and scope boundary?",
+      "rationale": null,
+      "resolved_at": null,
+      "resolved_by": null,
+      "slot_key": "specify.intent.summary-confirmation",
+      "status": "open",
+      "step_id": null,
+      "summary_json": null
+    }
+  ],
+  "mission_id": "01M6GF8WCN56FHB65F9WVKAGHP",
+  "version": 1
+}
