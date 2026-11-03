@@ -1,7 +1,7 @@
 {
-  "event_count": 14,
-  "last_event_id": "01M6GHY9R7BNYR59MRRGR7YV20",
-  "materialized_at": "2026-11-03T11:15:35.815336+00:00",
+  "event_count": 16,
+  "last_event_id": "01M6GHZFTK29ETVY4425EYM81Y",
+  "materialized_at": "2026-11-03T11:16:14.792073+00:00",
   "mission_number": "",
   "mission_slug": "bdd-suite-skeleton-01M6GF8W",
   "mission_type": "",
@@ -13,9 +13,9 @@
     "claimed": 0,
     "done": 0,
     "for_review": 0,
-    "in_progress": 0,
+    "in_progress": 1,
     "in_review": 1,
-    "planned": 3
+    "planned": 2
   },
   "work_packages": {
     "WP01": {
@@ -76,11 +76,15 @@
       }
     },
     "WP03": {
-      "actor": "finalize-tasks",
+      "actor": "claude",
+      "agent": "claude",
       "force_count": 0,
-      "lane": "planned",
-      "last_event_id": "01M6GHA0Z1YGS15S8BGZCZ3FF9",
-      "last_transition_at": "2026-11-03T11:04:31.457115+00:00"
+      "implementer_of_record": "claude",
+      "lane": "in_progress",
+      "last_event_id": "01M6GHZFTK29ETVY4425EYM81Y",
+      "last_transition_at": "2026-11-03T11:16:14.792073+00:00",
+      "shell_pid": 21444,
+      "shell_pid_created_at": "1793704565.4"
     },
     "WP04": {
       "actor": "finalize-tasks",
