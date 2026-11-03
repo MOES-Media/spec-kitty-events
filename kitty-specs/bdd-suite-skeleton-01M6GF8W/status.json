@@ -1,13 +1,13 @@
 {
-  "event_count": 17,
-  "last_event_id": "01M6GJ2VD1AMCF2QZJZWK4WPC3",
-  "materialized_at": "2026-11-03T11:18:04.961311+00:00",
+  "event_count": 18,
+  "last_event_id": "01M6GJ7NGCN27QY1KSMGPD8JMK",
+  "materialized_at": "2026-11-03T11:20:42.764897+00:00",
   "mission_number": "",
   "mission_slug": "bdd-suite-skeleton-01M6GF8W",
   "mission_type": "",
   "schema_version": 2,
   "summary": {
-    "approved": 1,
+    "approved": 0,
     "blocked": 0,
     "canceled": 0,
     "claimed": 0,
@@ -15,7 +15,7 @@
     "for_review": 0,
     "in_progress": 1,
     "in_review": 0,
-    "planned": 3
+    "planned": 4
   },
   "work_packages": {
     "WP01": {
@@ -23,11 +23,11 @@
       "agent": "claude",
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
-      "force_count": 0,
+      "force_count": 1,
       "implementer_of_record": "claude",
-      "lane": "approved",
-      "last_event_id": "01M6GHY9R7BNYR59MRRGR7YV20",
-      "last_transition_at": "2026-11-03T11:15:35.815336+00:00",
+      "lane": "planned",
+      "last_event_id": "01M6GJ7NGCN27QY1KSMGPD8JMK",
+      "last_transition_at": "2026-11-03T11:20:42.764897+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
         "WP01 ready for review (commit a6e0546 on kitty/mission-bdd-suite-skeleton-01M6GF8W-lane-a).\n\nT001: pytest-bdd>=9.0.1,<10 and gherkin-official>=29,!=31.0.0,!=32.0.0 added to [dependency-groups].dev (with the comment) and [project.optional-dependencies].dev. [project].dependencies and the conformance extra untouched. `uv lock --upgrade-package pytest-bdd==9.0.1` -> Resolved 39 packages; added only: pytest-bdd 9.0.1, gherkin-official 42.0.1, mako 1.4.3, MarkupSafe 3.0.4, parse 1.22.4 (no re-pin needed), parse-type 0.6.6, six 1.17.0. git diff --numstat uv.lock = 224 added / 0 removed (no existing version moved; typing-extensions 4.16.0, packaging, pytest 9.1.1 unchanged). uv sync OK; importlib.metadata: pytest-bdd 9.0.1, gherkin-official 42.0.1, pytest 9.1.1.\n\nT002: uv build --wheel of branch and of origin/main (b4c4477 = merge-base; temporary git worktree, removed). Requires-Dist/Provides-Extra:\norigin/main:\nRequires-Dist: pydantic<3.0.0,>=2.0.0\nRequires-Dist: python-ulid>=1.1.0\nProvides-Extra: dev\nRequires-Dist: pytest>=7.0.0; extra == \"dev\"\nRequires-Dist: pytest-cov>=4.0.0; extra == \"dev\"\nRequires-Dist: hypothesis>=6.0.0; extra == \"dev\"\nRequires-Dist: mypy>=1.0.0; extra == \"dev\"\nRequires-Dist: pyyaml<7,>=6.0; extra == \"dev\"\nProvides-Extra: conformance\nRequires-Dist: jsonschema<5.0.0,>=4.21.0; extra == \"conformance\"\nbranch: identical, plus exactly two lines after pyyaml:\nRequires-Dist: pytest-bdd<10,>=9.0.1; extra == \"dev\"\nRequires-Dist: gherkin-official!=31.0.0,!=32.0.0,>=29; extra == \"dev\"\nBase lines (no extra== marker) byte-identical (cmp). No build output committed.\n\nT003: docs/changelog/unreleased/197-bdd-suite-skeleton.md (section Added) as specified; grep class_fixture_verdict -> line 6. CHANGELOG.md not edited. COMPATIBILITY.md: no entry added - its sections are written per release by the release PR, which folds this fragment into the next minor's section.\n\nGates:\n- changelog.py check: pass; guard: pass.\n- uv run pytest --pyargs spec_kitty_events.conformance -q: 1200 passed (origin/main: 1200 passed).\n- uv run ruff check .: All checks passed.\n- uv run ruff format --check .: FAILS on 1 file outside WP01 owned_files - kitty-specs/bdd-suite-skeleton-01M6GF8W/tasks/WP04-envelope-scenarios-and-step-binding.md:191 (python code block in planning doc wants a blank line after the docstring; from planning commit bd3d278). 867 other files formatted; with kitty-specs excluded, 349 files clean. Not fixed (not owned).\n- Diff-scoped lint: no changed .py files, nothing to lint.\n- make test-fast: 4302 passed, 130 skipped, 1 failed - tests/test_version_not_amended.py::test_real_repo_unreleased_version_with_src_change_passes, environmental: the clone is shallow with no tags (\"shallow checkout ... release tags are not present\"); fails identically on origin/main.",
@@ -35,10 +35,10 @@
       ],
       "provider": "__resolved_provider_absent__",
       "review_result": {
-        "feedback_path": "/home/user/spec-kitty-events/.worktrees/bdd-suite-skeleton-01M6GF8W-coord/kitty-specs/bdd-suite-skeleton-01M6GF8W/tasks/WP01-dev-dependencies-and-changelog/review-cycle-1.md",
-        "reference": "review-cycle://bdd-suite-skeleton-01M6GF8W/WP01-dev-dependencies-and-changelog/review-cycle-1.md",
+        "feedback_path": "/home/user/spec-kitty-events/.worktrees/bdd-suite-skeleton-01M6GF8W-coord/kitty-specs/bdd-suite-skeleton-01M6GF8W/tasks/WP01-dev-dependencies-and-changelog/review-cycle-2.md",
+        "reference": "review-cycle://bdd-suite-skeleton-01M6GF8W/WP01-dev-dependencies-and-changelog/review-cycle-2.md",
         "reviewer": "claude",
-        "verdict": "approved"
+        "verdict": "changes_requested"
       },
       "role": "reviewer",
       "shell_pid": 17443,
