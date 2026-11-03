@@ -13,7 +13,7 @@ The verdict that the class-taxonomy envelope fixtures pin today comes from a pri
 
 **Language/Version**: Python 3.10+ (package floor; `acceptance` runs 3.12)
 **Primary Dependencies**:
-- New dev dependency `pytest-bdd>=9.0,<10`, locked at 9.0.0. It brings `gherkin-official`, `mako`, `parse` and `parse-type`.
+- New dev dependency `pytest-bdd>=9.0.1,<10`, locked at 9.0.1 (9.0.0 breaks on pytest 9.2.0; research R-3). It brings `gherkin-official`, `mako`, `parse` and `parse-type`.
 - Explicit dev dependency `gherkin-official>=29,!=31.0.0,!=32.0.0`, the same constraint pytest-bdd declares. It is listed because the contract check imports the parser directly.
 - No runtime dependency change.
 
@@ -128,7 +128,7 @@ docs/changelog/unreleased/197-bdd-suite-skeleton.md   # section: Added
 6. **Wiring (FR-020/FR-021).**
    - `pyproject.toml` gains pytest-bdd and gherkin-official in the `dev` dependency group and in the `[project.optional-dependencies].dev` extra; `acceptance` installs that extra. The wheel's base requirements are unchanged; only `Provides-Extra: dev` gains entries, which a build-metadata check verifies (squad R-M2).
    - Planted contract-check trees are valid, ruff-clean Python. A deliberately bad import carries `# noqa: F401`.
-   - `uv.lock` is regenerated, with pytest-bdd held at 9.0.0.
+   - `uv.lock` is regenerated, with pytest-bdd locked at 9.0.1.
    - The `make lint` target gains `uv run python scripts/scenario_contract.py`.
    - `make test-fast` and `acceptance` already collect `tests/`. The suite is collected through `tests/scenarios/test_*.py`.
 
@@ -147,6 +147,6 @@ C1 and C2 can run in parallel. C3 needs C1, C4 needs C3, and C5 closes.
 ## Risks
 
 - **The moved code diverges from the private code.** Mitigated by the parity run plus the unchanged class test (approach 1).
-- **pytest-bdd tag handling changes in a minor release.** Mitigated by pinning `<10` and holding the lock at 9.0.0. The `pytest_bdd_apply_tag` hook has been stable since 4.x.
+- **pytest-bdd tag handling changes in a minor release.** Mitigated by pinning `<10` and locking 9.0.1. The `pytest_bdd_apply_tag` hook has been stable since 4.x.
 - **gherkin-official major bumps.** The lock pins the exact version, and pytest-bdd and the contract check share that one parser.
 - **NFR-001 budget.** Mutation runs are grouped by disjoint class from the start, with inner runs given `-o addopts= --no-cov` so they skip coverage. Promises 008 and 009 share a class, which `contracts/scenario-contract-check.md` accounts for.

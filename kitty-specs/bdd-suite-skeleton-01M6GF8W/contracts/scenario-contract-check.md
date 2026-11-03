@@ -50,6 +50,18 @@ Each rule has a planted tree at `tests/fixtures/scenario_contract/<CODE>/` that 
 
 Both points are recorded under deviation D-2.
 
+## Register and index grammar (shared by WP03 and WP04)
+
+- **Index** (`tests/scenarios/README.md`): the steps table sits under a heading `## Available steps`, as a Markdown table with header `| Group | Step |`.
+  - Each row looks like ``| Arrange | `Given the conformance fixtures of class "<fixture_class>"` |``.
+  - The group is one of Arrange, Assume, Act or Assert. The step cell is one code span: the keyword, a space, then the phrase.
+  - A placeholder is written `<name>`, using the same `name` as the step definition's `{name}` or `{name:fmt}` field.
+  - Rows outside that table are ignored.
+- **Register** (`<area>/PROMISES.md`): one `## <title> — \`<behaviour>/\`` section per behaviour, each with a table whose header is `| Promise | Consumer guarantee | Authority | Binding |`.
+  - The Promise cell is a code span `` `PR-…` ``.
+  - The Binding cell is `python`, `python, jvm` or `@wip`, optionally in a code span.
+  - Other tables in the file are ignored.
+
 ## Mutation tests (SC-004, SC-002)
 
 - **One table drives the tests**: (promise, fixture file, mutation, expected failing scenarios). It runs in-process with `pytester` and the arguments `-p no:cacheprovider -o addopts= --no-cov`.

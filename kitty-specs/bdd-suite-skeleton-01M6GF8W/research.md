@@ -14,7 +14,7 @@ Phase 0 of the plan. Every unknown from the Technical Context is resolved here. 
 
 ## R-2 Scenario runner and parser
 
-- **Decision**: pytest-bdd 9.0.0 (R1). The contract check uses `gherkin-official` directly.
+- **Decision**: pytest-bdd 9.0.1 (R1). The contract check uses `gherkin-official` directly.
 - **Rationale**:
   - pytest-bdd binds Gherkin to pytest, which is the repo's runner, so the suite joins `make test-fast` and `acceptance` with no new job.
   - pytest-bdd parses with `gherkin-official`. Using the same parser in the contract check means a file the check accepts is a file the runner can load.
@@ -29,7 +29,7 @@ Phase 0 of the plan. Every unknown from the Technical Context is resolved here. 
 
 | Package | Version | Published | Licence | PyPI author/maintainer | Wheel | Notes |
 |---|---|---|---|---|---|---|
-| pytest-bdd | 9.0.0 | 2026-09-30 | MIT | Oleg Pidsadnyi, Anatoly Bubenkov; maintainer Alessio Bogon | pure | dev-only; held at 9.0.0 (9.0.1 is from 2026-10-31) |
+| pytest-bdd | **9.0.1** (floor `>=9.0.1`) | 2026-10-31 | MIT | Oleg Pidsadnyi, Anatoly Bubenkov; maintainer Alessio Bogon | pure | dev-only. Changed after the post-tasks squad: 9.0.0 fails on pytest 9.2.0 (`'FixtureManager' object has no attribute '_arg2fixturedefs'`, reproduced) and `acceptance` installs unlocked, so a 9.0.0 floor would let CI and the lock diverge. 9.0.1 is a fix release, 3 days old at planning; it is accepted against the two-week age heuristic, because the alternative is a known break |
 | gherkin-official | as locked (42.0.1 latest, 2026-08-05) | — | MIT | Cucumber Ltd, Björn Rasmusson | pure | dev-only; parser |
 | mako | 1.4.3 | 2026-09-22 | MIT | no author field on PyPI | pure | transitive |
 | MarkupSafe | 3.0.4 | 2026-10-02 | BSD-3-Clause | no author field on PyPI | **native** (C speedups; pure fallback in the sdist) | transitive, through mako |
@@ -115,3 +115,38 @@ No finding diverged: alphonso and robbie independently found the `build_id` omis
 | X-6 | Generate the steps table instead of a drift rule | deferred_with_rationale | the spec adopts core's hand-written table (FR-002); generating it is a follow-up proposal for both repos |
 | X-7 | The "46 fixtures" arithmetic | accepted | plan Scale (34 = 26 + 8) |
 | X-8 | The check-order table is duplicated between contract and README | accepted | the contract names the README as the single source once it lands |
+
+## Adversarial squad, post-tasks (2026-11-03)
+
+The delegates were profile-loaded:
+- reviewer-renata, read-only: changes required (3 MAJOR);
+- planner-priti, read-only: revise (4 MAJOR);
+- implementer-ivan, who prototyped in the scratchpad: implementable with fixes (2 MAJOR).
+
+There was no divergence. Ivan's prototypes confirm the gherkin-official API, the pytest-bdd tag hook, the conftest step import, `parsers.parse` binding, nested `pytest.main` runs, and the submodule-import design.
+
+| # | Finding | Disposition | Evidence |
+|---|---|---|---|
+| R-M1 | The 001, 002 and 010 mutations change the input only, so a binding that ignores pins passes | accepted | WP05 table: pin plus input rows |
+| R-M2 | `SCHEMA_VERSION_MISSING` is not a code; 009 expected set unreachable | accepted | WP05 uses `UNSUPPORTED_SCHEMA_VERSION`; WP04's 009 Then step checks the pin |
+| R-M3 | The identity test proves only an import | accepted | WP02 T008 spy and no-residual-attributes check; WP05 T020 binding spy |
+| R-m1 | Where `expected_error_code` is read from | accepted | WP04 T016: read from the register, which must agree with the file |
+| R-m2 | 007 flips only the register | accepted | WP05 table: register and file |
+| R-m3 | FR-004 skip has no executable check | accepted | WP04 `test_tag_hook.py` |
+| R-n1 | FR-022 checked only by eye | accepted | WP01 grep |
+| P-M1 | WP05 edits WP03's script (`stats`) | accepted | WP03 `discover()`; WP05 T021 consumes it |
+| P-M2 | COMPATIBILITY.md check orphaned | accepted (no entry) | WP01 T003 note: the release PR writes per-release sections |
+| P-M3 | SC-002 skipped-fixture and call-count cases missing | accepted | WP05 T020 cases 3, 3b, 3c |
+| P-M4 | WP03 oversized; split into 03a and 03b | changed | kept as one WP (single script, one owner) with an explicit order and a land-core-first escape hatch |
+| P-m1 | WP04's independent test claims the real-tree check; grammar unwritten | accepted | contract § "Register and index grammar"; WP04 T018; WP05 reopen path |
+| P-m2 | The CLAUDE.md gate set is missing from some WPs | accepted | every WP's Gates block |
+| P-m3 | Subprocess as the primary runner | changed | in-process kept: ivan's prototype shows 4 nested runs with no leak; subprocess stays the documented fallback |
+| P-n1 | The minor bump belongs to the release PR | accepted | WP02 reviewer guidance |
+| I-M1 | Parametrization picks up conftest.py and `__pycache__` | accepted | WP03 T013 directory filter |
+| I-M2 | NO_FEATURES needs an empty directory git does not track | accepted | WP03 T013 `.gitkeep` |
+| I-m1 | pytest-bdd 9.0.0 breaks on pytest 9.2.0 | accepted | WP01 and R-3: 9.0.1 |
+| I-m2 | `pytest_bdd.__version__` does not exist | accepted | WP01 T001 |
+| I-m3 | Two `Lane` classes; MISSION_CLOSED omitted | accepted | WP02 T004 explicit modules |
+| I-m4 | The inner run's path depends on the working directory | accepted | WP05 T019 |
+| I-m5 | The PARSE_ERROR tree triggers other codes | accepted | WP03 T013 |
+| I-n1 | mypy typing of gherkin results | accepted | WP03 T009 cast note |
