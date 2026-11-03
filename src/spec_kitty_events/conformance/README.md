@@ -28,12 +28,53 @@ taxonomy can coexist with the legacy fixture tree (which the existing
 | `lane_mapping_legacy` | mixed | `class_taxonomy/lane_mapping_legacy/{valid,invalid}/` | Resolutions of legacy lane strings to canonical lanes. |
 
 Note on `historical_row_raw`: today's validator may emit
-`ENVELOPE_SHAPE_INVALID`, `FORBIDDEN_KEY`, or `UNKNOWN_LANE` instead of the
-ideal `RAW_HISTORICAL_ROW` for these inputs. Each historical_row fixture
+`ENVELOPE_SHAPE_INVALID`, `FORBIDDEN_KEY`, `UNKNOWN_LANE`, or
+`PAYLOAD_SCHEMA_FAIL` instead of the ideal `RAW_HISTORICAL_ROW` for these
+inputs. Each historical_row fixture
 documents this caveat in its `notes`. The conformance class assertion test
 accepts any rejection for these fixtures while pinning the *ideal* code in
 `expected_error_code`. A downstream WP can refine the validator to detect
 the raw-historical-row class as a distinct rejection.
+
+## Envelope verdict check order
+
+The verdict the eight-class fixtures pin is the public function
+`spec_kitty_events.conformance.class_fixture_verdict` (R4, #197):
+
+```python
+def class_fixture_verdict(fixture_class: str, fixture_input: object) -> ValidationError | None
+```
+
+It returns `None` when the input is accepted, otherwise the first
+`ValidationError` (from `spec_kitty_events.validation_errors`) found by the
+order below. It is pure: no I/O and no global state. It raises `ValueError`
+when `fixture_class` is not one of the eight taxonomy classes; in particular
+`envelope_strict_journal` is not judged here, its verdict comes from
+`spec_kitty_events.strict.validate_strict_envelope`.
+
+### Envelope check order (first failure wins)
+
+| # | Check | Code |
+|---|---|---|
+| 1 | Input is a JSON object | `ENVELOPE_SHAPE_INVALID` |
+| 2 | Every required envelope field is present: `event_id, event_type, aggregate_id, payload, timestamp, build_id, node_id, lamport_clock, correlation_id, project_uuid` (this order; `details.missing` lists the absent ones in this order) | `ENVELOPE_SHAPE_INVALID` |
+| 3 | No forbidden legacy key at any depth, including inside arrays (first in traversal order) | `FORBIDDEN_KEY` |
+| 4 | `payload` is a JSON object | `PAYLOAD_SCHEMA_FAIL` |
+| 5 | For `WPStatusChanged`, `from_lane` and `to_lane`, when present, are strings among the canonical lanes or `LANE_ALIASES` | `PAYLOAD_SCHEMA_FAIL` (not a string) / `UNKNOWN_LANE` |
+| 6 | The envelope validates as `Event` | `PAYLOAD_SCHEMA_FAIL` if the error is anchored at `payload`, else `ENVELOPE_SHAPE_INVALID` |
+| 7 | For `MissionCreated`, `MissionClosed` and `WPStatusChanged`, the payload validates as its typed model | `PAYLOAD_SCHEMA_FAIL` |
+
+### Lane-mapping check order (`lane_mapping_legacy`)
+
+| # | Check | Code |
+|---|---|---|
+| 1a | Input is a JSON object | `PAYLOAD_SCHEMA_FAIL` (empty path) |
+| 1b | `legacy_lane` is a string | `PAYLOAD_SCHEMA_FAIL` (path `legacy_lane`) |
+| 2 | `legacy_lane` is canonical or in `LANE_ALIASES` | `UNKNOWN_LANE` |
+| 3 | If `canonical_lane` is given, the resolved lane equals it | `UNKNOWN_LANE` |
+
+`tests/test_class_fixture_verdict.py` pins the row 2 field list to the
+implementation.
 
 ## Cutover-boundary fixtures (8.0.0)
 
