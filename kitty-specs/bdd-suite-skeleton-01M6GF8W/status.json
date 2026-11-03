@@ -51,7 +51,7 @@
     },
     "WP02": {
       "actor": "claude",
-      "agent": "claude",
+      "agent": null,
       "agent_profile": "reviewer-renata",
       "agent_profile_version": "1.0",
       "force_count": 1,
@@ -64,6 +64,7 @@
         "WP02 done (commits ffb77dc2, 1af5ad5a). New public symbol spec_kitty_events.conformance.class_fixture_verdict (module conformance/class_verdict.py, imports from status/lifecycle/models/forbidden_keys/validation_errors only); __all__ gained exactly one name. Class test helpers delegate; moved constants/_classify_pydantic_error/_validate_envelope/_validate_lane_mapping removed from the test. Assert diff check (git diff -U0 HEAD~2 tests/test_conformance_classes.py | grep assert): empty. README: new 'Envelope verdict check order' section + historical_row_raw caveat now lists PAYLOAD_SCHEMA_FAIL. Gates: WP pytest list (5 files) 99 passed; test_conformance_classes 30 passed (main: 30); test_class_fixture_verdict 9 passed; --pyargs spec_kitty_events.conformance 1200 passed (origin/main b4c4477: 1200 passed); mypy --strict src/spec_kitty_events: no issues in 67 files (use uv run python -m mypy; global mypy lacks pydantic); ruff check: clean; ruff format --check: only kitty-specs/.../tasks/WP04-envelope-scenarios-and-step-binding.md (planning artifact, not owned, pre-existing on mission base); changelog check/guard: rc 0; make test-fast: 4310 passed, 130 skipped, 2 failed - tests/test_version_not_amended.py (shallow checkout without release tags; test_script_passes_against_this_repo fails on the base too, the other trips because src/ changed) - environmental. No changelog fragment written (not in owned_files). Minor-version note: new public symbol implies a minor bump, handled by the release PR; no version or COMPATIBILITY.md edit here."
       ],
       "provider": "__resolved_provider_absent__",
+      "review": null,
       "review_result": {
         "feedback_path": "/home/user/spec-kitty-events/.worktrees/bdd-suite-skeleton-01M6GF8W-coord/kitty-specs/bdd-suite-skeleton-01M6GF8W/tasks/WP02-public-class-fixture-verdict/review-cycle-1.md",
         "reference": "review-cycle://bdd-suite-skeleton-01M6GF8W/WP02-public-class-fixture-verdict/review-cycle-1.md",
@@ -71,14 +72,14 @@
         "verdict": "changes_requested"
       },
       "role": "reviewer",
-      "shell_pid": 18433,
-      "shell_pid_created_at": "1793704365.16",
+      "shell_pid": null,
+      "shell_pid_created_at": null,
       "subtasks": {
-        "T004": "done",
-        "T005": "done",
-        "T006": "done",
-        "T007": "done",
-        "T008": "done"
+        "T004": "planned",
+        "T005": "planned",
+        "T006": "planned",
+        "T007": "planned",
+        "T008": "planned"
       }
     },
     "WP03": {
