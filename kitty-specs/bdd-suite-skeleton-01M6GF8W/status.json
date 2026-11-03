@@ -1,7 +1,7 @@
 {
-  "event_count": 44,
-  "last_event_id": "01M6GM2CAMF79FBE299PPTXR66",
-  "materialized_at": "2026-11-03T11:52:46.676594+00:00",
+  "event_count": 45,
+  "last_event_id": "01M6GM3PZKYSNX59S2FYPE2Y7W",
+  "materialized_at": "2026-11-03T11:53:30.355626+00:00",
   "mission_number": "",
   "mission_slug": "bdd-suite-skeleton-01M6GF8W",
   "mission_type": "",
@@ -12,9 +12,9 @@
     "canceled": 0,
     "claimed": 0,
     "done": 0,
-    "for_review": 1,
+    "for_review": 0,
     "in_progress": 0,
-    "in_review": 0,
+    "in_review": 1,
     "planned": 1
   },
   "work_packages": {
@@ -124,15 +124,15 @@
       }
     },
     "WP04": {
-      "actor": "user",
-      "agent": null,
-      "agent_profile": "python-pedro",
+      "actor": "claude",
+      "agent": "claude",
+      "agent_profile": "reviewer-renata",
       "agent_profile_version": "1.0",
       "force_count": 1,
       "implementer_of_record": "claude",
-      "lane": "for_review",
-      "last_event_id": "01M6GM2CAMF79FBE299PPTXR66",
-      "last_transition_at": "2026-11-03T11:52:46.676594+00:00",
+      "lane": "in_review",
+      "last_event_id": "01M6GM3PZKYSNX59S2FYPE2Y7W",
+      "last_transition_at": "2026-11-03T11:53:30.355626+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
         "WP04 ready for review (commit cecdd0e6). Gates: scenarios -W error::PytestUnknownMarkWarning 19 passed (10 scenarios + 9 tag-hook); make test-fast 4332 passed, 130 skipped; conformance pyargs 1200 passed; ruff check . clean; ruff format --check . flags only kitty-specs/.../WP04-...md (known); diff-scoped ruff check/format on tests/scenarios clean; changelog check+guard exit 0; mypy --strict src 67 files clean (also tests/scenarios 6 files clean). Contract check (lane-c script, read-only): 0 error(s), 0 info, exit 0. Steps: Given the conformance fixtures of class {fixture_class}; Given the conformance fixture {fixture_id} of class {fixture_class}; When each envelope is validated; When each envelope is validated under the strict journal profile; When each legacy lane is resolved; Then each is accepted; Then each is refused with exactly the code its fixture pins; Then each is refused; Then each is accepted or refused with exactly the codes its fixture pins; Then it is refused with the code {code}; Then every selected fixture was evaluated. Sanity mutations over a scratch copy via SPEC_KITTY_SCENARIO_FIXTURES: deleting envelope_invalid_shape/missing_event_type.json failed only 006 in Arrange; re-pinning unknown_event_type.json failed exactly 008+009; reversing skew_missing_version codes failed only 008 (shared with the first in one run: 3 failed, 7 passed). No STOP: every pin agrees with the public verdict. Decisions: the single-fixture Arrange step checks its entry is registered once and on disk, not the whole class folder, so a planted unregistered strict-journal file fails 008 only; pins normalised to ordered code tuples; no fixture edits.",
@@ -146,9 +146,9 @@
         "reviewer": "claude",
         "verdict": "changes_requested"
       },
-      "role": "implementer",
-      "shell_pid": null,
-      "shell_pid_created_at": null,
+      "role": "reviewer",
+      "shell_pid": 27869,
+      "shell_pid_created_at": "1793706805.26",
       "subtasks": {
         "T015": "done",
         "T016": "done",
