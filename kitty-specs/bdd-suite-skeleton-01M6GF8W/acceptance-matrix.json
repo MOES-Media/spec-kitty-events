@@ -38,10 +38,10 @@
       "criterion_id": "FR-004",
       "description": "Verify FR-004 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "tests/scenarios/test_tag_hook.py (@wip/@manual skip in place); WIP_* planted trees",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-11-03T12:28:14.340494+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
