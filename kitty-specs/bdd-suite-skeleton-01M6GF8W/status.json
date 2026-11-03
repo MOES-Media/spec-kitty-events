@@ -1,51 +1,53 @@
 {
-  "event_count": 26,
-  "last_event_id": "01M6GJFNT9P1F7R825J64ZWJ60",
-  "materialized_at": "2026-11-03T11:25:05.225120+00:00",
+  "event_count": 57,
+  "last_event_id": "01M6GP02RGT2MGYA8XYJQT500B",
+  "materialized_at": "2026-11-03T12:26:28.496236+00:00",
   "mission_number": "",
   "mission_slug": "bdd-suite-skeleton-01M6GF8W",
   "mission_type": "software-dev",
   "schema_version": 2,
   "summary": {
-    "approved": 0,
+    "approved": 5,
     "blocked": 0,
     "canceled": 0,
     "claimed": 0,
     "done": 0,
     "for_review": 0,
-    "in_progress": 1,
-    "in_review": 2,
-    "planned": 2
+    "in_progress": 0,
+    "in_review": 0,
+    "planned": 0
   },
   "work_packages": {
     "WP01": {
       "actor": "claude",
       "agent": "claude",
-      "agent_profile": "reviewer-renata",
-      "agent_profile_version": "1.0",
-      "force_count": 1,
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 2,
       "implementer_of_record": "claude",
-      "lane": "in_review",
-      "last_event_id": "01M6GJF435BT4RSQJ789G55TN6",
-      "last_transition_at": "2026-11-03T11:24:47.077937+00:00",
+      "lane": "approved",
+      "last_event_id": "01M6GK0B1S5ZN447MCVH0CEC7Q",
+      "last_transition_at": "2026-11-03T11:34:11.258040+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
         "WP01 ready for review (commit a6e0546 on kitty/mission-bdd-suite-skeleton-01M6GF8W-lane-a).\n\nT001: pytest-bdd>=9.0.1,<10 and gherkin-official>=29,!=31.0.0,!=32.0.0 added to [dependency-groups].dev (with the comment) and [project.optional-dependencies].dev. [project].dependencies and the conformance extra untouched. `uv lock --upgrade-package pytest-bdd==9.0.1` -> Resolved 39 packages; added only: pytest-bdd 9.0.1, gherkin-official 42.0.1, mako 1.4.3, MarkupSafe 3.0.4, parse 1.22.4 (no re-pin needed), parse-type 0.6.6, six 1.17.0. git diff --numstat uv.lock = 224 added / 0 removed (no existing version moved; typing-extensions 4.16.0, packaging, pytest 9.1.1 unchanged). uv sync OK; importlib.metadata: pytest-bdd 9.0.1, gherkin-official 42.0.1, pytest 9.1.1.\n\nT002: uv build --wheel of branch and of origin/main (b4c4477 = merge-base; temporary git worktree, removed). Requires-Dist/Provides-Extra:\norigin/main:\nRequires-Dist: pydantic<3.0.0,>=2.0.0\nRequires-Dist: python-ulid>=1.1.0\nProvides-Extra: dev\nRequires-Dist: pytest>=7.0.0; extra == \"dev\"\nRequires-Dist: pytest-cov>=4.0.0; extra == \"dev\"\nRequires-Dist: hypothesis>=6.0.0; extra == \"dev\"\nRequires-Dist: mypy>=1.0.0; extra == \"dev\"\nRequires-Dist: pyyaml<7,>=6.0; extra == \"dev\"\nProvides-Extra: conformance\nRequires-Dist: jsonschema<5.0.0,>=4.21.0; extra == \"conformance\"\nbranch: identical, plus exactly two lines after pyyaml:\nRequires-Dist: pytest-bdd<10,>=9.0.1; extra == \"dev\"\nRequires-Dist: gherkin-official!=31.0.0,!=32.0.0,>=29; extra == \"dev\"\nBase lines (no extra== marker) byte-identical (cmp). No build output committed.\n\nT003: docs/changelog/unreleased/197-bdd-suite-skeleton.md (section Added) as specified; grep class_fixture_verdict -> line 6. CHANGELOG.md not edited. COMPATIBILITY.md: no entry added - its sections are written per release by the release PR, which folds this fragment into the next minor's section.\n\nGates:\n- changelog.py check: pass; guard: pass.\n- uv run pytest --pyargs spec_kitty_events.conformance -q: 1200 passed (origin/main: 1200 passed).\n- uv run ruff check .: All checks passed.\n- uv run ruff format --check .: FAILS on 1 file outside WP01 owned_files - kitty-specs/bdd-suite-skeleton-01M6GF8W/tasks/WP04-envelope-scenarios-and-step-binding.md:191 (python code block in planning doc wants a blank line after the docstring; from planning commit bd3d278). 867 other files formatted; with kitty-specs excluded, 349 files clean. Not fixed (not owned).\n- Diff-scoped lint: no changed .py files, nothing to lint.\n- make test-fast: 4302 passed, 130 skipped, 1 failed - tests/test_version_not_amended.py::test_real_repo_unreleased_version_with_src_change_passes, environmental: the clone is shallow with no tags (\"shallow checkout ... release tags are not present\"); fails identically on origin/main.",
         "Review passed (reviewer-renata): WP commit a6e05466 touches only owned files (pyproject.toml, uv.lock, fragment). uv.lock diff: 0 removed lines, adds only gherkin-official 42.0.1, mako 1.4.3, markupsafe 3.0.4, parse 1.22.4, parse-type 0.6.6, pytest-bdd 9.0.1, six 1.17.0 plus root dep lists; uv lock --check clean. [project].dependencies untouched; both dev lists hold both lines. Wheel Requires-Dist vs origin/main b4c4477b: base lines identical, exactly two added extra==dev lines. changelog.py check=0, guard=0; fragment grep class_fixture_verdict hits line 6; CHANGELOG.md/COMPATIBILITY.md untouched. Conformance gate 1200 passed (= main). importlib pytest-bdd 9.0.1. ruff check clean; ruff format flags only known WP04 prompt (fixed in 487f28e). tests/test_version_not_amended.py 10 passed. No owned-file overlap with WP02-05. Anti-pattern checklist: 1-3,8 N/A (no code), 4 PASS, 5-7 PASS.",
         "Reopened: add T023 version 11.4.0 declaration",
-        "Cycle 1 rework: T023 done in f4e97466. Version 11.4.0 in pyproject.toml, __init__.__version__, README (declaration + 2 pip lines), COMPATIBILITY.md (current-version line + new 11.4.0 section with 'Adopting 11.4.0', above 11.3.0), CHANGELOG [Unreleased] opening paragraph only. uv lock: only root package 11.3.0->11.4.0. Gates: test_compatibility_doc+test_version_not_amended 32 passed; check_version_not_amended.py exit 0 (ok); make test-fast 4303 passed, 130 skipped; conformance 1200 passed; ruff check clean; ruff format --check: only kitty-specs/.../WP04-envelope-scenarios-and-step-binding.md (fixed on planning branch); changelog check+guard green. T001-T003 untouched."
+        "Cycle 1 rework: T023 done in f4e97466. Version 11.4.0 in pyproject.toml, __init__.__version__, README (declaration + 2 pip lines), COMPATIBILITY.md (current-version line + new 11.4.0 section with 'Adopting 11.4.0', above 11.3.0), CHANGELOG [Unreleased] opening paragraph only. uv lock: only root package 11.3.0->11.4.0. Gates: test_compatibility_doc+test_version_not_amended 32 passed; check_version_not_amended.py exit 0 (ok); make test-fast 4303 passed, 130 skipped; conformance 1200 passed; ruff check clean; ruff format --check: only kitty-specs/.../WP04-envelope-scenarios-and-step-binding.md (fixed on planning branch); changelog check+guard green. T001-T003 untouched.",
+        "Cycle 2 rework (bb6853b0): java/build.gradle.kts line 14 version 11.3.0 -> 11.4.0 (only change in that file; PORTED_EVENTS_VERSION and service manifest.json untouched); CHANGELOG [Unreleased] opening paragraph re-wrapped (no ### subsection touched). make test-java blocked by Maven Central HTTP 429; Python equivalent of checkVersionMatchesPyproject: java 11.4.0 == pyproject 11.4.0 OK. Gates: compat+version-not-amended tests 32 passed; check_version_not_amended ok; changelog check+guard pass; make test-fast 4303 passed/130 skipped; conformance 1200 passed; ruff check clean; ruff format flags only known WP04 md.",
+        "Review passed (cycle 3): bb6853b0 sets java/build.gradle.kts version to 11.4.0 = pyproject (Python replica of checkVersionMatchesPyproject equal); diff limited to that line plus CHANGELOG paragraph re-wrap; tests/version/changelog/ruff checks pass; no other package-version 11.3.0 references"
       ],
       "provider": "__resolved_provider_absent__",
       "review": null,
       "review_result": {
-        "feedback_path": "/home/user/spec-kitty-events/.worktrees/bdd-suite-skeleton-01M6GF8W-coord/kitty-specs/bdd-suite-skeleton-01M6GF8W/tasks/WP01-dev-dependencies-and-changelog/review-cycle-2.md",
-        "reference": "review-cycle://bdd-suite-skeleton-01M6GF8W/WP01-dev-dependencies-and-changelog/review-cycle-2.md",
+        "feedback_path": "/home/user/spec-kitty-events/.worktrees/bdd-suite-skeleton-01M6GF8W-coord/kitty-specs/bdd-suite-skeleton-01M6GF8W/tasks/WP01-dev-dependencies-and-changelog/review-cycle-1.md",
+        "reference": "review-cycle://bdd-suite-skeleton-01M6GF8W/WP01-dev-dependencies-and-changelog/review-cycle-1.md",
         "reviewer": "claude",
-        "verdict": "changes_requested"
+        "verdict": "approved"
       },
       "role": "reviewer",
-      "shell_pid": 1064,
-      "shell_pid_created_at": "1793705081.26",
+      "shell_pid": 14732,
+      "shell_pid_created_at": "1793705570.96",
       "subtasks": {
         "T001": "done",
         "T002": "done",
@@ -56,25 +58,26 @@
     "WP02": {
       "actor": "claude",
       "agent": "claude",
-      "agent_profile": "reviewer-renata",
-      "agent_profile_version": "1.0",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 1,
       "implementer_of_record": "claude",
-      "lane": "in_review",
-      "last_event_id": "01M6GJFNT9P1F7R825J64ZWJ60",
-      "last_transition_at": "2026-11-03T11:25:05.225120+00:00",
+      "lane": "approved",
+      "last_event_id": "01M6GJJHBP4YXTY4HWA37Z7NPG",
+      "last_transition_at": "2026-11-03T11:26:38.966849+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
         "WP02 done (commits ffb77dc2, 1af5ad5a). New public symbol spec_kitty_events.conformance.class_fixture_verdict (module conformance/class_verdict.py, imports from status/lifecycle/models/forbidden_keys/validation_errors only); __all__ gained exactly one name. Class test helpers delegate; moved constants/_classify_pydantic_error/_validate_envelope/_validate_lane_mapping removed from the test. Assert diff check (git diff -U0 HEAD~2 tests/test_conformance_classes.py | grep assert): empty. README: new 'Envelope verdict check order' section + historical_row_raw caveat now lists PAYLOAD_SCHEMA_FAIL. Gates: WP pytest list (5 files) 99 passed; test_conformance_classes 30 passed (main: 30); test_class_fixture_verdict 9 passed; --pyargs spec_kitty_events.conformance 1200 passed (origin/main b4c4477: 1200 passed); mypy --strict src/spec_kitty_events: no issues in 67 files (use uv run python -m mypy; global mypy lacks pydantic); ruff check: clean; ruff format --check: only kitty-specs/.../tasks/WP04-envelope-scenarios-and-step-binding.md (planning artifact, not owned, pre-existing on mission base); changelog check/guard: rc 0; make test-fast: 4310 passed, 130 skipped, 2 failed - tests/test_version_not_amended.py (shallow checkout without release tags; test_script_passes_against_this_repo fails on the base too, the other trips because src/ changed) - environmental. No changelog fragment written (not in owned_files). Minor-version note: new public symbol implies a minor bump, handled by the release PR; no version or COMPATIBILITY.md edit here.",
-        "Cycle 1 rework (d09ef480): added tests/test_class_fixture_verdict.py::test_forbidden_key_precedes_event_model_failure (canonical envelope + feature_slug + lamport_clock='not-an-int' -> FORBIDDEN_KEY; without feature_slug -> ENVELOPE_SHAPE_INVALID). Existing 3-before-7 case kept. Mutation proof (reverted, source unchanged): swap checks 3 and 6 (with event_type hoisted so it does not crash) -> new test red (ENVELOPE_SHAPE_INVALID is not FORBIDDEN_KEY), 1 failed/39 passed; reviewer's M1 (check 3 moved between 6 and 7) -> same red; naive swap also red but via UnboundLocalError. Gates: targeted 40 passed; mypy --strict clean (67 files); conformance --pyargs 1200 passed; ruff check clean; ruff format flags only the known WP04 task file; changelog check/guard exit 0; make test-fast 4312 passed, 130 skipped, 1 failed = test_version_not_amended::test_script_passes_against_this_repo (known; fixed by WP01 T023 version bump to 11.4.0 in another lane; pyproject.toml not touched)."
+        "Cycle 1 rework (d09ef480): added tests/test_class_fixture_verdict.py::test_forbidden_key_precedes_event_model_failure (canonical envelope + feature_slug + lamport_clock='not-an-int' -> FORBIDDEN_KEY; without feature_slug -> ENVELOPE_SHAPE_INVALID). Existing 3-before-7 case kept. Mutation proof (reverted, source unchanged): swap checks 3 and 6 (with event_type hoisted so it does not crash) -> new test red (ENVELOPE_SHAPE_INVALID is not FORBIDDEN_KEY), 1 failed/39 passed; reviewer's M1 (check 3 moved between 6 and 7) -> same red; naive swap also red but via UnboundLocalError. Gates: targeted 40 passed; mypy --strict clean (67 files); conformance --pyargs 1200 passed; ruff check clean; ruff format flags only the known WP04 task file; changelog check/guard exit 0; make test-fast 4312 passed, 130 skipped, 1 failed = test_version_not_amended::test_script_passes_against_this_repo (known; fixed by WP01 T023 version bump to 11.4.0 in another lane; pyproject.toml not touched).",
+        "Review passed (cycle 2): new test_forbidden_key_precedes_event_model_failure kills all three check-3 reorderings (swap 3/6, 3 between 6 and 7, 3 after 7) on its FORBIDDEN_KEY assertion; rework touches only tests/test_class_fixture_verdict.py, no assert changed in test_conformance_classes.py; targeted 40 passed, mypy --strict clean, conformance 1200 passed, ruff check clean."
       ],
       "provider": "__resolved_provider_absent__",
       "review": null,
       "review_result": {
-        "feedback_path": "/home/user/spec-kitty-events/.worktrees/bdd-suite-skeleton-01M6GF8W-coord/kitty-specs/bdd-suite-skeleton-01M6GF8W/tasks/WP02-public-class-fixture-verdict/review-cycle-1.md",
-        "reference": "review-cycle://bdd-suite-skeleton-01M6GF8W/WP02-public-class-fixture-verdict/review-cycle-1.md",
+        "feedback_path": "/home/user/spec-kitty-events/.worktrees/bdd-suite-skeleton-01M6GF8W-coord/kitty-specs/bdd-suite-skeleton-01M6GF8W/tasks/WP02-public-class-fixture-verdict/review-cycle-2.md",
+        "reference": "review-cycle://bdd-suite-skeleton-01M6GF8W/WP02-public-class-fixture-verdict/review-cycle-2.md",
         "reviewer": "claude",
-        "verdict": "changes_requested"
+        "verdict": "approved"
       },
       "role": "reviewer",
       "shell_pid": 1533,
@@ -90,32 +93,106 @@
     "WP03": {
       "actor": "claude",
       "agent": "claude",
-      "agent_profile": "python-pedro",
-      "agent_profile_version": "1.0",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 0,
       "implementer_of_record": "claude",
-      "lane": "in_progress",
-      "last_event_id": "01M6GHZFTK29ETVY4425EYM81Y",
-      "last_transition_at": "2026-11-03T11:16:14.792073+00:00",
+      "lane": "approved",
+      "last_event_id": "01M6GJXJE267KXJMGNF4R3RX07",
+      "last_transition_at": "2026-11-03T11:32:40.514796+00:00",
       "model": "__resolved_model_absent__",
+      "notes": [
+        "WP03 ready for review (commit 3fcdaaad on lane-c). Gates: uv run pytest tests/test_scenario_contract.py --no-cov -q -> 58 passed; uv run python -m mypy --strict scripts/scenario_contract.py -> no issues (mypy comes from the dev extra; ran uv run --extra dev once to install it into the venv); make test-fast -> 4361 passed, 130 skipped; uv run pytest --pyargs spec_kitty_events.conformance -q -> 1200 passed; ruff check . -> clean; ruff format --check . -> only the known kitty-specs/.../tasks/WP04 md (fixed on planning 487f28e); changelog.py check and guard -> exit 0. Planted trees (22, each reports exactly its code, _clean reports nothing): PARSE_ERROR NO_FEATURES NO_SCENARIOS NO_STEPS NO_EXAMPLES NO_GATING_SCENARIOS UNBOUND_STEP AMBIGUOUS_STEP BAD_PROMISE_ID DUPLICATE_PROMISE WIP_MISSING_OWNER WIP_MISSING_SINCE BAD_WIP_OWNER BAD_WIP_SINCE BAD_DEFECT BAD_QA_REF UNKNOWN_PREFIXED_TAG BAD_BARE_TAG UNREGISTERED_PROMISE BAD_BINDING_DECLARATION STEPS_TABLE_DRIFT FORBIDDEN_TEST_IMPORT. Deviations/tensions: (1) contract lists 'aliased imports' as unread, T010 says track 'as' aliases; implemented T010 (from pytest_bdd import given as g IS read; import pytest_bdd as x is NOT); (2) BAD_PROMISE_ID, DUPLICATE_PROMISE, WIP_MISSING_* and AMBIGUOUS_STEP trees need a paired register/index edit to keep one code (e.g. bad id also in the register row); one logical defect each; (3) extra _relative_import/ dir (underscore, excluded from parametrization) for the relative-import case; (4) a plain Scenario with Examples is treated as an outline, as gherkin does; (5) STEPS_TABLE_DRIFT placeholder compare is literal about quotes; (6) unparseable step .py is a usage error (UsageError, exit 2). No STOP.",
+        "Review passed: 22 planted trees each give exactly their code, _clean is clean (58 tests). 20 checker mutations, 18 caught; the 2 that survived are test gaps (background collection, multi-finding sort), not fakeable rules. Unread decorator forms (parsers.re/cfparse/@step/module alias/non-literal/f-string/parse(text=)) all fail safe as UNBOUND_STEP. CLI exits 0/1/2, sorted, relative to the features root. discover() works. No core import. mypy strict, ruff check, conformance 1200, make test-fast 4361 pass. Scope: owned files only. All 7 declared deviations accepted. Minors: contract says aliased imports are not read but T010 reads them (reconcile the contract); index keyword not checked against group; background/sort not pinned by tests."
+      ],
       "provider": "__resolved_provider_absent__",
-      "role": "implementer",
-      "shell_pid": 21444,
-      "shell_pid_created_at": "1793704565.4"
+      "review_result": {
+        "feedback_path": "/home/user/spec-kitty-events/.worktrees/bdd-suite-skeleton-01M6GF8W-coord/kitty-specs/bdd-suite-skeleton-01M6GF8W/tasks/WP03-scenario-contract-check/review-cycle-1.md",
+        "reference": "review-cycle://bdd-suite-skeleton-01M6GF8W/WP03-scenario-contract-check/review-cycle-1.md",
+        "reviewer": "claude",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "shell_pid": 7166,
+      "shell_pid_created_at": "1793705266.15",
+      "subtasks": {
+        "T009": "done",
+        "T010": "done",
+        "T011": "done",
+        "T012": "done",
+        "T013": "done"
+      }
     },
     "WP04": {
-      "actor": "finalize-tasks",
-      "force_count": 0,
-      "lane": "planned",
-      "last_event_id": "01M6GHA2F30JCDR957YB42YZYT",
-      "last_transition_at": "2026-11-03T11:04:32.995114+00:00"
+      "actor": "claude",
+      "agent": "claude",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 1,
+      "implementer_of_record": "claude",
+      "lane": "approved",
+      "last_event_id": "01M6GMP0E0E5Q91W1Y8GPN4P7S",
+      "last_transition_at": "2026-11-03T12:03:29.856253+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "WP04 ready for review (commit cecdd0e6). Gates: scenarios -W error::PytestUnknownMarkWarning 19 passed (10 scenarios + 9 tag-hook); make test-fast 4332 passed, 130 skipped; conformance pyargs 1200 passed; ruff check . clean; ruff format --check . flags only kitty-specs/.../WP04-...md (known); diff-scoped ruff check/format on tests/scenarios clean; changelog check+guard exit 0; mypy --strict src 67 files clean (also tests/scenarios 6 files clean). Contract check (lane-c script, read-only): 0 error(s), 0 info, exit 0. Steps: Given the conformance fixtures of class {fixture_class}; Given the conformance fixture {fixture_id} of class {fixture_class}; When each envelope is validated; When each envelope is validated under the strict journal profile; When each legacy lane is resolved; Then each is accepted; Then each is refused with exactly the code its fixture pins; Then each is refused; Then each is accepted or refused with exactly the codes its fixture pins; Then it is refused with the code {code}; Then every selected fixture was evaluated. Sanity mutations over a scratch copy via SPEC_KITTY_SCENARIO_FIXTURES: deleting envelope_invalid_shape/missing_event_type.json failed only 006 in Arrange; re-pinning unknown_event_type.json failed exactly 008+009; reversing skew_missing_version codes failed only 008 (shared with the first in one run: 3 failed, 7 passed). No STOP: every pin agrees with the public verdict. Decisions: the single-fixture Arrange step checks its entry is registered once and on disk, not the whole class folder, so a planted unregistered strict-journal file fails 008 only; pins normalised to ordered code tuples; no fixture edits.",
+        "Review cycle 1 fixed (3669b6de). MAJOR 1: select_class(root, fixture_class) holds the whole-class checks (unique ids and paths, register==disk, non-empty); select_id(root, fixture_class, fixture_id) builds on it and pytest.fails on an unknown id. Unregistered strict-journal file fails 008 and 009; removed skew_missing_version.json fails 008 and 009. MAJOR 2: every Assert step compares outcome with the fixture's own pin (_off_pin: codes equal, refused iff invalid); _require_pins kept as a second guard. Canonical flip (register+file invalid/FORBIDDEN_KEY): -_require_pins kills 001 via the pin compare; -pin compare kills 001 via _require_pins; both removed survives (control). Raw-row flip to valid: -_require_pins in each is refused still fails 007. MAJOR 3: Arrange fails on duplicate register ids/paths; coverage compares calls with the disk-glob count. Duplicated canonical entry: unmutated fails 001 (register repeats id); disk_count=len(cases) mutant killed by the uniqueness check; uniqueness removed killed by coverage (calls=5, disk=4); both together survive (control). Committed rows for the pin-flip and duplicate-register cases belong in WP05's T020 table. MINOR: README gains How to add a promise and the contract-check command under Running. tests/scenarios/test_tag_hook.py is in WP04 owned_files on issue-197-bdd-suite-skeleton; no change. Gates: tests/scenarios 19 passed (10 scenarios + 9 tag-hook), lane-c contract check exit 0, make test-fast 4332 passed/130 skipped, conformance 1200 passed, ruff check clean, mypy --strict clean (73 files), changelog check+guard exit 0. ruff format --check flags one pre-existing file outside this change (a code block in kitty-specs/.../tasks/WP04-...md).",
+        "Review passed (cycle 2): 3 cycle-1 MAJORs fixed. FR-008: unregistered/removed strict file fails 008+009; select_id builds on select_class, unknown id fails. Pin links: M1 (either check removed) killed by canonical pin flip; 19 Assert/selection mutants each killed by some fixture flip. Coverage: duplicate register entry fails 001 in Arrange (_require_unique); M3 is now equivalent, uniqueness removal killed by coverage step. 19 passed, contract check 0, conformance 1200, test-fast 4332/130 skipped, ruff/mypy strict clean, scope tests/scenarios only. Minors: test_tag_hook.py still outside owned_files; code-only re-pins rely on _off_pin's single code comparison."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review": null,
+      "review_result": {
+        "feedback_path": "/home/user/spec-kitty-events/.worktrees/bdd-suite-skeleton-01M6GF8W-coord/kitty-specs/bdd-suite-skeleton-01M6GF8W/tasks/WP04-envelope-scenarios-and-step-binding/review-cycle-2.md",
+        "reference": "review-cycle://bdd-suite-skeleton-01M6GF8W/WP04-envelope-scenarios-and-step-binding/review-cycle-2.md",
+        "reviewer": "claude",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "shell_pid": 27869,
+      "shell_pid_created_at": "1793706805.26",
+      "subtasks": {
+        "T015": "done",
+        "T016": "done",
+        "T017": "done",
+        "T018": "done"
+      }
     },
     "WP05": {
-      "actor": "finalize-tasks",
-      "force_count": 0,
-      "lane": "planned",
-      "last_event_id": "01M6GHA3XYPKTYRE59TWN291RP",
-      "last_transition_at": "2026-11-03T11:04:34.494078+00:00"
+      "actor": "claude",
+      "agent": "claude",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 1,
+      "implementer_of_record": "claude",
+      "lane": "approved",
+      "last_event_id": "01M6GP02RGT2MGYA8XYJQT500B",
+      "last_transition_at": "2026-11-03T12:26:28.496236+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "WP05 ready (commit 60881cf1). Files: tests/scenarios/test_pinned_verdict_mutations.py (13 tests), tests/test_scenario_contract_real_tree.py (3), Makefile lint += scripts/scenario_contract.py. Mutation groups (in-process pytest.main, exact failing sets, every failure in a Then step): taxonomy-pins {001..007,010}; taxonomy-inputs {001,002,010}; 008-pin {008}; 009-pin {008,009}; 009-input {008,009}. Control: 10 passed. Coverage: unregistered extra + removed file -> {001,003} Arrange; duplicate entry -> {001} Arrange 'register repeats id'; planted strict file -> {008,009} Arrange; added fixture -> 10 pass, canonical class_fixture_verdict calls control+1, others unchanged; strict spy = 8 files + 1 = 9; skipped case: dropped -> 001 fails in 'each is accepted' (never evaluated), stored-not-counted -> 003 fails only in 'every selected fixture was evaluated'; select_id unknown id -> pytest.fail. Reviewer check: neutering each_as_pinned fails 008/009 groups. NFR-001: 5.4-6.0s pytest + 0.16s check (4 cpu x86_64). NFR-004: two -rA runs identical (modulo durations). NFR-005: schemas/fixtures diff empty; conformance 1200 passed. make test-fast 4406 passed 130 skipped. Lint: all steps pass except known ruff-format on kitty-specs WP04 md (fixed on planning branch 487f28e). mypy --strict clean with MYPYPATH=scripts (scenario_contract import via sys.path, same as existing tests).",
+        "Review passed: 16/16 new tests green; all 14 table rows implemented in 5 groups (008, 009-pin, 009-input run alone), exact-set assertions; control asserts 10 passed; coverage cases 1-4 incl. 3b-3e present. Binding mutants (no pin check, no _require_unique, select_id without class check, coverage always passes, order-insensitive codes) each turn a WP05 test red; widened/narrowed expectations go red. Real-tree test: 0 errors, ids exactly 001-010 via discover(). make lint wires scenario_contract.py after docs_index. NFR-001 5.8s; NFR-004 identical. test-fast 4406 passed/130 skipped; conformance 1200; ruff check clean; version guard ok; schemas/fixtures diff empty; scope = 3 owned files. Deviations accepted: 3c two-variant split is faithful to SC-002; MYPYPATH=scripts matches existing pattern. Minor (non-blocking): a first-code-only binding mutant survives - spec edge case says SC-004 planted check should kill it; reversing a 2-code list cannot. Follow-up: add a second-code-only strict mutation.",
+        "Reopened: add second-code-only strict mutation (spec edge case)",
+        "Cycle 1 rework: added strict row 008-pin-second (own group) pinning skew_missing_version to [ENVELOPE_SHAPE_INVALID, ENVELOPE_SHAPE_INVALID]; fails exactly {008}. Mutation proof: with _off_pin comparing only [:1], strict-008-pin-second goes red and only it (1 failed, 13 passed); binding reverted. Case 3c derives the disk count. Gates: scenarios+contract 94 passed in 6.3s wall; scenario_contract 0 errors; make test-fast 4407 passed, 130 skipped; conformance 1200 passed; ruff clean. Commit 6d85c1bd.",
+        "Review passed (cycle 2): 6d85c1bd touches only test_pinned_verdict_mutations.py; 008-pin-second (own group) fails exactly {008}; [:1] mutant turns only that group red while reversed-order row stays green; case 3c derives count; scenarios 94 passed 3.5s, contract 0.13s, test-fast 4407 passed, conformance 1200, ruff clean"
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review": null,
+      "review_result": {
+        "feedback_path": "/home/user/spec-kitty-events/.worktrees/bdd-suite-skeleton-01M6GF8W-coord/kitty-specs/bdd-suite-skeleton-01M6GF8W/tasks/WP05-mutation-coverage-and-real-tree-gates/review-cycle-1.md",
+        "reference": "review-cycle://bdd-suite-skeleton-01M6GF8W/WP05-mutation-coverage-and-real-tree-gates/review-cycle-1.md",
+        "reviewer": "claude",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "shell_pid": 12273,
+      "shell_pid_created_at": "1793708647.5",
+      "subtasks": {
+        "T014": "done",
+        "T019": "done",
+        "T020": "done",
+        "T021": "done",
+        "T022": "done"
+      }
     }
   }
 }
