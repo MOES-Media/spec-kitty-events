@@ -27,19 +27,22 @@ Phase 0 of the plan. Every unknown from the Technical Context is resolved here. 
 
 ## R-3 Supply chain (DIRECTIVE_051, advisory)
 
-| Package | Version | Published | Licence | Maintainer | Notes |
-|---|---|---|---|---|---|
-| pytest-bdd | 9.0.0 | 2026-09-30 | MIT | pytest-dev | dev-only; locked |
-| gherkin-official | resolved by lock (≤42.x) | 42.0.1: 2026-08-05 | MIT | Cucumber org | dev-only; parser |
-| mako | 1.4.3 | 2026-09-22 | MIT | Pallets/SQLAlchemy authors | transitive (pytest-bdd templates) |
-| parse | 1.22.4 | 2026-10-20 | MIT | r1chardj0n3s | transitive; 14 days old at planning; if the lock resolves a newer one, hold it at 1.22.4 or an older 1.22.x |
-| parse-type | 0.6.6 | 2025-08-11 | MIT | jenisys | transitive |
+| Package | Version | Published | Licence | PyPI author/maintainer | Wheel | Notes |
+|---|---|---|---|---|---|---|
+| pytest-bdd | 9.0.0 | 2026-09-30 | MIT | Oleg Pidsadnyi, Anatoly Bubenkov; maintainer Alessio Bogon | pure | dev-only; held at 9.0.0 (9.0.1 is from 2026-10-31) |
+| gherkin-official | as locked (42.0.1 latest, 2026-08-05) | — | MIT | Cucumber Ltd, Björn Rasmusson | pure | dev-only; parser |
+| mako | 1.4.3 | 2026-09-22 | MIT | no author field on PyPI | pure | transitive |
+| MarkupSafe | 3.0.4 | 2026-10-02 | BSD-3-Clause | no author field on PyPI | **native** (C speedups; pure fallback in the sdist) | transitive, through mako |
+| parse | 1.22.4 | 2026-10-20 | MIT | no author field on PyPI | pure | transitive; exactly 14 days old at planning; if a newer release appears before locking, hold 1.22.4 |
+| parse-type | 0.6.6 | 2025-08-11 (releases API) | MIT | Jens Engel (jenisys) | pure | transitive |
+| six | 1.17.0 | 2024-12-04 | MIT | no author field on PyPI | pure | transitive, through parse-type |
+| typing-extensions | already locked (4.16.0) | — | — | — | — | no change |
 
 - **Controls**:
-  - Every new package is dev-only. The published wheel's `Requires-Dist` is unchanged, which WP05 verifies with a build.
+  - Every new package is dev-only. The wheel's base requirements, those without an `extra ==` marker, are unchanged; only `Provides-Extra: dev` gains entries. A build-metadata check verifies this (squad R-M2).
   - `uv.lock` records sha256 hashes for every artifact.
-  - Version ranges are bounded (`<10`, `<43`).
-  - No install script or build hook is involved; all are pure-Python wheels.
+  - pytest-bdd is bounded at `<10`. gherkin-official takes pytest-bdd's own constraint and is held by the lock.
+  - No install script or build hook is involved. Every package except MarkupSafe ships a pure-Python wheel; MarkupSafe ships platform wheels and a pure fallback.
 - **Adversarial evidence**: no dependency here touches runtime or security-sensitive paths. The plan-phase squad is asked to challenge this table, and its dispositions are appended below.
 
 ## R-4 Core convention fidelity
@@ -50,11 +53,12 @@ Read on 2026-11-03 from core's `scripts/ci/scenario_contract.py`, `docs/developm
 - **Strengthened, declared under D-2**:
   - Core checks a `@promise:` id only when the tag is present. Here every gating scenario must carry exactly one, and a missing tag is reported as BAD_PROMISE_ID.
   - The Binding column uses the closed vocabulary `python` | `python, jvm` | `@wip`, where core uses free text (`bound`, ...).
-- **Not adopted, because there is nothing for them to check in D1**: NO_EXAMPLES, UNSUPPORTED_EXPRESSION, NO_STEP_DEFINITIONS and STEP_FILE_UNREADABLE. An unsupported step-definition form shows up as UNBOUND_STEP. Folding a missing or unreadable steps directory into a usage error (exit 2) is a CLI concern.
+- **Also adopted after the post-plan squad**: NO_EXAMPLES (Scenario Outlines are allowed), BAD_DEFECT and BAD_QA_REF.
+- **Not carried**: UNSUPPORTED_EXPRESSION, because an unread step-definition form shows up as UNBOUND_STEP; NO_STEP_DEFINITIONS and STEP_FILE_UNREADABLE, because a missing or unreadable steps directory is a usage error (exit 2).
 
 ## R-5 Check order of the envelope verdict
 
-This is the order of the private dispatcher at branch point (`tests/test_conformance_classes.py:176-292`), which becomes contract in `contracts/class-fixture-verdict.md`:
+This is the order of the private dispatcher at branch point (`tests/test_conformance_classes.py:136-365`, helpers and dispatcher), which becomes contract in `contracts/class-fixture-verdict.md`:
 1. wrapper is an object;
 2. required envelope fields;
 3. forbidden keys, recursively;
@@ -63,10 +67,51 @@ This is the order of the private dispatcher at branch point (`tests/test_conform
 6. `Event` model;
 7. typed payload model for MissionCreated, MissionClosed and WPStatusChanged.
 
-Lane-mapping inputs have their own three-step order.
+Lane-mapping inputs have their own order. A non-object input and a non-string `legacy_lane` both give `PAYLOAD_SCHEMA_FAIL`, with different paths.
 
 ## R-6 Required check reach
 
 - `acceptance.yml` installs `.[dev,conformance]` and runs `pytest --cov --cov-report=xml` with `testpaths = ["tests"]`, so `tests/scenarios/test_*.py` is collected.
 - `make test-fast` runs `uv run pytest --no-cov -q`, which uses the dependency group.
 - Both lists of development dependencies (the group and the extra) must therefore gain the new packages (squad D-M3).
+
+## R-7 Prior art for listing class fixtures
+
+- `conformance/loader.py` serves only the legacy `fixtures` categories.
+- `tests/test_fixture_determinism.py` (`CLASS_DIRS`) and `tests/test_conformance_classes.py` each list the class fixtures their own way.
+- The step binding cannot reuse either one, because FORBIDDEN_TEST_IMPORT forbids importing `tests/` modules. Promoting a listing helper into the package would be a second new public symbol, which C-007 says to escalate.
+- **Decision**: the binding keeps its own small loader inside `tests/scenarios/steps/`. Folding the three listers into one is recorded as a follow-up, not done here.
+
+## Adversarial squad, post-plan (2026-11-03)
+
+The delegates were profile-loaded and worked read-only:
+- architect-alphonso: changes requested (2 MAJOR);
+- researcher-robbie: rework (2 MAJOR);
+- randy-reducer: proportionate (0 MAJOR).
+
+No finding diverged: alphonso and robbie independently found the `build_id` omission.
+
+| # | Finding | Disposition | Evidence |
+|---|---|---|---|
+| A-M1 | The moved module causes an import cycle through the package root | accepted | plan approach 1 (imports); `contracts/class-fixture-verdict.md` (Imports; fresh-interpreter test) |
+| A-M2 | Accepting unknown class names creates a second verdict path | accepted | contract "Raises" |
+| A-m1 / R-M1 | `build_id` missing from the required-field list | accepted | contract check 2; README-equals-tuple test |
+| A-m2 | Tag-hook mechanics: the return value is discarded | accepted | plan approach 4 |
+| A-m3 | Import site of the step fixtures unnamed | accepted | plan approach 3 (conftest import) |
+| A-m4 | STEPS_TABLE_DRIFT normalisation too narrow | accepted | `contracts/scenario-contract-check.md` |
+| A-m5 | pytester runs inherit `--cov`; the env var must be read at call time | accepted | contract "Mutation tests"; plan approach 3 |
+| A-n1 | Planted bad import fails ruff | accepted | contract preamble; plan approach 6 |
+| R-M2 | The dev extra changes wheel metadata, contradicting "Requires-Dist unchanged" | accepted | R-3 controls; plan approach 6 |
+| R-m1 | R-3 table incomplete or unsupported (six, MarkupSafe, maintainers) | accepted | R-3 table |
+| R-m2 | BAD_DEFECT and BAD_QA_REF missing; NO_EXAMPLES reason weak | accepted | contract rules (22); spec FR-011 and SC-003 |
+| R-n1 | R-5 line range; lane-mapping paths differ | accepted | R-5 |
+| R-m3 | Three listers of class fixtures | deferred_with_rationale | R-7: a fold needs a second public symbol (C-007); follow-up issue at PR time |
+| R-m4 | ci.yml runs through an external `bin/ci-run.sh` | no change needed | `suite` is not a required check; `acceptance` and `make test-fast` are the gates (R-6) |
+| X-1 | Parity-run-then-delete is ceremony | accepted | plan approach 1 (equivalence) |
+| X-2 | gherkin `<43` cap is speculative | changed | the pin mirrors pytest-bdd's constraint; it is kept because the check imports gherkin directly |
+| X-3 | Env-var seam | accepted (documented, read in one place) | plan approach 3; contract |
+| X-4 | Mutation runs grouped by default | accepted | contract "Mutation tests"; plan Risks |
+| X-5 | Core codes not carried, undocumented | accepted | contract "Not carried from core" |
+| X-6 | Generate the steps table instead of a drift rule | deferred_with_rationale | the spec adopts core's hand-written table (FR-002); generating it is a follow-up proposal for both repos |
+| X-7 | The "46 fixtures" arithmetic | accepted | plan Scale (34 = 26 + 8) |
+| X-8 | The check-order table is duplicated between contract and README | accepted | the contract names the README as the single source once it lands |

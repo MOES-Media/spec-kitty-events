@@ -14,7 +14,7 @@ The verdict that the class-taxonomy envelope fixtures pin today comes from a pri
 **Language/Version**: Python 3.10+ (package floor; `acceptance` runs 3.12)
 **Primary Dependencies**:
 - New dev dependency `pytest-bdd>=9.0,<10`, locked at 9.0.0. It brings `gherkin-official`, `mako`, `parse` and `parse-type`.
-- Explicit dev dependency `gherkin-official>=29,!=31.0.0,!=32.0.0,<43`, the parser the contract check uses directly.
+- Explicit dev dependency `gherkin-official>=29,!=31.0.0,!=32.0.0`, the same constraint pytest-bdd declares. It is listed because the contract check imports the parser directly.
 - No runtime dependency change.
 
 **Storage**: committed fixtures under `src/spec_kitty_events/conformance/fixtures/`, read-only
@@ -30,8 +30,8 @@ The verdict that the class-taxonomy envelope fixtures pin today comes from a pri
 
 **Scale/Scope**:
 - 10 promises over 4 feature files; 1 public function.
-- 1 contract-check script with 19 rules, each with a planted example.
-- About 46 fixtures evaluated: 4 canonical, 3 synthesized, 4 forbidden-key, 2 unknown-lane, 3 payload-schema, 2 shape, 5 historical, 8 strict, 3 lane-mapping, the last split into 2 valid and 1 invalid.
+- 1 contract-check script with 22 rules, each with a planted example.
+- 34 fixtures evaluated: 26 class-taxonomy entries plus 8 strict-journal files. The 26 are 4 canonical, 3 synthesized, 4 forbidden-key, 2 unknown-lane, 3 payload-schema, 2 shape, 5 historical and 3 lane-mapping.
 
 ## Charter Check
 
@@ -45,7 +45,7 @@ The verdict that the class-taxonomy envelope fixtures pin today comes from a pri
 | Performance: deterministic and efficient validation | The verdict function is the existing logic. Scenario selection is sorted by path (NFR-004). | pass |
 | Deployment: ships as a library with committed schemas and fixtures | The function ships. The suite does not ship (C-003); `tests/` is not part of the wheel. | pass |
 | Package boundary: no consumer imports | No consumer import is added. FORBIDDEN_TEST_IMPORT also guards the step binding against `tests/` imports. | pass |
-| DIRECTIVE_051, supply chain | Recorded in `research.md` §R-3 (age, licence, maintainer, lock hashes). | pass, advisory |
+| DIRECTIVE_051, supply chain | Recorded in `research.md` §R-3 (age, licence, maintainer, lock hashes). The base requirements are unchanged; only the `dev` extra gains entries. | pass, advisory |
 
 Re-check after Phase 1: no new gaps.
 
@@ -103,13 +103,12 @@ docs/changelog/unreleased/197-bdd-suite-skeleton.md   # section: Added
 
 ## Approach (key decisions; rationale in research.md)
 
-1. **Public verdict (R4, FR-010, FR-019).** The private dispatcher's code moves verbatim into `conformance/class_verdict.py` as `class_fixture_verdict(fixture_class: str, fixture_input: object) -> ValidationError | None`. The helpers it needs move with it, as module-private names. It returns `None` for an accepted input, or the first `ValidationError` by the documented check order.
-   - The existing test keeps its name, its `_ValidationOutcome` type and every assertion. Only the bodies of `_validate_envelope`, `_validate_lane_mapping` and `_validate_for_class` become one-line delegations, so `git diff` shows no change to any `assert`. `_classify_pydantic_error` moves too.
-   - Equivalence is shown three ways:
-     - the unchanged test still passes over all 34 entries;
-     - a parity test runs the old implementation, captured at branch point as a frozen copy in the test, against the new one over every class-taxonomy fixture and both registers;
-     - an identity test asserts that the shim's target `is` the function the step binding imports.
-   - The frozen copy is deleted in WP01's final step. Only the parity result is recorded in the PR, because keeping two copies would reintroduce the split. *Decision: the parity check runs during the WP and is recorded in the PR, rather than committed.*
+1. **Public verdict (R4, FR-010, FR-019).** The private dispatcher's *behaviour* moves into `conformance/class_verdict.py` as `class_fixture_verdict(fixture_class: str, fixture_input: object) -> ValidationError | None`. The helpers it needs move with it, as module-private names, and it returns `None` for an accepted input.
+   - **Imports**: the module imports only from defining submodules: `spec_kitty_events.status`, `.lifecycle`, `.forbidden_keys`, `.models` and `.validation_errors`. It never imports from the package root, because `spec_kitty_events/__init__` → `strict` → `conformance.validators` → `conformance/__init__` would otherwise hit a partially initialised root (squad A-M1, reproduced).
+   - **Class names**: a name outside the eight taxonomy classes raises `ValueError`, including `envelope_strict_journal`, which keeps its own public validator (squad A-M2).
+   - **The existing test** keeps its name, its `_ValidationOutcome` type and every assertion. Only the bodies of `_validate_envelope`, `_validate_lane_mapping` and `_validate_for_class` become one-line delegations, and `_classify_pydantic_error` moves. `git diff` shows no change to any `assert`.
+   - **Equivalence** rests on two things: the unchanged class test passes over all 26 entries, and the moved function bodies are identical apart from imports, as `git diff -M` shows.
+   - **New pins** (`tests/test_class_fixture_verdict.py`): precedence, `ValueError` on an unknown class, identity of the delegation target, README field list equals the implementation's tuple, and a fresh-interpreter import of the package.
 2. **Scenario wording is technology-agnostic (C-004).**
    - Inputs are named by class or register id in double quotes: `Given the conformance fixtures of class "envelope_invalid_shape"`. That shape binds as pytest-bdd `parsers.parse('... "{fixture_class}"')` today and as a Cucumber `{string}` in D3.
    - Codes appear only as contract vocabulary, for example `"UNKNOWN_EVENT_TYPE"`.
@@ -117,17 +116,18 @@ docs/changelog/unreleased/197-bdd-suite-skeleton.md   # section: Added
    - The Arrange step loads the class's register (`classes.entries` for the eight classes; the top-level `fixtures` array filtered by path prefix for `envelope_strict_journal`). It globs the class folder on disk and fails on a mismatch or on an empty selection (FR-008).
    - The Act step calls the public verdict function, or `validate_strict_envelope`, once per fixture through a counting wrapper. It collects every outcome without short-circuiting.
    - The Assert steps compare each outcome with the fixture's pin, report every mismatch together, and finish with `Then every fixture of the class was evaluated`. That step compares the call count with the independent disk glob (SC-002).
-   - Fixtures are read from the installed package through `importlib.resources`. The environment variable `SPEC_KITTY_SCENARIO_FIXTURES` overrides the root, for the mutation tests only.
-4. **Tags (FR-003/FR-004).** `conftest.py` implements `pytest_bdd_apply_tag`. `@wip` becomes a skip marker with reason `wip`, and `@manual` is skipped. `promise:`, `qa:`, `defect:`, `wip-owner:` and `wip-since:` are consumed without registering pytest markers, so the run gives no unknown-mark warnings. The contract check, not pytest, validates the grammar.
+   - Fixtures are read from the installed package through `importlib.resources`. The test-only environment variable `SPEC_KITTY_SCENARIO_FIXTURES` overrides the root. It is read in one place, the Arrange step, at call time, because in-process `pytester` runs share `sys.modules`. The step module is imported by `tests/scenarios/conftest.py`, which makes its step fixtures visible to the test modules in that folder. pytest-bdd binds steps through module namespaces, and `pytest_plugins` is not allowed in a non-root conftest.
+4. **Tags (FR-003/FR-004).** `conftest.py` implements `pytest_bdd_apply_tag`. pytest-bdd 9 discards the hook's return value, so the hook marks the function in place and returns `True` for every tag the contract allows; anything else falls through to `pytest.mark` and warns. `@wip` becomes a skip marker with reason `wip`, and `@manual` is skipped. `promise:`, `qa:`, `defect:`, `wip-owner:` and `wip-since:` are consumed without registering pytest markers, so the run gives no unknown-mark warnings. The contract check, not pytest, validates the grammar.
 5. **Contract check (FR-011/FR-012).**
    - It parses feature files with `gherkin-official`, the same parser pytest-bdd uses, so the two cannot disagree on what parses.
-   - It reads Python step definitions statically with `ast`: decorators `given`/`when`/`then` from `pytest_bdd`, with either a string literal or `parsers.parse("<literal>")`. The `parse` fields `{name}` and `{name:d}` are translated to regular expressions.
+   - It reads Python step definitions statically with `ast`: decorators `given`/`when`/`then` from `pytest_bdd`, with either a string literal or `parsers.parse("<literal>")`. The `parse` fields `{name}` and `{name:fmt}` are translated to regular expressions, and stacked decorators are each read.
    - Any other form leaves its steps unbound, so they fail loudly as UNBOUND_STEP, as core's matcher does.
    - Sources are passed as `--steps python=<dir>`. The parser registry is keyed by binding name, so D3 adds `jvm` by porting core's `_JAVA_STEP_RE`. In D1, any `jvm` claim is BAD_BINDING_DECLARATION.
    - Exit status is 1 on any error.
    - `tests/test_scenario_contract.py` runs the check over the real tree, asserting 0 errors, at least 1 feature and at least 10 promises, and over each planted tree, asserting exactly that tree's one code.
 6. **Wiring (FR-020/FR-021).**
-   - `pyproject.toml` gains pytest-bdd and gherkin-official in the `dev` dependency group and in the `[project.optional-dependencies].dev` extra; `acceptance` installs that extra.
+   - `pyproject.toml` gains pytest-bdd and gherkin-official in the `dev` dependency group and in the `[project.optional-dependencies].dev` extra; `acceptance` installs that extra. The wheel's base requirements are unchanged; only `Provides-Extra: dev` gains entries, which a build-metadata check verifies (squad R-M2).
+   - Planted contract-check trees are valid, ruff-clean Python. A deliberately bad import carries `# noqa: F401`.
    - `uv.lock` is regenerated, with pytest-bdd held at 9.0.0.
    - The `make lint` target gains `uv run python scripts/scenario_contract.py`.
    - `make test-fast` and `acceptance` already collect `tests/`. The suite is collected through `tests/scenarios/test_*.py`.
@@ -148,5 +148,5 @@ C1 and C2 can run in parallel. C3 needs C1, C4 needs C3, and C5 closes.
 
 - **The moved code diverges from the private code.** Mitigated by the parity run plus the unchanged class test (approach 1).
 - **pytest-bdd tag handling changes in a minor release.** Mitigated by pinning `<10` and holding the lock at 9.0.0. The `pytest_bdd_apply_tag` hook has been stable since 4.x.
-- **gherkin-official upper bound.** pytest-bdd's own constraint is open-ended. The explicit `<43` cap keeps the parser that the contract check and pytest-bdd share on the locked major version.
-- **NFR-001 budget.** About ten in-process `pytester` runs of one feature file each. If they exceed the budget, they collapse into one run per mutation group, where the mutations target disjoint classes. Promises 008 and 009 share a class, which `contracts/scenario-contract-check.md` accounts for.
+- **gherkin-official major bumps.** The lock pins the exact version, and pytest-bdd and the contract check share that one parser.
+- **NFR-001 budget.** Mutation runs are grouped by disjoint class from the start, with inner runs given `-o addopts= --no-cov` so they skip coverage. Promises 008 and 009 share a class, which `contracts/scenario-contract-check.md` accounts for.
