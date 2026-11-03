@@ -1,6 +1,6 @@
 ---
 work_package_id: WP01
-title: Dev dependencies and changelog
+title: Dev dependencies, changelog and the 11.4.0 version declaration
 dependencies: []
 requirement_refs:
 - C-002
@@ -18,6 +18,7 @@ subtasks:
 - T001
 - T002
 - T003
+- T023
 phase: Phase 1 - Foundations
 agent: claude
 history:
@@ -31,12 +32,16 @@ owned_files:
 - pyproject.toml
 - uv.lock
 - docs/changelog/unreleased/197-bdd-suite-skeleton.md
+- src/spec_kitty_events/__init__.py
+- COMPATIBILITY.md
+- README.md
+- CHANGELOG.md
 role: implementer
 tags: []
 tracker_refs: []
 ---
 
-# WP01 — Dev dependencies and changelog
+# WP01 — Dev dependencies, changelog and the 11.4.0 version declaration
 
 ## ⚡ Do This First: Load Agent Profile
 
@@ -122,6 +127,26 @@ section: Added
 Then run `uv run python scripts/changelog.py check && uv run python scripts/changelog.py guard`, and `grep -n 'class_fixture_verdict' docs/changelog/unreleased/197-bdd-suite-skeleton.md`, which is FR-022's executable check. Do **not** edit `CHANGELOG.md`.
 
 **COMPATIBILITY.md**: add no entry. Its sections are written per release, by the release PR, which folds this fragment into the next minor's section. Say so in the handoff.
+
+### T023 — Declare version 11.4.0 (added after the WP02 review, 2026-11-03)
+
+**Why**: `scripts/check_version_not_amended.py` (ADR 0005, Consequences) rejects any `src/` change while the working-tree version is already released as a tag. `v11.3.0` exists, and WP02 adds `src/spec_kitty_events/conformance/class_verdict.py`. Spec ruling R4 makes that new public symbol a **minor** release, so the declaration becomes `11.4.0`. The version stays unreleased (no tag) until the release PR.
+
+Edit only the version declarations:
+1. `pyproject.toml`: set `version = "11.4.0"`. Then run `uv lock`. The root package's entry in `uv.lock` moves to 11.4.0, and nothing else may change; confirm with `git diff uv.lock`.
+2. `src/spec_kitty_events/__init__.py`: `__version__ = "11.4.0"`. Touch nothing else in that file.
+3. `README.md`: the `**Package Version**` declaration and the two `pip install "spec-kitty-events...==11.3.0"` lines become 11.4.0 (`tests/test_compatibility_doc.py` pins the declaration).
+4. `COMPATIBILITY.md`:
+   - set the `**Current package version**` line to `11.4.0`;
+   - add a new section above the `11.3.0` one, headed ``## `11.4.0` — envelope verdict made public, contract scenario suite (minor)``. It says the release is additive: no envelope, payload, schema, fixture or verdict changes. It names the new public `spec_kitty_events.conformance.class_fixture_verdict` and its documented check order (link `src/spec_kitty_events/conformance/README.md`), and notes the repository-only scenario suite (`tests/scenarios/`, not shipped).
+   - Add a short `### Adopting 11.4.0` subsection: core and saas need no change; another binding can reproduce the envelope verdict from the documented order.
+   - Read the 11.2.1 and 11.3.0 sections for tone and shape, and keep the section-ordering contract that `tests/test_compatibility_doc.py` checks.
+5. `CHANGELOG.md`: change **only** the opening paragraph of `## [Unreleased]` ("…the version stays `11.3.0`…"), which the fragments README allows a version-bumping PR to correct. It should say the version moves to `11.4.0` for a new public conformance function, and keep the sentence about the services. Do **not** touch any `###` subsection; `changelog.py guard` enforces this.
+
+**Validation**:
+- `uv run pytest tests/test_compatibility_doc.py tests/test_version_not_amended.py --no-cov -q` is green.
+- `uv run python scripts/check_version_not_amended.py` exits 0.
+- `changelog.py check` and `guard` are green.
 
 Every work package also runs the gate set from CLAUDE.md before handoff:
 
