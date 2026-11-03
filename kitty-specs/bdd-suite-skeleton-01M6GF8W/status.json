@@ -20,7 +20,7 @@
   "work_packages": {
     "WP01": {
       "actor": "claude",
-      "agent": "claude",
+      "agent": null,
       "agent_profile": "reviewer-renata",
       "agent_profile_version": "1.0",
       "force_count": 2,
@@ -44,13 +44,13 @@
         "verdict": "changes_requested"
       },
       "role": "reviewer",
-      "shell_pid": 1064,
-      "shell_pid_created_at": "1793705081.26",
+      "shell_pid": null,
+      "shell_pid_created_at": null,
       "subtasks": {
-        "T001": "done",
-        "T002": "done",
-        "T003": "done",
-        "T023": "done"
+        "T001": "planned",
+        "T002": "planned",
+        "T003": "planned",
+        "T023": "planned"
       }
     },
     "WP02": {
