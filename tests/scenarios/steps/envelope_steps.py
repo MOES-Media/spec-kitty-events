@@ -14,8 +14,11 @@ Each scenario selects fixtures by class or by register id, never by content (FR-
   register entry, and the file must agree; for the strict journal profile, they come from the
   file (``expected``, ordered ``expected_error_codes``), and the register's
   ``expected_result`` must agree.
-- **Coverage**: the register paths must equal the ``*.json`` files on disk, an empty selection
-  fails, and the closing step checks that every selected fixture reached the verdict once.
+- **Coverage**: the register's ids and paths must each be unique, the register paths must equal
+  the ``*.json`` files on disk, and an empty selection fails (``select_class``). The single-fixture
+  selection (``select_id``) runs the same whole-class checks first. The closing step checks that
+  the verdict was computed once per selected fixture and per file counted on disk.
+- **Assert**: every Assert step compares each outcome with that fixture's own pin.
 
 The verdict functions are looked up as module attributes at call time, so a test can
 monkeypatch them on this module to count calls.
@@ -25,6 +28,7 @@ from __future__ import annotations
 
 import json
 import os
+from collections import Counter
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from importlib.resources import files
@@ -152,20 +156,25 @@ def _case(root: Path, fixture_class: str, entry: dict[str, Any]) -> Case:
     return _taxonomy_case(root, entry)
 
 
-# --------------------------------------------------------------------------------------------
-# Arrange
-# --------------------------------------------------------------------------------------------
+def _require_unique(fixture_class: str, register: list[dict[str, Any]], key: str) -> None:
+    counts = Counter(str(entry.get(key)) for entry in register)
+    repeated = sorted(value for value, count in counts.items() if count > 1)
+    if repeated:
+        pytest.fail(f"class {fixture_class!r}: register repeats {key} {repeated}")
 
 
-@given(parsers.parse('the conformance fixtures of class "{fixture_class}"'))
-def select_class(scenario_ctx: ScenarioContext, fixture_class: str) -> None:
-    """Select every fixture of a class; register and disk must agree."""
-    root = _fixture_root()
+def select_class(root: Path, fixture_class: str) -> list[Case]:
+    """Every case a class registers, ordered by path.
+
+    Fails unless the register's ids and paths are each unique, the set of register paths
+    equals the set of ``*.json`` files in the class folder, and the selection is not empty.
+    """
     manifest = _load_json(root / "manifest.json")
     register = _register(manifest, fixture_class)
+    _require_unique(fixture_class, register, "id")
+    _require_unique(fixture_class, register, "path")
     register_paths = {entry["path"] for entry in register}
-    disk = _disk_paths(root, fixture_class)
-    disk_paths = set(disk)
+    disk_paths = set(_disk_paths(root, fixture_class))
     if register_paths != disk_paths:
         pytest.fail(
             f"class {fixture_class!r}: register and disk disagree; "
@@ -174,28 +183,41 @@ def select_class(scenario_ctx: ScenarioContext, fixture_class: str) -> None:
         )
     if not register:
         pytest.fail(f"class {fixture_class!r} selects no fixtures under {root}")
-    scenario_ctx.fixture_class = fixture_class
-    scenario_ctx.disk_count = len(disk)
     ordered = sorted(register, key=lambda entry: str(entry["path"]))
-    scenario_ctx.cases = [_case(root, fixture_class, entry) for entry in ordered]
+    return [_case(root, fixture_class, entry) for entry in ordered]
 
 
-@given(parsers.parse('the conformance fixture "{fixture_id}" of class "{fixture_class}"'))
-def select_one(scenario_ctx: ScenarioContext, fixture_id: str, fixture_class: str) -> None:
-    """Select one fixture by its register id; it must be registered and on disk."""
-    root = _fixture_root()
-    manifest = _load_json(root / "manifest.json")
-    matches = [e for e in _register(manifest, fixture_class) if e.get("id") == fixture_id]
+def select_id(root: Path, fixture_class: str, fixture_id: str) -> Case:
+    """The one case of a class whose register id matches, after the whole-class selection."""
+    matches = [case for case in select_class(root, fixture_class) if case.id == fixture_id]
     if len(matches) != 1:
         pytest.fail(
             f"class {fixture_class!r}: register id {fixture_id!r} matches {len(matches)} entries"
         )
-    entry = matches[0]
-    if not (root / entry["path"]).is_file():
-        pytest.fail(f"{fixture_id}: registered path {entry['path']!r} is not on disk")
+    return matches[0]
+
+
+# --------------------------------------------------------------------------------------------
+# Arrange
+# --------------------------------------------------------------------------------------------
+
+
+@given(parsers.parse('the conformance fixtures of class "{fixture_class}"'))
+def given_class(scenario_ctx: ScenarioContext, fixture_class: str) -> None:
+    """Select every fixture of a class; register and disk must agree."""
+    root = _fixture_root()
+    scenario_ctx.cases = select_class(root, fixture_class)
+    scenario_ctx.fixture_class = fixture_class
+    # Counted from the disk glob, independently of the register.
+    scenario_ctx.disk_count = len(_disk_paths(root, fixture_class))
+
+
+@given(parsers.parse('the conformance fixture "{fixture_id}" of class "{fixture_class}"'))
+def given_one(scenario_ctx: ScenarioContext, fixture_id: str, fixture_class: str) -> None:
+    """Select one fixture by its register id; the whole class must pass selection first."""
+    scenario_ctx.cases = [select_id(_fixture_root(), fixture_class, fixture_id)]
     scenario_ctx.fixture_class = fixture_class
     scenario_ctx.disk_count = 1
-    scenario_ctx.cases = [_case(root, fixture_class, entry)]
 
 
 # --------------------------------------------------------------------------------------------
@@ -260,9 +282,26 @@ def _require_pins(ctx: ScenarioContext, expected: str) -> None:
         pytest.fail(f"these fixtures do not pin {expected!r}: {wrong}")
 
 
+def _off_pin(ctx: ScenarioContext) -> dict[str, tuple[str, str, tuple[str, ...], tuple[str, ...]]]:
+    """Cases whose outcome disagrees with their own pin: the codes, and refused iff invalid."""
+    off = {}
+    for case in ctx.cases:
+        actual = _outcome(ctx, case)
+        if actual != case.codes or bool(actual) != (case.expected == "invalid"):
+            off[case.path] = (
+                case.expected,
+                "refused" if actual else "accepted",
+                case.codes,
+                actual,
+            )
+    return off
+
+
 @then("each is accepted")
 def each_accepted(scenario_ctx: ScenarioContext) -> None:
     _require_pins(scenario_ctx, "valid")
+    off = _off_pin(scenario_ctx)
+    assert not off, f"(pinned, verdict, pinned codes, actual codes) differ: {off}"
     refused = {c.path: _outcome(scenario_ctx, c) for c in scenario_ctx.cases}
     refused = {path: codes for path, codes in refused.items() if codes}
     assert not refused, f"pinned valid but refused: {refused}"
@@ -271,12 +310,8 @@ def each_accepted(scenario_ctx: ScenarioContext) -> None:
 @then("each is refused with exactly the code its fixture pins")
 def each_refused_with_pinned_code(scenario_ctx: ScenarioContext) -> None:
     _require_pins(scenario_ctx, "invalid")
-    mismatched = {
-        case.path: (case.codes, _outcome(scenario_ctx, case))
-        for case in scenario_ctx.cases
-        if _outcome(scenario_ctx, case) != case.codes
-    }
-    assert not mismatched, f"(pinned, actual) codes differ: {mismatched}"
+    off = _off_pin(scenario_ctx)
+    assert not off, f"(pinned, verdict, pinned codes, actual codes) differ: {off}"
 
 
 @then("each is refused")
@@ -285,21 +320,22 @@ def each_refused(scenario_ctx: ScenarioContext) -> None:
 
     The pinned ``RAW_HISTORICAL_ROW`` is the ideal code, which today's validator does not
     always emit (conformance README, the note on ``historical_row_raw``); this step must not
-    claim it is.
+    claim it is. It still compares each verdict with its own pin: refused exactly when the
+    fixture pins ``invalid`` with a code.
     """
     _require_pins(scenario_ctx, "invalid")
-    accepted = [c.path for c in scenario_ctx.cases if not _outcome(scenario_ctx, c)]
-    assert not accepted, f"pinned invalid but accepted: {accepted}"
+    off = {
+        case.path: (case.expected, case.codes, _outcome(scenario_ctx, case))
+        for case in scenario_ctx.cases
+        if bool(_outcome(scenario_ctx, case)) != (case.expected == "invalid" and bool(case.codes))
+    }
+    assert not off, f"(pinned, pinned codes, actual codes): refusal disagrees with pin: {off}"
 
 
 @then("each is accepted or refused with exactly the codes its fixture pins")
 def each_as_pinned(scenario_ctx: ScenarioContext) -> None:
-    mismatched = {
-        case.path: (case.codes, _outcome(scenario_ctx, case))
-        for case in scenario_ctx.cases
-        if _outcome(scenario_ctx, case) != case.codes
-    }
-    assert not mismatched, f"(pinned, actual) ordered codes differ: {mismatched}"
+    off = _off_pin(scenario_ctx)
+    assert not off, f"(pinned, verdict, pinned codes, actual codes) differ: {off}"
 
 
 @then(parsers.parse('it is refused with the code "{code}"'))

@@ -42,9 +42,12 @@ Steps follow Arrange, Assume, Act, Assert. Reuse these before adding new ones.
 "The conformance fixtures of class" selects every fixture a class registers: for the eight
 taxonomy classes, `manifest.json` `classes.entries`; for `envelope_strict_journal`, the top-level
 `fixtures` array. The registered paths must equal the class folder's files on disk, and the
-selection must not be empty, or the step fails. "The conformance fixture" selects one fixture by
-its register id. "Each is refused" checks refusal only; it is for `historical_row_raw`, whose
-pinned code is an ideal today's validator does not always emit (conformance README).
+selection must not be empty, or the step fails; it also fails if the class's register repeats an
+id or a path. "The conformance fixture" runs the same whole-class selection, with the same checks,
+then keeps the one fixture whose register id matches; an unknown id fails the step. "Each is
+refused" checks refusal only; it is for `historical_row_raw`, whose pinned code is an ideal
+today's validator does not always emit (conformance README). Every Assert step compares each
+outcome with that fixture's own pin.
 "Every selected fixture was evaluated" checks that the verdict was computed once per selected
 fixture and per file on disk.
 
@@ -76,7 +79,20 @@ Binding is `python`, `python, jvm` or `@wip`; it is `@wip` exactly when the scen
 
 ```bash
 uv run pytest tests/scenarios --no-cov -q -W error::pytest.PytestUnknownMarkWarning
+uv run python scripts/scenario_contract.py               # the contract check
 ```
 
 `SPEC_KITTY_SCENARIO_FIXTURES` (test-only, documented in `conftest.py`) points the Arrange steps
 at another fixture root laid out like the packaged one.
+
+## How to add a promise
+
+1. Pick the area and the behaviour folder, and write the scenario with the steps in
+   [Available steps](#available-steps).
+2. Tag it `@promise:PR-EVENTS-<AREA>-NNN`, using the next free number in the area.
+3. Add its row to `<area>/PROMISES.md`, under the behaviour's section, with Binding `python`.
+4. If a new step is needed, add it to `steps/` and to the steps table above, in the same change.
+5. Run the scenarios and the contract check (see [Running](#running)).
+
+To draft a scenario that does not gate yet, tag it `@wip @wip-owner:<handle>
+@wip-since:<YYYY-MM-DD>` and write `@wip` in its Binding column.
