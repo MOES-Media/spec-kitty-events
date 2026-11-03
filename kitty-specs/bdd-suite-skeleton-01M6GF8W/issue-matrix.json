@@ -1,0 +1,77 @@
+{
+  "rows": {
+    "#117": {
+      "evidence_ref": "<auto-classified: no action required>",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<auto-classified: context_only>",
+      "verdict": "not-applicable",
+      "wp": null
+    },
+    "#121": {
+      "evidence_ref": "Parent issue (scope D); spec.md:12 Refs only - this mission is slice D1 and closes #197, not #121",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "not-applicable",
+      "wp": null
+    },
+    "#122": {
+      "evidence_ref": "Docs slice E; out of scope per spec.md C-006",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "not-applicable",
+      "wp": null
+    },
+    "#197": {
+      "evidence_ref": "Mission issue; WP01 slice (dev deps + changelog fragment) landed in a6e05466; WP02-WP05 still open",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "in-mission",
+      "wp": null
+    },
+    "#198": {
+      "evidence_ref": "Follow-up slice D2 (ledger/replay); out of scope per spec.md C-006",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "not-applicable",
+      "wp": null
+    },
+    "#199": {
+      "evidence_ref": "Follow-up slice D3 (upcast/compat/JVM binding); out of scope per spec.md C-006; corrected by comment when D1 PR opens (spec.md:216)",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "not-applicable",
+      "wp": null
+    }
+  },
+  "schema_version": 1
+}

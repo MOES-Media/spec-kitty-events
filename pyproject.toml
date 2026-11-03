@@ -1,6 +1,6 @@
 [project]
 name = "spec-kitty-events"
-version = "11.3.0"
+version = "11.4.0"
 description = "Event log library with Lamport clocks and systematic error tracking"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -29,6 +29,8 @@ dev = [
     "hypothesis>=6.0.0",
     "mypy>=1.0.0",
     "pyyaml>=6.0,<7",
+    "pytest-bdd>=9.0.1,<10",
+    "gherkin-official>=29,!=31.0.0,!=32.0.0",
 ]
 conformance = [
     "jsonschema>=4.21.0,<5.0.0",
@@ -199,4 +201,8 @@ dev = [
     "jsonschema>=4.21.0,<5.0.0",
     "ruff>=0.16,<0.17",
     "pyyaml>=6.0,<7",
+    # Scenario suite (tests/scenarios, #197): the reference step binding and the Gherkin
+    # parser the contract check (scripts/scenario_contract.py) imports directly.
+    "pytest-bdd>=9.0.1,<10",
+    "gherkin-official>=29,!=31.0.0,!=32.0.0",
 ]
