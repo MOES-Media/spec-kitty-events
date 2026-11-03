@@ -49,7 +49,7 @@
       "wp": null
     },
     "#198": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Follow-up slice D2 (ledger/replay); out of scope per spec.md C-006",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -57,7 +57,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
+      "verdict": "not-applicable",
       "wp": null
     },
     "#199": {
