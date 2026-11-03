@@ -48,10 +48,10 @@
       "criterion_id": "FR-005",
       "description": "Verify FR-005 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "envelope/PROMISES.md Binding column = python x10; BAD_BINDING_DECLARATION planted tree",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-11-03T12:28:19.694079+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
