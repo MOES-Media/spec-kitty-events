@@ -1,0 +1,140 @@
+schema_version: 1
+mission_id: 01M6GF8WCN56FHB65F9WVKAGHP
+mission_slug: bdd-suite-skeleton-01M6GF8W
+mission_number: 24
+friendly_name: BDD suite skeleton and envelope scenarios
+mission_type: software-dev
+target_branch: issue-197-bdd-suite-skeleton
+created_at: '2026-11-03T12:33:57.106919+00:00'
+created_by:
+  kind: runtime
+  id: spec-kitty-generator
+  display: Spec Kitty Generator
+provenance:
+  kind: runtime_post_completion
+  invoked_at: '2026-11-03T12:33:57.106919+00:00'
+  policy_resolved_from:
+    enabled: <default>
+    timing: <default>
+    failure_policy: <default>
+    write_record: <default>
+    generate_proposals: <default>
+    apply_proposals: <default>
+    permissions.write_record: <default>
+    permissions.inspect_mission_artifacts: <default>
+    permissions.propose_glossary_changes: <default>
+    permissions.propose_drg_changes: <default>
+    permissions.propose_doctrine_changes: <default>
+    permissions.apply_low_risk_changes: <default>
+    permissions.apply_structural_changes: <default>
+    precedence: <default>
+    generator: <default>
+policy_source:
+  enabled: <default>
+  timing: <default>
+  failure_policy: <default>
+  write_record: <default>
+  generate_proposals: <default>
+  apply_proposals: <default>
+  permissions.write_record: <default>
+  permissions.inspect_mission_artifacts: <default>
+  permissions.propose_glossary_changes: <default>
+  permissions.propose_drg_changes: <default>
+  permissions.propose_doctrine_changes: <default>
+  permissions.apply_low_risk_changes: <default>
+  permissions.apply_structural_changes: <default>
+  precedence: <default>
+  generator: <default>
+findings_status: has_findings
+helped:
+- id: h-001
+  category: implementation
+  summary: WP03 completed without rejection cycles
+  evidence_refs:
+  - e-010
+not_helpful:
+- id: n-005
+  category: doc
+  summary: analysis-report.md records 5 finding(s)
+  evidence_refs:
+  - e-015
+  details: The analysis-report.md artifact for this mission records 5 finding(s) in its structured frontmatter. Review
+    them to understand documented issues and decisions.
+- id: n-001
+  category: review_loop
+  summary: WP01 required 2 rejection cycle(s) before approval
+  evidence_refs:
+  - e-011
+  details: WP WP01 was sent back to an earlier lane with documented review feedback 2 time(s).
+- id: n-002
+  category: review_loop
+  summary: WP02 required 1 rejection cycle(s) before approval
+  evidence_refs:
+  - e-012
+  details: WP WP02 was sent back to an earlier lane with documented review feedback 1 time(s).
+- id: n-003
+  category: review_loop
+  summary: WP04 required 1 rejection cycle(s) before approval
+  evidence_refs:
+  - e-013
+  details: WP WP04 was sent back to an earlier lane with documented review feedback 1 time(s).
+- id: n-004
+  category: review_loop
+  summary: WP05 required 1 rejection cycle(s) before approval
+  evidence_refs:
+  - e-014
+  details: WP WP05 was sent back to an earlier lane with documented review feedback 1 time(s).
+gaps: []
+proposals: []
+evidence_refs:
+- id: e-001
+  kind: file
+  path: kitty-specs/bdd-suite-skeleton-01M6GF8W/meta.json
+- id: e-002
+  kind: file
+  path: kitty-specs/bdd-suite-skeleton-01M6GF8W/spec.md
+- id: e-003
+  kind: file
+  path: kitty-specs/bdd-suite-skeleton-01M6GF8W/plan.md
+- id: e-004
+  kind: file
+  path: kitty-specs/bdd-suite-skeleton-01M6GF8W/tasks.md
+- id: e-005
+  kind: file
+  path: kitty-specs/bdd-suite-skeleton-01M6GF8W/tasks/WP01-dev-dependencies-and-changelog.md
+- id: e-006
+  kind: file
+  path: kitty-specs/bdd-suite-skeleton-01M6GF8W/tasks/WP02-public-class-fixture-verdict.md
+- id: e-007
+  kind: file
+  path: kitty-specs/bdd-suite-skeleton-01M6GF8W/tasks/WP03-scenario-contract-check.md
+- id: e-008
+  kind: file
+  path: kitty-specs/bdd-suite-skeleton-01M6GF8W/tasks/WP04-envelope-scenarios-and-step-binding.md
+- id: e-009
+  kind: file
+  path: kitty-specs/bdd-suite-skeleton-01M6GF8W/tasks/WP05-mutation-coverage-and-real-tree-gates.md
+- id: e-010
+  kind: file
+  path: kitty-specs/bdd-suite-skeleton-01M6GF8W/status.events.jsonl
+- id: e-011
+  kind: event_range
+  path: kitty-specs/bdd-suite-skeleton-01M6GF8W/status.events.jsonl
+  range: 01M6GJ7NGCN27QY1KSMGPD8JMK..01M6GJP791N9BMK1ZE2N9CQ8NB
+- id: e-012
+  kind: event_range
+  path: kitty-specs/bdd-suite-skeleton-01M6GF8W/status.events.jsonl
+  range: 01M6GJ2VD1AMCF2QZJZWK4WPC3
+- id: e-013
+  kind: event_range
+  path: kitty-specs/bdd-suite-skeleton-01M6GF8W/status.events.jsonl
+  range: 01M6GKQHTMQ0JTX7F6R4MEZX6R
+- id: e-014
+  kind: event_range
+  path: kitty-specs/bdd-suite-skeleton-01M6GF8W/status.events.jsonl
+  range: 01M6GNNDENBXG81Y8X1GVPHV9B
+- id: e-015
+  kind: file
+  path: kitty-specs/bdd-suite-skeleton-01M6GF8W/analysis-report.md
+generator_version: '1.0'
+provenance_history: []
