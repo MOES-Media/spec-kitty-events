@@ -12,6 +12,9 @@ requirement_refs:
 planning_base_branch: issue-197-bdd-suite-skeleton
 merge_target_branch: issue-197-bdd-suite-skeleton
 branch_strategy: Planning artifacts for this mission were generated on issue-197-bdd-suite-skeleton. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into issue-197-bdd-suite-skeleton unless the human explicitly redirects the landing branch.
+base_branch: kitty/mission-bdd-suite-skeleton-01M6GF8W
+base_commit: 142121f1ba59d908fb335030fa07e47367cb37a3
+created_at: '2026-11-03T11:16:13.896446+00:00'
 subtasks:
 - T009
 - T010
