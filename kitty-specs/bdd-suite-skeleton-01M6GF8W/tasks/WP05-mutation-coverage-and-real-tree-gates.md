@@ -126,6 +126,8 @@ These are separate runs, or combined into the groups above where the classes are
    This also proves the binding side of SC-005, because the binding really calls the public function.
 3b. **Strict side**: the same spy on `validate_strict_envelope`. Its call count equals the number of strict-journal files on disk, plus 1 for 009.
 3c. **Skipped fixture (SC-002)**: monkeypatch `envelope_steps._evaluate` with a wrapper that silently drops one chosen case id, neither counting nor storing it. Only `Then every selected fixture was evaluated` of the covering scenario fails. Assert exactly that failure.
+3d. **Duplicate register entry (WP04 review, M3)**: duplicate one `classes.entries` row of the canonical class in the tmp `manifest.json`. 001 must fail in Arrange, because register ids and paths must be unique. This also kills a binding mutant whose coverage step compares against the register count instead of the disk count.
+3e. **Single-fixture selection keeps the class check (WP04 review, FR-008)**: plant an unregistered file in `envelope_strict_journal`. Both 008 and 009 must fail.
 4. **Unknown register id**: unit-test the binding's `select_id` helper, imported from `tests.scenarios.steps.envelope_steps`. That is allowed, because it is inside `tests/scenarios`. With an id that does not exist, it raises `pytest.fail.Exception`.
 
 ### T021 — Real-tree contract run (FR-012, SC-003)
