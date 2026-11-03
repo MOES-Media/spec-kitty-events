@@ -78,10 +78,10 @@
       "criterion_id": "FR-008",
       "description": "Verify FR-008 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "select_class register-vs-disk + uniqueness; WP05 cases 1,2,3d,3e",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-11-03T12:28:35.318139+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
