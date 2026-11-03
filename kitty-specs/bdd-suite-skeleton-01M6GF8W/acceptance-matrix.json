@@ -2,7 +2,7 @@
   "mission_slug": "bdd-suite-skeleton-01M6GF8W",
   "mission_number": "",
   "mission_type": "",
-  "overall_verdict": "pending",
+  "overall_verdict": "pass",
   "criteria": [
     {
       "criterion_id": "FR-001",
@@ -218,10 +218,10 @@
       "criterion_id": "FR-022",
       "description": "Verify FR-022 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "docs/changelog/unreleased/197-bdd-suite-skeleton.md (section Added, names class_fixture_verdict); changelog check+guard ok",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-11-03T12:29:46.316080+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     }
   ],
