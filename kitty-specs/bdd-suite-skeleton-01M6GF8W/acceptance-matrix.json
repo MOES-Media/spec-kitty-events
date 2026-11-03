@@ -98,10 +98,10 @@
       "criterion_id": "FR-010",
       "description": "Verify FR-010 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "src/spec_kitty_events/conformance/class_verdict.py; tests/test_class_fixture_verdict.py spy/identity; tests/test_conformance_classes.py assertions unchanged",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-11-03T12:28:46.107010+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
