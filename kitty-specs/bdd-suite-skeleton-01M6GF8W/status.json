@@ -53,6 +53,9 @@
       "last_event_id": "01M6GHQY6BE5P9J843C8SW7C25",
       "last_transition_at": "2026-11-03T11:12:07.371072+00:00",
       "model": "__resolved_model_absent__",
+      "notes": [
+        "WP02 done (commits ffb77dc2, 1af5ad5a). New public symbol spec_kitty_events.conformance.class_fixture_verdict (module conformance/class_verdict.py, imports from status/lifecycle/models/forbidden_keys/validation_errors only); __all__ gained exactly one name. Class test helpers delegate; moved constants/_classify_pydantic_error/_validate_envelope/_validate_lane_mapping removed from the test. Assert diff check (git diff -U0 HEAD~2 tests/test_conformance_classes.py | grep assert): empty. README: new 'Envelope verdict check order' section + historical_row_raw caveat now lists PAYLOAD_SCHEMA_FAIL. Gates: WP pytest list (5 files) 99 passed; test_conformance_classes 30 passed (main: 30); test_class_fixture_verdict 9 passed; --pyargs spec_kitty_events.conformance 1200 passed (origin/main b4c4477: 1200 passed); mypy --strict src/spec_kitty_events: no issues in 67 files (use uv run python -m mypy; global mypy lacks pydantic); ruff check: clean; ruff format --check: only kitty-specs/.../tasks/WP04-envelope-scenarios-and-step-binding.md (planning artifact, not owned, pre-existing on mission base); changelog check/guard: rc 0; make test-fast: 4310 passed, 130 skipped, 2 failed - tests/test_version_not_amended.py (shallow checkout without release tags; test_script_passes_against_this_repo fails on the base too, the other trips because src/ changed) - environmental. No changelog fragment written (not in owned_files). Minor-version note: new public symbol implies a minor bump, handled by the release PR; no version or COMPATIBILITY.md edit here."
+      ],
       "provider": "__resolved_provider_absent__",
       "role": "implementer",
       "shell_pid": 8805,
