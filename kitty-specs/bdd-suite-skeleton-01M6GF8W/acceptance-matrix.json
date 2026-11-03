@@ -168,10 +168,10 @@
       "criterion_id": "FR-017",
       "description": "Verify FR-017 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "strict-journal-profile.feature (009) UNKNOWN_EVENT_TYPE; 009 pin and input mutations fail {008,009}",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-11-03T12:29:21.743078+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
