@@ -178,10 +178,10 @@
       "criterion_id": "FR-018",
       "description": "Verify FR-018 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "resolves-legacy-lanes.feature (010) green; 010 pin and input mutations fail {010}",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-11-03T12:29:26.701085+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
