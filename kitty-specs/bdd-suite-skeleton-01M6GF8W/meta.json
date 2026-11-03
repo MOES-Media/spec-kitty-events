@@ -26,6 +26,7 @@
   "purpose_context": "The events package is the contract authority for Spec Kitty, but its shared behaviour is only expressed as Python tests and fixtures. This mission (issue #197, slice D1 of #121) adds a technology-agnostic Gherkin scenario suite that mirrors core's scenario conventions, a Python reference binding driven by the committed conformance fixtures, a per-PR check that keeps the suite well formed, and the first scenarios covering envelope acceptance and refusal, so later slices and the Java binding can reuse the same promises.",
   "purpose_tldr": "Give the event contract a black-box Gherkin scenario suite that every language binding can run, starting with envelope validation.",
   "slug": "bdd-suite-skeleton-01M6GF8W",
+  "status_phase": "1",
   "target_branch": "issue-197-bdd-suite-skeleton",
   "topology": "coord",
   "vcs": "git",
