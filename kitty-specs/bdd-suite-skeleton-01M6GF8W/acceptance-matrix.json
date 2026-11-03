@@ -188,10 +188,10 @@
       "criterion_id": "FR-019",
       "description": "Verify FR-019 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "src/spec_kitty_events/conformance/README.md 'Envelope verdict check order'; precedence tests kill 3/6 and 3/7 swaps",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-11-03T12:29:31.466153+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
