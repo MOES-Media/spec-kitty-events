@@ -118,10 +118,10 @@
       "criterion_id": "FR-012",
       "description": "Verify FR-012 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "22 planted trees under tests/fixtures/scenario_contract/; tests/test_scenario_contract_real_tree.py (0 errors, promises 001-010)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-11-03T12:28:56.214237+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
