@@ -12,7 +12,7 @@ uv run python scripts/scenario_contract.py [--features DIR] [--steps NAME=DIR]..
   - The argument may be a string literal or `parsers.parse(<literal>)`.
   - Stacked decorators on one function are each read.
   - `parse` fields `{name}` and `{name:fmt}` become regex groups.
-  - Any other form (`parsers.re`, `parsers.cfparse`, `@step`, aliased imports, non-literal strings) is not read, so the steps it would bind fail loudly as UNBOUND_STEP.
+  - Any other form (`parsers.re`, `parsers.cfparse`, `@step`, a module alias such as `import pytest_bdd as x`, non-literal strings; `from pytest_bdd import given as g` IS read) is not read, so the steps it would bind fail loudly as UNBOUND_STEP.
   - `jvm` is reserved for D3.
 
 ## Rules (22)
