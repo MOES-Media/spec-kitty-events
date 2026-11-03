@@ -8,8 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 No model, schema, fixture or envelope changes its accept or reject boundary. The version
-moves to `11.4.0` for a new public conformance function. This repository becomes the home of the
-events-domain services (#147), and the services are now imported.
+moves to `11.4.0` for a new public conformance function. This repository becomes the home
+of the events-domain services (#147), and the services are now imported.
 
 ### Added
 
