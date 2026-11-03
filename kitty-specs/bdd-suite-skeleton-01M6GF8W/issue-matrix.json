@@ -36,6 +36,18 @@
       "verdict": "unknown",
       "wp": null
     },
+    "#197": {
+      "evidence_ref": "Mission issue; WP01 slice (dev deps + changelog fragment) landed in a6e05466; WP02-WP05 still open",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "in-mission",
+      "wp": null
+    },
     "#198": {
       "evidence_ref": "<link or commit>",
       "fr": null,
