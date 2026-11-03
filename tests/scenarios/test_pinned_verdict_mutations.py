@@ -8,7 +8,8 @@ temporary copy of the packaged conformance fixtures, named by ``SPEC_KITTY_SCENA
   its input alone; an *input* mutation changes the input and leaves its pin. Taxonomy pins are
   edited in both the register entry and the file, so the Arrange agreement check passes and the
   Assert step is what fails. Mutations of disjoint classes share a run; the rows of the shared
-  ``envelope_strict_journal`` class (008, 009) each run alone.
+  ``envelope_strict_journal`` class (008, 009) each run alone. One 008 row changes only the
+  second pinned code, so a binding that compares just the first code fails it.
 - **Coverage (SC-002, US2)**: an unregistered, removed, duplicated or skipped fixture fails the
   run, and an added, correctly registered fixture is evaluated (counted by a spy on the public
   verdict function the binding really calls, SC-005).
@@ -209,6 +210,14 @@ def _reversed_skew(root: Path) -> None:
     _strict_codes(root, rel, codes[::-1])
 
 
+def _second_code_only_skew(root: Path) -> None:
+    """Change only the second pinned code: a binding comparing just the first code passes it."""
+    rel = f"{STRICT}/skew_missing_version.json"
+    codes = _load(root / rel)["expected_error_codes"]
+    assert codes == ["ENVELOPE_SHAPE_INVALID", "UNSUPPORTED_SCHEMA_VERSION"], codes
+    _strict_codes(root, rel, [codes[0], codes[0]])
+
+
 def _set_key(key: str, value: object) -> Callable[[dict[str, Any]], None]:
     def edit(document: dict[str, Any]) -> None:
         assert key in document, key
@@ -261,6 +270,7 @@ MUTATIONS = {
     ),
     "007-pin": _m("007", "pin", _F007, lambda r: _repin(r, _F007, "valid", None)),
     "008-pin": _m("008", "pin", _F008, _reversed_skew),
+    "008-pin-second": _m("008", "pin", _F008, _second_code_only_skew),
     "009-pin": _m(
         "009",
         "pin",
@@ -299,6 +309,7 @@ GROUPS = {
     ],
     "taxonomy-inputs": ["001-input", "002-input", "010-input"],
     "strict-008-pin": ["008-pin"],
+    "strict-008-pin-second": ["008-pin-second"],
     "strict-009-pin": ["009-pin"],
     "strict-009-input": ["009-input"],
 }
@@ -489,7 +500,11 @@ def test_skipped_fixture_fails_its_scenario(monkeypatch: pytest.MonkeyPatch, roo
     assert result.failed["001"].type == "then"
     assert "was never evaluated" in result.failed["001"].message
     assert result.failed["003"].name == "every selected fixture was evaluated"
-    assert "verdict calls=3, fixtures on disk=4, selected=4" in result.failed["003"].message
+    on_disk = _count_files(root, FORBIDDEN)
+    assert (
+        f"verdict calls={on_disk - 1}, fixtures on disk={on_disk}, selected={on_disk}"
+        in result.failed["003"].message
+    )
 
 
 def test_unknown_register_id_fails_selection(pristine: Path) -> None:
