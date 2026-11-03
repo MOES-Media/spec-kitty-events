@@ -1,20 +1,20 @@
 {
-  "event_count": 50,
-  "last_event_id": "01M6GN913TVSTJE4D3D5KGZ268",
-  "materialized_at": "2026-11-03T12:13:53.146608+00:00",
+  "event_count": 51,
+  "last_event_id": "01M6GNKTZSN9RJMHH7MQN3BPKY",
+  "materialized_at": "2026-11-03T12:19:47.321768+00:00",
   "mission_number": "",
   "mission_slug": "bdd-suite-skeleton-01M6GF8W",
   "mission_type": "",
   "schema_version": 2,
   "summary": {
-    "approved": 4,
+    "approved": 5,
     "blocked": 0,
     "canceled": 0,
     "claimed": 0,
     "done": 0,
     "for_review": 0,
     "in_progress": 0,
-    "in_review": 1,
+    "in_review": 0,
     "planned": 0
   },
   "work_packages": {
@@ -160,18 +160,24 @@
     "WP05": {
       "actor": "claude",
       "agent": "claude",
-      "agent_profile": "reviewer-renata",
-      "agent_profile_version": "1.0",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 0,
       "implementer_of_record": "claude",
-      "lane": "in_review",
-      "last_event_id": "01M6GN913TVSTJE4D3D5KGZ268",
-      "last_transition_at": "2026-11-03T12:13:53.146608+00:00",
+      "lane": "approved",
+      "last_event_id": "01M6GNKTZSN9RJMHH7MQN3BPKY",
+      "last_transition_at": "2026-11-03T12:19:47.321768+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
         "WP05 ready (commit 60881cf1). Files: tests/scenarios/test_pinned_verdict_mutations.py (13 tests), tests/test_scenario_contract_real_tree.py (3), Makefile lint += scripts/scenario_contract.py. Mutation groups (in-process pytest.main, exact failing sets, every failure in a Then step): taxonomy-pins {001..007,010}; taxonomy-inputs {001,002,010}; 008-pin {008}; 009-pin {008,009}; 009-input {008,009}. Control: 10 passed. Coverage: unregistered extra + removed file -> {001,003} Arrange; duplicate entry -> {001} Arrange 'register repeats id'; planted strict file -> {008,009} Arrange; added fixture -> 10 pass, canonical class_fixture_verdict calls control+1, others unchanged; strict spy = 8 files + 1 = 9; skipped case: dropped -> 001 fails in 'each is accepted' (never evaluated), stored-not-counted -> 003 fails only in 'every selected fixture was evaluated'; select_id unknown id -> pytest.fail. Reviewer check: neutering each_as_pinned fails 008/009 groups. NFR-001: 5.4-6.0s pytest + 0.16s check (4 cpu x86_64). NFR-004: two -rA runs identical (modulo durations). NFR-005: schemas/fixtures diff empty; conformance 1200 passed. make test-fast 4406 passed 130 skipped. Lint: all steps pass except known ruff-format on kitty-specs WP04 md (fixed on planning branch 487f28e). mypy --strict clean with MYPYPATH=scripts (scenario_contract import via sys.path, same as existing tests)."
       ],
       "provider": "__resolved_provider_absent__",
+      "review_result": {
+        "feedback_path": "/home/user/spec-kitty-events/.worktrees/bdd-suite-skeleton-01M6GF8W-coord/kitty-specs/bdd-suite-skeleton-01M6GF8W/tasks/WP05-mutation-coverage-and-real-tree-gates/review-cycle-1.md",
+        "reference": "review-cycle://bdd-suite-skeleton-01M6GF8W/WP05-mutation-coverage-and-real-tree-gates/review-cycle-1.md",
+        "reviewer": "claude",
+        "verdict": "approved"
+      },
       "role": "reviewer",
       "shell_pid": 5032,
       "shell_pid_created_at": "1793708025.33",
